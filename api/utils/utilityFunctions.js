@@ -1,6 +1,6 @@
 import validator from "validator";
 import jwt from "jsonwebtoken";
-const { Company, Developer } = require("../models/index");
+import { Developer } from '../models/'
 
 export const trimValues = (obj) => {
   Object.keys(obj).forEach((key) => {
@@ -66,7 +66,6 @@ export const isAuthedAsDeveloper = async (req) => {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decode = await jwt.verify(token, process.env.JWT_SECRET);
     const { _id, as } = decode;
-    console.log(_id);
     if (as === "Company") return false;
     const developer = await Developer.findOne({
       _id,
@@ -74,6 +73,7 @@ export const isAuthedAsDeveloper = async (req) => {
     });
     if (!developer) return false;
     req.developer = user;
+    req.as=as;
     req.token = token;
     return true;
   } catch (e) {

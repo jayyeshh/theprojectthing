@@ -3,11 +3,13 @@ import mongoose from "mongoose";
 require("./db/mongoose");
 import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
+import projectRoutes from "./routes/projectRoutes";
 
 const app = express();
 app.use(express.json());
 app.use("/developer", developerRoutes);
 app.use("/company", companyRoutes);
+app.use("/project", projectRoutes);
 app.use((err, req, res, next) => {
   //to check if request is in valid JSON format or not
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {

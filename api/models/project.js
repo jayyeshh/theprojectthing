@@ -11,6 +11,9 @@ const projectSchema = new Schema(
     about: {
       type: String,
     },
+    photo: {
+      type: Buffer
+    },
     developer: {
       type: mongoose.Types.ObjectId,
       ref: "Developer",

@@ -1,8 +1,29 @@
 import express from "express";
 import { Project } from "../models";
 import { isAuthedAsDeveloper } from "../utils/utilityFunctions";
+import authAsDev from '../middlewares/authAsDev';
+import sharp from 'sharp';
+import multer from 'multer';
 
 const router = new express.Router();
+
+const upload = multer({
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/gm)) {
+      return cb(new Error("Please upload file with proper extension only!"));
+    }
+    cb(undefined, true);
+  },
+});
+
+router.post("/", authAsDev, upload.single("photo"), async (req, res) => {
+  const buffer = await sharp(req.file.buffer).png().toBuffer();
+  console.log(req.body);
+  console.log(buffer.toString().length);
+})
 
 router.get("/:pid", async (req, res) => {
   const { pid } = req.params;
@@ -28,7 +49,6 @@ router.get("/:pid", async (req, res) => {
     //requesting developer is developer of project
     return res.send(project);
   } else {
-    //loggedIn as Developer and viewing other developer's project
     project.toObject();
     delete project.viewedBy;
     return res.send(project);
@@ -36,3 +56,9 @@ router.get("/:pid", async (req, res) => {
 });
 
 export default router;
+
+/*
+Routes:
+/:pid => patch
+/:pid => delete
+*/
