@@ -11,15 +11,15 @@ import { NavLink } from "react-router-dom";
 const useStyles = makeStyles({
   root: {
     maxWidth: 345,
-    margin: '1rem'
+    margin: "1rem",
   },
-  navlinkStyels: {
+  navlinkStyles: {
     textDecoration: "none",
-    opacity: '.9',
-    transition: 'all .2s ease-in-out',
+    opacity: ".9",
+    transition: "all .2s ease-in-out",
     "&:hover": {
-        opacity: '1',
-        backgroundColor: '#cfcfcf',
+      opacity: "1",
+      backgroundColor: "#cfcfcf",
     },
   },
 });
@@ -41,16 +41,22 @@ const AuthCard = (props) => {
       </CardActionArea>
       <CardActions>
         <NavLink
-          className={classes.navlinkStyels}
-          to={"/auth/" + props.for + "/signup"}
+          className={classes.navlinkStyles}
+          to={{
+            pathname: "/auth/" + props.for,
+            loginState: false,
+          }}
         >
           <Button size="small" color="primary">
             SignUp
           </Button>
         </NavLink>
         <NavLink
-          className={classes.navlinkStyels}
-          to={"/auth/" + props.for + "/login"}
+          className={classes.navlinkStyles}
+          to={{
+            pathname: "/auth/" + props.for,
+            loginState: true,
+          }}
         >
           <Button size="small" color="primary">
             Login

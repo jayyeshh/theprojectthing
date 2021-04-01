@@ -4,6 +4,7 @@ require("./db/mongoose");
 import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import projectRoutes from "./routes/projectRoutes";
+// import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());

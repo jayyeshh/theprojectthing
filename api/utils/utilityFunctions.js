@@ -1,6 +1,6 @@
 import validator from "validator";
 import jwt from "jsonwebtoken";
-import { Developer } from '../models/'
+import { Developer } from "../models/";
 
 export const trimValues = (obj) => {
   Object.keys(obj).forEach((key) => {
@@ -44,7 +44,7 @@ export const handlerRegistrationError = (error, res) => {
   }
   if (error.name === "Password Invalidation") {
     return res.status(400).send({
-      error: error.message,
+      password: error.message,
     });
   }
   if (!error.errors) {
@@ -61,7 +61,7 @@ export const handlerRegistrationError = (error, res) => {
   return res.status(400).send(resp);
 };
 
-export const isAuthedAsDeveloper = async (req) => {
+export const isAuthedAsDeveloper = async (req, res) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decode = await jwt.verify(token, process.env.JWT_SECRET);
@@ -72,11 +72,12 @@ export const isAuthedAsDeveloper = async (req) => {
       "tokens.token": token,
     });
     if (!developer) return false;
-    req.developer = user;
-    req.as=as;
+    req.developer = developer;
+    req.as = as;
     req.token = token;
+    console.log(req.developer);
     return true;
   } catch (e) {
-    res.sendStatus(500);
+    return res.sendStatus(500);
   }
 };

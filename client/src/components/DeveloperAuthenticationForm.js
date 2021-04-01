@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import LoginForm from "./LoginForm";
-import CompanySignUpForm from "./CompanySignUpForm";
+import DeveloperSignUpForm from "./DeveloperSignUpForm";
 import { makeStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
 
@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CompanyAuthenticationForm = (props) => {
+const DeveloperAuthenticationForm = (props) => {
   const [loginState, setLoginState] = useState(false);
   const [note, setNote] = useState("");
   const classes = useStyles();
@@ -49,7 +49,7 @@ const CompanyAuthenticationForm = (props) => {
             setLoginState={setLoginState}
           />
         ) : (
-          <CompanySignUpForm
+          <DeveloperSignUpForm
             registered={registered}
             setLoginState={setLoginState}
           />
@@ -59,4 +59,4 @@ const CompanyAuthenticationForm = (props) => {
   );
 };
 
-export default CompanyAuthenticationForm;
+export default DeveloperAuthenticationForm;

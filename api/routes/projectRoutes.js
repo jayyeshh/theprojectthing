@@ -1,9 +1,9 @@
 import express from "express";
 import { Project } from "../models";
 import { isAuthedAsDeveloper } from "../utils/utilityFunctions";
-import authAsDev from '../middlewares/authAsDev';
-import sharp from 'sharp';
-import multer from 'multer';
+import authAsDev from "../middlewares/authAsDev";
+import sharp from "sharp";
+import multer from "multer";
 
 const router = new express.Router();
 
@@ -20,10 +20,34 @@ const upload = multer({
 });
 
 router.post("/", authAsDev, upload.single("photo"), async (req, res) => {
-  const buffer = await sharp(req.file.buffer).png().toBuffer();
-  console.log(req.body);
-  console.log(buffer.toString().length);
-})
+  let buffer;
+  const { title, about, github, site } = req.body;
+  if (!title)
+    return res.status(400).send({ error: "title is required for a project!" });
+  if (req.file) buffer = await sharp(req.file.buffer).png().toBuffer();
+  const links = {
+    github,
+    site,
+  };
+  const project = new Project({
+    title,
+    about,
+    links,
+    developer: req.developer._id,
+    photo: buffer,
+  });
+  try {
+    await project.save();
+    res.status(201).send({
+      project,
+    });
+  } catch (error) {
+    res.status(400).send({
+      error: error.message,
+    });
+  }
+  res.status(201).send();
+});
 
 router.get("/:pid", async (req, res) => {
   const { pid } = req.params;

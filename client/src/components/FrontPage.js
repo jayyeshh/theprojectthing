@@ -1,19 +1,28 @@
 import React from "react";
 import Header from "./Header";
 import { Grid } from "@material-ui/core";
-import Dashboard from "./Dashboard";
+import { useHistory } from "react-router";
+import { connect } from "react-redux";
 
-const FrontPage = () => {
+const FrontPage = (props) => {
+  const history = useHistory();
+  if (props.isAuthenticated) history.push("/dashboard");
   return (
     <Grid container direction="column">
       <Grid item>
         <Header />
       </Grid>
       <Grid item container>
-        <Dashboard />
+        FrontPage
       </Grid>
     </Grid>
   );
 };
 
-export default FrontPage;
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.authenticated,
+  };
+};
+
+export default connect(mapStateToProps)(FrontPage);

@@ -37,7 +37,6 @@ const companySchema = new Schema(
     password: {
       type: String,
       required: true,
-      minLength: 8,
     },
     websites: {
       website: {

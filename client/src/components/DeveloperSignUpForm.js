@@ -9,9 +9,9 @@ import {
   Button,
   CircularProgress,
 } from "@material-ui/core";
+import { green } from "@material-ui/core/colors";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "../utility/axios/apiInstance";
-import { green } from "@material-ui/core/colors";
 import React, { useState } from "react";
 
 const useStyles = makeStyles((theme) => ({
@@ -88,7 +88,7 @@ const errorInitials = {
   error: "",
 };
 
-const CompanySignUpForm = (props) => {
+const DeveloperSignUpForm = (props) => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [fieldValues, setFieldValues] = useState(initials);
@@ -103,24 +103,24 @@ const CompanySignUpForm = (props) => {
     e.preventDefault();
     const { username, name, email, password, confirmPassword } = fieldValues;
     if (password !== confirmPassword) {
-      return setErrors({
-        ...errorInitials,
-        password: "password mismatch!",
-        confirmPassword: "password mismatch!",
-        error: "password mismatch!",
-      });
+        return setErrors({
+            ...errorInitials,
+            password: "password mismatch!",
+            confirmPassword: "password mismatch!",
+            error: "password mismatch!",
+        });
     }
     setLoading(true);
     axios
-      .post("/company/register", {
+      .post("/developer/register", {
         username,
         email,
         name,
         password,
       })
       .then((resp) => {
-        setLoading(false);
         setErrors(errorInitials);
+        setLoading(false);
 
         if (resp.status === 201) {
           props.registered();
@@ -273,4 +273,4 @@ const CompanySignUpForm = (props) => {
   );
 };
 
-export default CompanySignUpForm;
+export default DeveloperSignUpForm;

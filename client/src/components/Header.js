@@ -1,15 +1,25 @@
-import { AppBar, Grid, Toolbar, Typography, Button } from "@material-ui/core";
+import {
+  AppBar,
+  Grid,
+  Toolbar,
+  Typography,
+  Button,
+  Tooltip,
+} from "@material-ui/core";
 import { NavLink, useHistory } from "react-router-dom";
+import PowerSettingsNewOutlinedIcon from "@material-ui/icons/PowerSettingsNewOutlined";
 import CodeIcon from "@material-ui/icons/Code";
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { connect } from "react-redux";
+import { logoutAction } from "../actions/authActions";
 
-const useStyles = makeStyles(theme=>({
+const useStyles = makeStyles((theme) => ({
   appBar: {
     backgroundColor: "#0d47a1",
-    [theme.breakpoints.down('xs')]:{
-      alignItems: 'center',
-    }
+    [theme.breakpoints.down("xs")]: {
+      alignItems: "center",
+    },
   },
   mainHeading: {
     fontFamily: "Patrick Hand",
@@ -21,6 +31,11 @@ const useStyles = makeStyles(theme=>({
     fontStyle: "bold",
     fontSize: "1.2rem",
   },
+  btnStyles: {
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
   gridStyles: {
     display: "flex",
     alignItems: "center",
@@ -31,9 +46,14 @@ const useStyles = makeStyles(theme=>({
   },
 }));
 
-const Header = () => {
+const Header = (props) => {
   const classes = useStyles();
   const history = useHistory();
+
+  const logout = () => {
+    props.logout();
+  };
+
   return (
     <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
@@ -46,14 +66,40 @@ const Header = () => {
 
           <CodeIcon fontSize="large" />
         </Grid>
-        {!history.location.pathname.split('/').includes('auth') && (
-          <NavLink to="/auth" className={classes.navlinkStyles}>
-            <Button className={classes.btn}>Join</Button>
-          </NavLink>
+        {!props.auth.authenticated &&
+          !history.location.pathname.split("/").includes("auth") && (
+            <NavLink to="/auth" className={classes.navlinkStyles}>
+              <Button className={classes.btn}>Join</Button>
+            </NavLink>
+          )}
+        {props.auth.authenticated && (
+          <>
+            {true && <Button className={classes.btn}>A</Button>}
+            {true && <Button className={classes.btn}>B</Button>}
+            {true && <Button className={classes.btn}>C</Button>}
+            <Tooltip title="logout">
+              <PowerSettingsNewOutlinedIcon
+                className={classes.btnStyles}
+                onClick={() => logout()}
+              />
+            </Tooltip>
+          </>
         )}
       </Toolbar>
     </AppBar>
   );
 };
 
-export default Header;
+const mapStateToProps = (state) => {
+  return {
+    auth: state.authReducer,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    logout: () => dispatch(logoutAction()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
