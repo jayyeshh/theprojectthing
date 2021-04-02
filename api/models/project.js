@@ -6,13 +6,15 @@ const projectSchema = new Schema(
   {
     title: {
       type: String,
+      trim: true,
       required: true,
     },
     about: {
       type: String,
+      trim: true,
     },
     photo: {
-      type: String
+      type: String,
     },
     developer: {
       type: mongoose.Types.ObjectId,
@@ -39,9 +41,11 @@ const projectSchema = new Schema(
     links: {
       github: {
         type: String,
+        trim: true,
       },
       site: {
         type: String,
+        trim: true,
       },
     },
     viewedBy: [

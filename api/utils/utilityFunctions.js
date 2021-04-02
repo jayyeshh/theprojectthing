@@ -62,11 +62,15 @@ export const handlerRegistrationError = (error, res) => {
 };
 
 export const isAuthedAsDeveloper = async (req, res) => {
+  if (!req.header("Authorization")) return res.sendStatus(401);
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decode = await jwt.verify(token, process.env.JWT_SECRET);
     const { _id, as } = decode;
-    if (as === "Company") return false;
+    if (as === "Company")
+      return res
+        .status(400)
+        .send({ error: "You don't have permission to perform this action!" });
     const developer = await Developer.findOne({
       _id,
       "tokens.token": token,
