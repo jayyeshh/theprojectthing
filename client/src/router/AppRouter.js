@@ -7,10 +7,14 @@ import Dashboard from "../components/Dashboard";
 import CompanyAuthenticationForm from "../components/CompanyAuthenticationForm";
 import DeveloperAuthenticationForm from "../components/DeveloperAuthenticationForm";
 import PrivateRoute from "./PrivateRoute";
+import Header from "../components/Header";
+import AddProject from '../components/AddProject'
 
 const AppRouter = () => {
-  return (
+ return (
     <Router>
+     <Header
+      />
       <Switch>
         <Route path="/" component={FrontPage} exact />
         <Route path="/auth" component={Authenticate} exact />
@@ -24,11 +28,8 @@ const AppRouter = () => {
           component={DeveloperAuthenticationForm}
           exact
         />
-        <PrivateRoute
-          path="/dashboard"
-          component={Dashboard}
-          exact
-        />
+        <PrivateRoute path="/dashboard" component={Dashboard} exact />
+        <PrivateRoute path="/projects/add" component={AddProject} exact />
         <Route component={NotFound} />
       </Switch>
     </Router>

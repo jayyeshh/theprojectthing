@@ -15,7 +15,6 @@ const Authenticate = () => {
   const classes = useStyles();
   return (
     <div>
-      <Header />
       <Grid
         container
         alignContent="center"

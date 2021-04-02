@@ -35,7 +35,6 @@ const CompanyAuthenticationForm = (props) => {
 
   return (
     <div>
-      <Header />
       <Grid
         container
         justify="center"

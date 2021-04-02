@@ -7,6 +7,7 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { NavLink, useHistory } from "react-router-dom";
+import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
 import PowerSettingsNewOutlinedIcon from "@material-ui/icons/PowerSettingsNewOutlined";
 import CodeIcon from "@material-ui/icons/Code";
 import React from "react";
@@ -74,7 +75,13 @@ const Header = (props) => {
           )}
         {props.auth.authenticated && (
           <>
-            {true && <Button className={classes.btn}>A</Button>}
+            {true && (
+              <NavLink className={classes.navlinkStyles} to="/projects/add">
+                <Tooltip title="add project">
+                  <AddCircleOutlineIcon className={classes.btnStyles} />
+                </Tooltip>
+              </NavLink>
+            )}
             {true && <Button className={classes.btn}>B</Button>}
             {true && <Button className={classes.btn}>C</Button>}
             <Tooltip title="logout">

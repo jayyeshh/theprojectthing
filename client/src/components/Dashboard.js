@@ -8,7 +8,6 @@ import DeveloperHomePage from "./DeveloperHomePage";
 const Dashboard = (props) => {
   return (
     <Grid container>
-      <Header />
       {props.authedAs === "Company" && <CompanyHomePage />}
       {props.authedAs === "Developer" && <DeveloperHomePage />}
     </Grid>
