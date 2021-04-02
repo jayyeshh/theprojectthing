@@ -3,9 +3,21 @@ import { Project } from "../models";
 import { isAuthedAsDeveloper } from "../utils/utilityFunctions";
 import authAsDev from "../middlewares/authAsDev";
 import sharp from "sharp";
+const fs = require('fs')
 import multer from "multer";
+import path from 'path'
 
 const router = new express.Router();
+
+const storage = new multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../assets/'))
+  },
+  filname: function (req, file, cb) {
+    console.log(file);
+    cb(null, file.originalname);
+  }
+})
 
 const upload = multer({
   limits: {
@@ -19,34 +31,49 @@ const upload = multer({
   },
 });
 
-router.post("/", authAsDev, upload.single("photo"), async (req, res) => {
-  let buffer;
-  const { title, about, github, site } = req.body;
-  if (!title)
-    return res.status(400).send({ error: "title is required for a project!" });
-  if (req.file) buffer = await sharp(req.file.buffer).png().toBuffer();
-  const links = {
-    github,
-    site,
-  };
-  const project = new Project({
-    title,
-    about,
-    links,
-    developer: req.developer._id,
-    photo: buffer,
-  });
-  try {
-    await project.save();
-    res.status(201).send({
-      project,
-    });
-  } catch (error) {
-    res.status(400).send({
-      error: error.message,
-    });
-  }
-  res.status(201).send();
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+})
+
+router.post("/", authAsDev, async (req, res) => {
+  const upload = multer({ storage }).single('image')
+  await upload(req, res, async function (err) {
+    let buffer;
+    const { title, about, github, site } = req.body;
+    if (!title)
+      return res.status(400).send({ error: "title is required for a project!" });
+    if (err) return res.send(err);
+    // if (req.file) buffer = await sharp(req.file.buffer).png().toBuffer();
+    await cloudinary.uploader.upload(req.file.path, { public_id: `project-images/${new Date().toString()}`, tags: 'projectphoto' },
+      async function (err, image) {
+        if (err) return res.status(400).send(err);
+        fs.unlinkSync(req.file.path)
+        const links = {
+          github,
+          site,
+        };
+        const project = new Project({
+          title,
+          about,
+          links,
+          developer: req.developer._id,
+          photo: image.url,
+        });
+        try {
+          await project.save();
+          res.status(201).send({
+            project,
+          });
+        } catch (error) {
+          res.status(400).send({
+            error: error.message,
+          });
+        }
+      })
+  })
 });
 
 router.get("/:pid", async (req, res) => {

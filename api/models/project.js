@@ -12,7 +12,7 @@ const projectSchema = new Schema(
       type: String,
     },
     photo: {
-      type: Buffer
+      type: String
     },
     developer: {
       type: mongoose.Types.ObjectId,

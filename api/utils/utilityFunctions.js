@@ -75,7 +75,6 @@ export const isAuthedAsDeveloper = async (req, res) => {
     req.developer = developer;
     req.as = as;
     req.token = token;
-    console.log(req.developer);
     return true;
   } catch (e) {
     return res.sendStatus(500);
