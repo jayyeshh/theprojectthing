@@ -1,6 +1,10 @@
 import express from "express";
 import { Developer, Project } from "../models";
-import { isAuthedAsDeveloper, trimValues } from "../utils/utilityFunctions";
+import {
+  isAuthedAsDeveloper,
+  isDev,
+  trimValues,
+} from "../utils/utilityFunctions";
 import authAsDev from "../middlewares/authAsDev";
 import sharp from "sharp";
 const fs = require("fs");
@@ -98,22 +102,28 @@ router.post("/", authAsDev, async (req, res) => {
 
 router.get("/:pid", async (req, res) => {
   const { pid } = req.params;
-  const project = await Project.findById(pid).populate([
-    {
-      path: "developer",
-    },
-    {
-      path: "comments",
-      populate: {
-        path: "by",
+  let project;
+  try {
+    project = await Project.findById(pid).populate([
+      {
+        path: "developer",
+        select: "-tokens",
       },
-    },
-  ]);
+      {
+        path: "comments",
+        populate: {
+          path: "by",
+        },
+      },
+    ]);
+  } catch (error) {
+    return res.status(500).send();
+  }
   if (!project)
     return res.status(404).send({
       error: "Invalid Project Id",
     });
-  const isDeveloper = await isAuthedAsDeveloper(req, res);
+  const isDeveloper = await isDev(req);
   if (
     isDeveloper &&
     req.developer._id.toString() === project.developer._id.toString()

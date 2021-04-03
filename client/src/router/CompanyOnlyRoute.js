@@ -1,12 +1,13 @@
 import { connect } from "react-redux";
 import { Redirect, Route } from "react-router";
 
-const PrivateRoute = ({
+const CompanyOnlyRoute = ({
   isAuthenticated,
+  as,
   component: Component,
   ...rest
 }) => {
-  return isAuthenticated ? (
+  return isAuthenticated && as === "Company" ? (
     <Component {...rest} />
   ) : (
     <Route>
@@ -18,7 +19,8 @@ const PrivateRoute = ({
 const mapStateToProps = (state) => {
   return {
     isAuthenticated: state.authReducer.authenticated,
+    as: state.authReducer.as,
   };
 };
 
-export default connect(mapStateToProps)(PrivateRoute);
+export default connect(mapStateToProps)(CompanyOnlyRoute);

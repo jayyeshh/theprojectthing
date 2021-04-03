@@ -10,7 +10,6 @@ import {
 import axios from "../utility/axios/apiInstance";
 import React, { useState } from "react";
 import { green } from "@material-ui/core/colors";
-import GitHubIcon from "@material-ui/icons/GitHub";
 import { DropzoneArea } from "material-ui-dropzone";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -125,6 +124,7 @@ const AddProject = () => {
 
   const addThisProject = (e) => {
     e.preventDefault();
+    setLoading(true);
     const data = new FormData();
     data.append("photo", fieldValues.photo);
     data.append("title", fieldValues.title);
@@ -136,9 +136,11 @@ const AddProject = () => {
     axios
       .post("/project/", data, configs)
       .then((resp) => {
+        setLoading(false);
         console.log("resp: ", resp);
       })
       .catch((err) => {
+        setLoading(false);
         console.log("Error: ", err);
       });
   };
@@ -203,7 +205,6 @@ const AddProject = () => {
           </Grid>
           <TextareaAutosize
             style={{ marginLeft: ".6rem" }}
-            multiline
             rows={5}
             cols={137}
             style={{
@@ -216,7 +217,7 @@ const AddProject = () => {
             id="about"
           />
         </Grid>
-        <Grid xs={12} className={classes.dropzoneStyles}>
+        <Grid item xs={12} className={classes.dropzoneStyles}>
           <DropzoneArea
             onChange={handleDropzoneChange}
             acceptedFiles={["image/*"]}
@@ -236,7 +237,6 @@ const AddProject = () => {
           >
             add project
           </Button>
-
           {loading && (
             <CircularProgress size={24} className={classes.buttonProgress} />
           )}

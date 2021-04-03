@@ -4,16 +4,13 @@ import {
   Toolbar,
   Typography,
   Button,
-  Tooltip,
 } from "@material-ui/core";
 import { NavLink, useHistory } from "react-router-dom";
-import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
-import PowerSettingsNewOutlinedIcon from "@material-ui/icons/PowerSettingsNewOutlined";
+import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
-import { logoutAction } from "../actions/authActions";
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -51,10 +48,6 @@ const Header = (props) => {
   const classes = useStyles();
   const history = useHistory();
 
-  const logout = () => {
-    props.logout();
-  };
-
   return (
     <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
@@ -73,25 +66,7 @@ const Header = (props) => {
               <Button className={classes.btn}>Join</Button>
             </NavLink>
           )}
-        {props.auth.authenticated && (
-          <>
-            {true && (
-              <NavLink className={classes.navlinkStyles} to="/projects/add">
-                <Tooltip title="add project">
-                  <AddCircleOutlineIcon className={classes.btnStyles} />
-                </Tooltip>
-              </NavLink>
-            )}
-            {true && <Button className={classes.btn}>B</Button>}
-            {true && <Button className={classes.btn}>C</Button>}
-            <Tooltip title="logout">
-              <PowerSettingsNewOutlinedIcon
-                className={classes.btnStyles}
-                onClick={() => logout()}
-              />
-            </Tooltip>
-          </>
-        )}
+        {props.auth.authenticated && <HeaderMenus />}
       </Toolbar>
     </AppBar>
   );
@@ -103,10 +78,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    logout: () => dispatch(logoutAction()),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Header);
+export default connect(mapStateToProps)(Header);

@@ -4,10 +4,17 @@ require("./db/mongoose");
 import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import projectRoutes from "./routes/projectRoutes";
+import auth from "./middlewares/auth";
 // import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
+// app.use(cookieParser());
+app.get("/profile", auth, async (req, res) => {
+  await req.user.populate("projects").execPopulate();
+  res.send({ profile: req.user, as: req.as });
+});
+
 app.use("/developer", developerRoutes);
 app.use("/company", companyRoutes);
 app.use("/project", projectRoutes);

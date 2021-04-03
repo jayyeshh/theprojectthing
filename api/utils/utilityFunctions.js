@@ -84,3 +84,24 @@ export const isAuthedAsDeveloper = async (req, res) => {
     return res.sendStatus(500);
   }
 };
+
+export const isDev = async (req) => {
+  if (!req.header("Authorization")) return false;
+  try {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    const decode = await jwt.verify(token, process.env.JWT_SECRET);
+    const { _id, as } = decode;
+    if (as === "Company") false;
+    const developer = await Developer.findOne({
+      _id,
+      "tokens.token": token,
+    });
+    if (!developer) return false;
+    req.developer = developer;
+    req.as = as;
+    req.token = token;
+    return true;
+  } catch (e) {
+    return false;
+  }
+};

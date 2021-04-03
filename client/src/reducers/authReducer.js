@@ -1,4 +1,4 @@
-import { LOGGED_IN, LOGOUT } from "../actions/action-types";
+import { LOGGED_IN, LOGOUT, SETUP_PROFILE } from "../actions/action-types";
 
 const initialState = {
   authenticated: false,
@@ -15,6 +15,8 @@ const authReducer = (state = initialState, action) => {
     case LOGGED_IN: {
       const newState = {};
       let email, username, name;
+      const { token } = action.payload;
+      localStorage.setItem("authToken", token);
       if (action.payload.company) {
         newState.as = "Company";
         ({ email, username, name } = action.payload.company);
@@ -33,7 +35,21 @@ const authReducer = (state = initialState, action) => {
       return newState;
     }
     case LOGOUT: {
+      localStorage.removeItem("authToken");
       return initialState;
+    }
+    case SETUP_PROFILE: {
+      const { profile, as } = action.payload;
+          const { followers, following, email, name, projects, username } = profile;
+      return {
+        authenticated: true,
+        as,
+        user: {
+          username,
+          name,
+          email,
+        },
+      };
     }
     default:
       return state;

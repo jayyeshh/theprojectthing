@@ -64,7 +64,8 @@ router.post("/login", async (req, res) => {
   }
   try {
     const token = await developer.generateAuthToken();
-    res.send({
+    // res.cookie("token", token, { httpOnly: true });
+    res.json({
       developer,
       token,
     });
