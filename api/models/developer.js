@@ -157,12 +157,12 @@ developerSchema.statics.findByCredentials = async ({
 };
 
 developerSchema.methods.toJSON = function () {
-  const company = this.toObject();
-  delete company.password;
-  delete company.tokens;
-  delete company.updatedAt;
-  delete company.createdAt;
-  return company;
+  const developer = this.toObject();
+  delete developer.password;
+  delete developer.tokens;
+  delete developer.updatedAt;
+  delete developer.createdAt;
+  return developer;
 };
 
 export default mongoose.model("Developer", developerSchema);

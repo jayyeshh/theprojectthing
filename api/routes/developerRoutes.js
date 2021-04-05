@@ -65,6 +65,10 @@ router.post("/login", async (req, res) => {
   try {
     const token = await developer.generateAuthToken();
     // res.cookie("token", token, { httpOnly: true });
+    developer = developer.toObject();
+    developer.followers = developer.followers.length;
+    developer.following = developer.following.length;
+    delete developer.tokens;
     res.json({
       developer,
       token,

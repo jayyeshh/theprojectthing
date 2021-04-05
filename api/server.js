@@ -5,6 +5,7 @@ import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import auth from "./middlewares/auth";
+import { Developer, Project } from "./models";
 // import cookieParser from "cookie-parser";
 
 const app = express();
@@ -12,7 +13,28 @@ app.use(express.json());
 // app.use(cookieParser());
 app.get("/profile", auth, async (req, res) => {
   await req.user.populate("projects").execPopulate();
-  res.send({ profile: req.user, as: req.as });
+  let profile = req.user.toObject();
+  profile.followers = profile.followers.length;
+  profile.following = profile.following.length;
+  res.send({ profile, as: req.as });
+});
+
+app.get("/devs", async (req, res) => {
+  try {
+    const devs = await Developer.find({});
+    res.send(devs);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+app.get("/projects", async (req, res) => {
+  try {
+    const projects = await Project.find({});
+    res.send(projects);
+  } catch (error) {
+    res.sendStatus(500);
+  }
 });
 
 app.use("/developer", developerRoutes);

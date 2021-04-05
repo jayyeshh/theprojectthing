@@ -41,10 +41,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+router.get("/home", authAsDev, async (req, res) => {
+  // req.developer.following.forEach(devId=>{
+  //   await Developer.findById(devId).populate('projects');
+  // })
+});
+
 router.post("/", authAsDev, async (req, res) => {
   const upload = multer({ storage }).single("photo");
   await upload(req, res, async function (err) {
     const { title, about, github, site } = req.body;
+    console.log("=> ", about);
     if (!title)
       return res
         .status(400)
@@ -60,43 +67,43 @@ router.post("/", authAsDev, async (req, res) => {
           "You have already posted a project with same title. Choose a different title!",
       });
     }
-    const links = {
-      github,
-      site,
-    };
     const project = new Project({
       title,
       about,
-      links,
+      links: {
+        github,
+        site,
+      },
       developer: req.developer._id,
     });
-    // if (req.file) buffer = await sharp(req.file.buffer).png().toBuffer();
-    await cloudinary.uploader.upload(
-      req.file.path,
-      {
-        public_id: `project-images/${req.developer.username}:${project._id}`,
-        tags: "projectphoto",
-      },
-      async function (err, image) {
-        console.log(image);
-        if (err) return res.status(400).send(err);
-        fs.unlinkSync(req.file.path);
-        project.photo = image.url;
-        try {
-          await project.save();
-          await req.developer.updateOne({
-            $addToSet: { projects: project._id },
-          });
-          res.status(201).send({
-            project,
-          });
-        } catch (error) {
-          res.status(400).send({
-            error: error.message,
-          });
+    if (req.file) {
+      // if (req.file) buffer = await sharp(req.file.buffer).png().toBuffer();
+      await cloudinary.uploader.upload(
+        req.file.path,
+        {
+          public_id: `project-images/${req.developer.username}:${project._id}`,
+          tags: "projectphoto",
+        },
+        async function (err, image) {
+          if (err) return res.status(400).send(err);
+          fs.unlinkSync(req.file.path);
+          project.photo = image.url;
         }
-      }
-    );
+      );
+    }
+    try {
+      await project.save();
+      await req.developer.updateOne({
+        $addToSet: { projects: project._id },
+      });
+      res.status(201).send({
+        project,
+      });
+    } catch (error) {
+      res.status(400).send({
+        error: error.message,
+      });
+    }
   });
 });
 
@@ -108,6 +115,9 @@ router.get("/:pid", async (req, res) => {
       {
         path: "developer",
         select: "-tokens",
+        populate: {
+          path: "projects",
+        },
       },
       {
         path: "comments",
