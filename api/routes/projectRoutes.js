@@ -41,12 +41,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-router.get("/home", authAsDev, async (req, res) => {
-  // req.developer.following.forEach(devId=>{
-  //   await Developer.findById(devId).populate('projects');
-  // })
-});
-
 router.post("/", authAsDev, async (req, res) => {
   const upload = multer({ storage }).single("photo");
   await upload(req, res, async function (err) {
@@ -134,17 +128,74 @@ router.get("/:pid", async (req, res) => {
       error: "Invalid Project Id",
     });
   const isDeveloper = await isDev(req);
+  const response = project.toObject();
+  if (isDeveloper) {
+    const upvoted = response.upvotes.some(
+      (id) => id.toString() === req.developer._id.toString()
+    );
+    const downvoted = response.downvotes.some(
+      (id) => id.toString() === req.developer._id.toString()
+    );
+    response.upvoted = upvoted;
+    response.downvoted = downvoted;
+  }
+  response.developer.followers = project.developer.followers.length;
+  response.developer.following = project.developer.following.length;
+  response.upvotes = project.upvotes.length;
+  response.downvotes = project.downvotes.length;
+
   if (
     isDeveloper &&
     req.developer._id.toString() === project.developer._id.toString()
   ) {
     //requesting developer is developer of project
-    return res.send(project);
+
+    return res.send(response);
   } else {
-    const response = project.toObject();
     delete response.viewedBy;
     return res.send(response);
   }
+});
+
+router.post("/vote", authAsDev, async (req, res) => {
+  const { pid, type } = req.body;
+  if (![1, -1].includes(type))
+    return res.status(400).send({ error: "Invalid Type" });
+  try {
+    const project = await Project.findById(pid);
+    if (!project) return res.status(404).send({ error: "Invalid Project Id!" });
+    if (type === -1) {
+      //downvote
+      if (project.downvotes.includes(req.developer._id)) {
+        await project.update({ $pull: { downvotes: req.developer._id } });
+      } else {
+        await project.updateOne({
+          $addToSet: { downvotes: req.developer._id },
+          $pull: { upvotes: req.developer._id },
+        });
+      }
+    }
+    if (type === 1) {
+      //upvote
+      if (project.upvotes.includes(req.developer._id)) {
+        await project.update({ $pull: { upvotes: req.developer._id } });
+      } else {
+        await project.updateOne({
+          $addToSet: { upvotes: req.developer._id },
+          $pull: { downvotes: req.developer._id },
+        });
+      }
+    }
+    res.sendStatus(200);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+router.get("/home", authAsDev, async (req, res) => {
+  // req.developer.following.forEach(devId=>{
+  //   await Developer.findById(devId).populate('projects');
+  // })
 });
 
 router.delete("/:pid", authAsDev, async (req, res) => {
