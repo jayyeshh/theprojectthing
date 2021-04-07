@@ -44,7 +44,7 @@ const HeaderMenus = (props) => {
             </NavLink>
           </Grid>
         )}
-        {props.auth.as==="Developer" && (
+        {props.auth.as === "Developer" && (
           <Grid item style={{ margin: ".4rem" }}>
             <NavLink className={classes.navlinkStyles} to="/projects/add">
               <Tooltip title="add project">
@@ -74,7 +74,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    logout: () => dispatch(logoutAction()),
+    logout: () => {
+      dispatch(logoutAction());
+      window.location.href = "/";
+    },
   };
 };
 

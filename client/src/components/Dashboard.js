@@ -1,16 +1,16 @@
 import React from "react";
-import Header from "./Header";
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import { connect } from "react-redux";
-import CompanyHomePage from "./CompanyHomePage";
-import DeveloperHomePage from "./DeveloperHomePage";
 import Profile from "./Profile";
 import { makeStyles } from "@material-ui/core/styles";
+import { setModalStateAction } from "../actions/modalActions";
+import Home from "./Home";
 
 const useStyles = makeStyles({
   profileContainer: {
     margin: "2rem 0",
-    padding: "1rem",
+    position: 'fixed',
+    right: '2%'
   },
 });
 
@@ -20,17 +20,25 @@ const Dashboard = (props) => {
     <Grid
       style={{
         width: "100vw",
-        height: "92vh",
         overflow: "hidden",
       }}
       container
-      spacing={4}
+      spacing={5}
     >
-      <Grid item xs={9}></Grid>
+      <Grid
+        style={{
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
+        item
+        xs={9}
+      >
+        <Home setModalState={props.setModalState} authedAs={props.authedAs} />
+      </Grid>
       <Grid className={classes.profileContainer} item xs={3}>
         <Profile authedAs={props.authedAs} />
       </Grid>
-    </Grid>
+   </Grid>
   );
 };
 
@@ -40,4 +48,11 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(Dashboard);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setModalState: (modalState, text) =>
+      dispatch(setModalStateAction({ showModal: modalState, text })),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

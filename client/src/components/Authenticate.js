@@ -2,7 +2,8 @@ import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 import AuthCard from "./AuthCard";
-import Header from "./Header";
+import { Redirect } from "react-router-dom";
+import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   headQuoteStyles: {
@@ -11,10 +12,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Authenticate = () => {
+const Authenticate = (props) => {
   const classes = useStyles();
   return (
     <div>
+      {props.isAuthenticated && <Redirect to="/" />}
       <Grid
         container
         alignContent="center"
@@ -49,4 +51,10 @@ const Authenticate = () => {
   );
 };
 
-export default Authenticate;
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.authenticated,
+  };
+};
+
+export default connect(mapStateToProps)(Authenticate);

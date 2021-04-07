@@ -1,14 +1,8 @@
-import {
-  AppBar,
-  Grid,
-  Toolbar,
-  Typography,
-  Button,
-} from "@material-ui/core";
-import { NavLink, useHistory } from "react-router-dom";
+import { AppBar, Grid, Toolbar, Typography, Button } from "@material-ui/core";
+import { NavLink, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 
@@ -46,7 +40,12 @@ const useStyles = makeStyles((theme) => ({
 
 const Header = (props) => {
   const classes = useStyles();
-  const history = useHistory();
+  const [currPath, setCurrPath] = useState("");
+  const location = useLocation();
+
+  useEffect(() => {
+    setCurrPath(location.pathname);
+  }, [location]);
 
   return (
     <AppBar position="sticky" className={classes.appBar}>
@@ -60,12 +59,11 @@ const Header = (props) => {
 
           <CodeIcon fontSize="large" />
         </Grid>
-        {!props.auth.authenticated &&
-          !history.location.pathname.split("/").includes("auth") && (
-            <NavLink to="/auth" className={classes.navlinkStyles}>
-              <Button className={classes.btn}>Join</Button>
-            </NavLink>
-          )}
+        {!props.auth.authenticated && !currPath.split("/").includes("auth") && (
+          <NavLink to="/auth" className={classes.navlinkStyles}>
+            <Button className={classes.btn}>Join</Button>
+          </NavLink>
+        )}
         {props.auth.authenticated && <HeaderMenus />}
       </Toolbar>
     </AppBar>

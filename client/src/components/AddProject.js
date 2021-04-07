@@ -12,6 +12,8 @@ import React, { useState } from "react";
 import { green } from "@material-ui/core/colors";
 import { DropzoneArea } from "material-ui-dropzone";
 import { makeStyles } from "@material-ui/core/styles";
+import { useHistory } from "react-router-dom";
+import { setupAuthentication } from "../actions/authActions";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -108,6 +110,7 @@ const errorInitials = {
 };
 
 const AddProject = () => {
+  const history = useHistory();
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [fieldValues, setFieldValues] = useState(initials);
@@ -128,20 +131,25 @@ const AddProject = () => {
     const data = new FormData();
     data.append("photo", fieldValues.photo);
     data.append("title", fieldValues.title);
+    data.append("about", fieldValues.about);
+    data.append("github", fieldValues.github);
+    data.append("site", fieldValues.site);
     const configs = {
       headers: {
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDY1OGRlYWMxNzM0MTMwNTI0N2FhYTIiLCJhcyI6IkRldmVsb3BlciIsImlhdCI6MTYxNzM2MzY3NX0.OI_7PZfcmsXYjzyBXOeKkNwEczar1ZKlfVS5RrSaIB8`,
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
     };
     axios
       .post("/project/", data, configs)
       .then((resp) => {
         setLoading(false);
-        console.log("resp: ", resp);
+        const { project } = resp.data;
+        history.push(`/projects/${project._id}`);
+        setupAuthentication();
       })
       .catch((err) => {
         setLoading(false);
-        console.log("Error: ", err);
+        setErrors({ ...errorInitials, error: err.response.data.error });
       });
   };
 
@@ -213,6 +221,7 @@ const AddProject = () => {
             }}
             label="Project Description"
             placeholder="Project Description"
+            onChange={onChangeHandler}
             name="about"
             id="about"
           />

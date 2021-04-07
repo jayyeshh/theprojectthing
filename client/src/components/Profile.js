@@ -21,6 +21,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import EmailIcon from "@material-ui/icons/Email";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
+import SideProfile from "./SideProfile";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,71 +46,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Profile = ({ as, user, projects }) => {
-  const classes = useStyles();
+const Profile = ({ as, user, projects, isAuthed }) => {
   return (
-    <Paper style={{ marginRight: "1rem" }} elevation={14}>
-      <Card className={classes.root}>
-        <CardHeader
-          style={{
-            borderBottom: "1px solid #cbd6ce",
-          }}
-          avatar={
-            <Avatar aria-label={user.username} className={classes.avatar}>
-              {user.username.charAt(0).toUpperCase()}
-            </Avatar>
-          }
-          title={user.username}
-          subheader={user.name}
-        />
-        <CardActionArea>
-          <CardContent style={{ display: "flex" }}>
-            <EmailIcon />
-            <Typography style={{ marginLeft: ".4rem" }} component="p">
-              {user.email}
-            </Typography>
-          </CardContent>
-        </CardActionArea>
-        {as === "Developer" && (
-          <Accordion>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography className={classes.heading}>Projects</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <List
-                component="nav"
-                className={classes.listStyles}
-                aria-label="Projects"
-              >
-                {projects.map((project) => (
-                  <NavLink
-                    to={"/projects/" + project._id}
-                    className={classes.linkStyles}
-                    key={project._id}
-                  >
-                    <ListItem button divider>
-                      <ListItemText primary={project.title} />
-                    </ListItem>
-                  </NavLink>
-                ))}
-              </List>
-            </AccordionDetails>
-          </Accordion>
-        )}
-        <CardActions>
-          <NavLink to="/profile/edit" style={{ textDecoration: "none" }}>
-            <Button size="small" color="primary">
-              Edit Profile
-            </Button>
-          </NavLink>
-        </CardActions>
-      </Card>
-    </Paper>
+    <SideProfile as={as} user={user} projects={projects} isAuthed={isAuthed} />
   );
 };
 
 const mapStateToProps = (state) => {
   return {
+    isAuthed: state.authReducer.authenticated,
     as: state.authReducer.as,
     user: state.authReducer.user,
     projects: state.projectReducer.projects,

@@ -1,0 +1,206 @@
+import React, { useState } from "react";
+import { Grid, Avatar, Button, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { NavLink } from "react-router-dom";
+import { connect } from "react-redux";
+import GitHubIcon from "@material-ui/icons/GitHub";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import {
+  voteProject,
+  getProjectById,
+} from "../utility/utilityFunctions/ApiCalls";
+
+const useStyles = makeStyles((theme) => ({
+  container: {
+    width: "70%",
+    height: "30rem",
+    border: ".1px solid #b1bdb4",
+    borderRadius: "3px",
+    margin: "2rem",
+  },
+  postHeader: {
+    maxHeight: "4rem",
+    height: "4rem",
+    borderBottom: "1px solid grey",
+    padding: "0 1rem",
+  },
+  linkStyles: {
+    textDecoration: "none",
+    color: "black",
+    margin: "0 .4rem",
+  },
+  usernameStyles: {
+    fontSize: "1.2rem",
+  },
+  postHeaderIdentity: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  footerStyles: {
+    display: "flex",
+    alignSelf: "flex-end",
+    borderTop: "1px solid grey",
+    height: "4rem",
+    alignContent: "center",
+    justifyContent: "space-between",
+    padding: "0 1rem",
+  },
+  vote: {
+    fontSize: "2.2rem",
+  },
+  voted: {
+    color: "red",
+  },
+}));
+
+const defaultImage =
+  "https://safetyaustraliagroup.com.au/wp-content/uploads/2019/05/image-not-found.png";
+
+const Post = ({ post, ...props }) => {
+  console.log(post);
+  const classes = useStyles();
+  const [error, setError] = useState("");
+  const vote = async (type) => {
+    if (type) {
+      //vote project
+      voteProject({ pid: post._id, type })
+        .then(async (_resp) => {
+          //refresh data
+          const updatedPost = await getProjectById(post._id);
+          props.updatePost(updatedPost.data);
+        })
+        .catch((error) => {
+          console.log(error);
+          //showErrorModal
+        });
+    }
+  };
+  return (
+    <Grid container direction="row" className={classes.container} xs={10}>
+      <Grid
+        xs={12}
+        item
+        container
+        direction="row"
+        className={classes.postHeader}
+        alignItems="center"
+        alignContent="center"
+        justify="space-between"
+      >
+        <div className={classes.postHeaderIdentity}>
+          <Avatar aria-label={post.developer.username}>
+            {post.developer.username.charAt(0).toUpperCase()}
+          </Avatar>
+          <NavLink
+            to={{
+              pathname: `/dev/${post.developer._id}`,
+            }}
+            className={classes.linkStyles}
+          >
+            <Typography className={classes.usernameStyles}>
+              {post.developer.username}
+            </Typography>
+          </NavLink>
+        </div>
+        <div>
+          <Button
+            onClick={() => window.open(post.links.github, "_blank")}
+            disabled={!(post.links && !!post.links.github)}
+          >
+            <GitHubIcon />
+          </Button>
+          <Button
+            onClick={() => window.open(post.links.site, "_blank")}
+            disabled={!(post.links && !!post.links.site)}
+          >
+            view
+          </Button>
+        </div>
+      </Grid>
+      <Grid
+        container
+        xs={12}
+        style={{
+          display: "flex",
+          flex: 1,
+          minWidth: "100%",
+          maxHeight: "22rem",
+        }}
+      >
+        {post.photo ? (
+          <img style={{ maxHeight: "100%" }} width="100%" src={post.photo} />
+        ) : (
+          <Grid
+            item
+            container
+            alignContent="center"
+            alignItems="center"
+            justify="center"
+          >
+            <Typography>No Image Found</Typography>
+          </Grid>
+        )}
+      </Grid>
+      <Grid
+        xs={12}
+        item
+        container
+        direction="row"
+        className={classes.footerStyles}
+      >
+        <div>
+          <Button
+            disabled={
+              !(props.isAuthenticated && props.as.toLowerCase() === "developer")
+            }
+            onClick={() => vote(1)}
+          >
+            <ExpandLessIcon
+              className={
+                post.upvoted ? `${classes.vote} ${classes.voted}` : classes.vote
+              }
+            />
+            <Typography>{post.upvotes}</Typography>
+          </Button>
+          <Button
+            disabled={
+              !(props.isAuthenticated && props.as.toLowerCase() === "developer")
+            }
+            onClick={() => vote(-1)}
+          >
+            <ExpandMoreIcon
+              className={
+                post.downvoted
+                  ? `${classes.vote} ${classes.voted}`
+                  : classes.vote
+              }
+            />
+            <Typography>{post.downvotes}</Typography>
+          </Button>
+        </div>
+        <NavLink
+          to={{
+            pathname: `/projects/${post._id}`,
+          }}
+          className={classes.linkStyles}
+          style={{
+            alignSelf: "center",
+          }}
+        >
+          <Typography>view project</Typography>
+        </NavLink>
+      </Grid>
+    </Grid>
+  );
+};
+
+const mapStateToProps = (state) => {
+  return {
+    isAuthenticated: state.authReducer.authenticated,
+    as: state.authReducer.as,
+  };
+};
+
+export default connect(mapStateToProps, null)(Post);
