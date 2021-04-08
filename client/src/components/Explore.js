@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
     height: "9rem",
     width: "100%",
     borderBottom: "1px solid gray",
-    zIndex: "1501",
+    zIndex: "1000",
     background: "white",
   },
   pageHeading: {
