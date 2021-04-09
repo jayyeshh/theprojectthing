@@ -110,7 +110,6 @@ const LoginForm = (props) => {
         password,
       })
       .then((resp) => {
-        console.log(resp);
         setLoading(false);
         setError("");
         props.setNote("");

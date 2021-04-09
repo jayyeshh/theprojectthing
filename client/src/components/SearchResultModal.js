@@ -1,79 +1,131 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Typography, Grid, Paper, Avatar } from "@material-ui/core";
+import CodeIcon from "@material-ui/icons/Code";
+import { NavLink } from "react-router-dom";
 
-const SearchResultModal = ({ searchedItems }) => {
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import { fade, makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  searchResults: {
+    position: "fixed",
+    maxHeight: "12rem",
+    overflow: "auto",
+    top: "9%",
+    left: '30%',
+    width: "40%",
+    display: "flex",
+    flexDirection: "column",
+    alignContent: "center",
+    backgroundColor: "white",
+    color: "black",
+    borderRadius: "2px",
+    transition: "all .4s ease-in-out",
+    zIndex: "99999999",
+  },
+  searchResult: {
+    padding: "1rem",
+    borderBottom: "1px solid grey",
+    transition: "all .2s ease-in-out",
+    "&:hover": {
+      backgroundColor: "#eee",
+      cursor: "pointer",
+    },
+  },
+  titleName: {
+    alignSelf: "center",
+    marginLeft: ".4rem",
+  },
+  linkStyles: {
+    width: "100%",
+    textDecoration: "none",
+    color: "black",
+  },
+}));
+
+const SearchResultModal = ({ isFocused, searchedItems }) => {
+  const classes = useStyles();
   return (
-    <Paper elevation={4} className={classes.searchResults}>
+    <Paper elevation={6} className={classes.searchResults}>
       <Grid container>
-        {searchedItems.map((item) => {
-          if (item.title) {
-            return (
-              <NavLink
-                to={`/project/${item._id}`}
-                className={classes.linkStyles}
-              >
-                <Grid
-                  xs={12}
-                  item
-                  container
-                  align="center"
-                  alignContent="center"
-                  direction="row"
-                  justify="flex-start"
-                  className={classes.searchResult}
+        {isFocused &&
+          searchedItems.map((item) => {
+            if (item.title) {
+              return (
+                <NavLink
+                  key={item._id}
+                  to={`/projects/${item._id}`}
+                  className={classes.linkStyles}
                 >
-                  <Avatar>
-                    <CodeIcon />
-                  </Avatar>
-                  <Typography className={classes.titleName}>
-                    {item.title}
-                  </Typography>
-                </Grid>
-              </NavLink>
-            );
-          } else if (item.username && !!item.db) {
-            return (
-              <NavLink
-                to={`/company/${item._id}`}
-                className={classes.linkStyles}
-              >
-                <Grid
-                  item
-                  container
-                  align="center"
-                  alignContent="center"
-                  direction="row"
-                  justify="flex-start"
+                  <Grid
+                    xs={12}
+                    item
+                    container
+                    align="center"
+                    alignContent="center"
+                    direction="row"
+                    justify="flex-start"
+                    className={classes.searchResult}
+                  >
+                    <Avatar>
+                      <CodeIcon />
+                    </Avatar>
+                    <Typography className={classes.titleName}>
+                      {item.title}
+                    </Typography>
+                  </Grid>
+                </NavLink>
+              );
+            } else if (item.username && !!item.hasOwnProperty('posts')) {
+              return (
+                <NavLink
+                  key={item._id}
+                  to={`/company/${item._id}`}
+                  className={classes.linkStyles}
                 >
-                  <Avatar>
-                    <AccountCircleIcon />
-                  </Avatar>
-                  <Typography className={classes.titleName}>
-                    {item.title}
-                  </Typography>
-                </Grid>
-              </NavLink>
-            );
-          } else if (item.username) {
-            return (
-              <NavLink to={`/dev/${item._id}`} className={classes.linkStyles}>
-                <Grid
-                  item
-                  container
-                  align="center"
-                  alignContent="center"
-                  direction="row"
-                  justify="flex-start"
-                  className={classes.searchResult}
+                  <Grid
+                    item
+                    container
+                    align="center"
+                    alignContent="center"
+                    direction="row"
+                    className={classes.searchResult}
+                    justify="flex-start"
+                  >
+                    <Avatar>
+                      <AccountCircleIcon />
+                    </Avatar>
+                    <Typography className={classes.titleName}>
+                      {item.username}
+                    </Typography>
+                  </Grid>
+                </NavLink>
+              );
+            } else if (item.username) {
+              return (
+                <NavLink
+                  key={item._id}
+                  to={`/dev/${item._id}`}
+                  className={classes.linkStyles}
                 >
-                  <Avatar>{item.username.charAt(0)}</Avatar>
-                  <Typography className={classes.titleName}>
-                    {item.username}
-                  </Typography>
-                </Grid>
-              </NavLink>
-            );
-          }
-        })}
+                  <Grid
+                    item
+                    container
+                    align="center"
+                    alignContent="center"
+                    direction="row"
+                    justify="flex-start"
+                    className={classes.searchResult}
+                  >
+                    <Avatar>{item.username.charAt(0)}</Avatar>
+                    <Typography className={classes.titleName}>
+                      {item.username}
+                    </Typography>
+                  </Grid>
+                </NavLink>
+              );
+            }
+          })}
       </Grid>
     </Paper>
   );

@@ -9,8 +9,8 @@ import Home from "./Home";
 const useStyles = makeStyles({
   profileContainer: {
     margin: "2rem 0",
-    position: 'fixed',
-    right: '2%'
+    position: "fixed",
+    right: "2%",
   },
 });
 
@@ -38,7 +38,7 @@ const Dashboard = (props) => {
       <Grid className={classes.profileContainer} item xs={3}>
         <Profile authedAs={props.authedAs} />
       </Grid>
-   </Grid>
+    </Grid>
   );
 };
 

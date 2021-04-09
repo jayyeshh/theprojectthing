@@ -55,13 +55,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const defaultImage =
-  "https://safetyaustraliagroup.com.au/wp-content/uploads/2019/05/image-not-found.png";
-
 const Post = ({ post, ...props }) => {
-  console.log(post);
   const classes = useStyles();
-  const [error, setError] = useState("");
   const vote = async (type) => {
     if (type) {
       //vote project

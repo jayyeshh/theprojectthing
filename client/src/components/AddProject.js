@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import axios from "../utility/axios/apiInstance";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { green } from "@material-ui/core/colors";
 import { DropzoneArea } from "material-ui-dropzone";
 import { makeStyles } from "@material-ui/core/styles";
@@ -109,11 +109,22 @@ const errorInitials = {
   error: "",
 };
 
-const AddProject = () => {
+const AddProject = (props) => {
   const history = useHistory();
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [fieldValues, setFieldValues] = useState(initials);
+  const [task, setTask] = useState("");
+
+  useEffect(() => {
+    if (props.location.pathname.startsWith("/projects/add")) {
+      setTask("toadd");
+    }
+    if (props.location.pathname.startsWith("/projects/edit")) {
+      setTask("toedit");
+      console.log("id: ", props);
+    }
+  }, []);
 
   const [errors, setErrors] = useState(errorInitials);
 

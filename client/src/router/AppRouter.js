@@ -18,6 +18,8 @@ import Explore from "../components/Explore";
 import EditProject from "../components/EditProject";
 import DevPage from "../components/DevPage";
 import GlobalModal from "../components/GlobalModal";
+import CompanyPage from "../components/CompanyPage";
+import PostPage from "../components/PostPage";
 
 const AppRouter = (props) => {
   return (
@@ -50,11 +52,13 @@ const AppRouter = (props) => {
         />
         <Route path="/explore" component={Explore} exact />
         <Route path="/projects/:id" component={ProjectPage} exact />
+        <Route path="/post/:id" component={PostPage} exact />
         <Route path="/dev/:id" component={DevPage} exact />
+        <Route path="/company/:id" component={CompanyPage} exact />
         <PrivateRoute path="/dashboard" component={Dashboard} exact />
         <DeveloperOnlyRoute
           path="/projects/edit/:pid"
-          component={EditProject}
+          component={AddProject}
           exact
         />
         <Route component={NotFound} />

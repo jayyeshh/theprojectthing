@@ -38,14 +38,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ExpandableProjectCard = ({ project }) => {
-  console.log(project);
   const classes = useStyles();
   const [expanded, setExpanded] = useState(false);
-
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
-
   return (
     <div>
       <Card className={classes.root}>

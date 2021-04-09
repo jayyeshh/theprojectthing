@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import axios from "../utility/axios/apiInstance";
 import Spinner from "./Spinner";
 import DevCard from "./DevCard";
+import CompanyCard from "./CompanyCard";
 import ProjectCard from "./ProjectCard";
 import { connect } from "react-redux";
 
@@ -81,6 +82,9 @@ const Explore = (props) => {
           <ToggleButton value="projects">
             <Typography>Projects</Typography>
           </ToggleButton>
+          <ToggleButton value="companies">
+            <Typography>Companies</Typography>
+          </ToggleButton>
         </ToggleButtonGroup>
       </Paper>
       <Grid
@@ -126,6 +130,15 @@ const Explore = (props) => {
                 md={4}
               >
                 <ProjectCard project={project} />
+              </Grid>
+            ))}
+          </Grid>
+        )}
+        {!loading && !!list.length && type === "companies" && (
+          <Grid item justify="center" direction="row" container xs={12}>
+            {list.map((company, index) => (
+              <Grid key={company._id} item sm={6} md={3}>
+                <CompanyCard setError={setError} profile={company} />
               </Grid>
             ))}
           </Grid>

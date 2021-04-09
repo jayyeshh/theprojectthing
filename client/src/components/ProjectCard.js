@@ -30,6 +30,7 @@ const onMediaFallback = (event) => {
 
 const ProjectCard = ({ project }) => {
   const classes = useStyles();
+  if (!!!project.title) return <></>;
   return (
     <Card className={classes.root}>
       <CardActionArea

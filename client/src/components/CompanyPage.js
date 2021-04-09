@@ -1,10 +1,10 @@
 import { Avatar, Grid, Typography } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
-import { getDeveloperById } from "../utility/utilityFunctions/ApiCalls";
+import { getCompanyById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container } from "@material-ui/core";
 import Spinner from "./Spinner";
-import ExpandableProjectCard from "./ExpandableProjectCard";
+import CompanyPost from "./CompanyPost";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -45,10 +45,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const DevPage = (props) => {
+const CompanyPage = (props) => {
   const classes = useStyles();
   const [loading, setLoading] = useState(true);
-  const [developer, setDeveloper] = useState({});
+  const [company, setCompany] = useState({});
   const [currLocation, setCurrLocation] = useState("");
   const [error, setError] = useState("");
 
@@ -58,9 +58,9 @@ const DevPage = (props) => {
   }
 
   useEffect(() => {
-    getDeveloperById(props.match.params.id)
+    getCompanyById(props.match.params.id)
       .then((resp) => {
-        setDeveloper(resp.data);
+        setCompany(resp.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -76,7 +76,7 @@ const DevPage = (props) => {
           <Spinner />
         </Container>
       )}
-      {!!Object.keys(developer).length && (
+      {!!Object.keys(company).length && (
         <Grid container item xs={12}>
           <Grid item xs={4} className={classes.profile}>
             <div
@@ -87,43 +87,19 @@ const DevPage = (props) => {
               }}
             >
               <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
-                {developer.name.charAt(0)}
+                {company.name.charAt(0)}
               </Avatar>
               <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
-                @{developer.username}
+                @{company.username}
               </Typography>
-              <Typography>{developer.name}</Typography>
+              <Typography>{company.name}</Typography>
               <div
                 style={{
                   margin: ".7rem 0",
                 }}
               >
                 <Typography>Email:</Typography>
-                <Typography> {developer.email}</Typography>
-              </div>
-              <div
-                style={{
-                  margin: ".7rem 0",
-                  display: "flex",
-                  flexDirection: "row",
-                }}
-              >
-                <Typography className={classes.labelStyle}>
-                  Followers:
-                </Typography>
-                <Typography> {developer.followers.length}</Typography>
-              </div>
-              <div
-                style={{
-                  margin: ".7rem 0",
-                  display: "flex",
-                  flexDirection: "row",
-                }}
-              >
-                <Typography className={classes.labelStyle}>
-                  Following:
-                </Typography>
-                <Typography> {developer.following.length}</Typography>
+                <Typography> {company.email}</Typography>
               </div>
             </div>
           </Grid>
@@ -142,24 +118,24 @@ const DevPage = (props) => {
               variant="h5"
               style={{ textDecoration: "underline" }}
             >
-              Projects
+              Posts
             </Typography>
-            <Grid container item direction="row" xs={12}>
-              {!!developer.projects &&
-                developer.projects.map((project) => {
-                  return (
-                    <Grid
-                      item
-                      xs={5}
-                      key={project._id}
-                      style={{
-                        margin: "1rem",
-                      }}
-                    >
-                      <ExpandableProjectCard project={project} />
-                    </Grid>
-                  );
-                })}
+            <Grid
+              container
+              item
+              direction="column"
+              xs={12}
+              style={{
+                margin: "1rem 0",
+              }}
+            >
+              {!!company.posts.length ? (
+                company.posts.map((post) => {
+                  return <CompanyPost post={post} />;
+                })
+              ) : (
+                <Typography style={{fontWeight: 400, fontSize: '1.4rem'}}>No Posts Yet</Typography>
+              )}
             </Grid>
           </Grid>
         </Grid>
@@ -168,4 +144,4 @@ const DevPage = (props) => {
   );
 };
 
-export default DevPage;
+export default CompanyPage;

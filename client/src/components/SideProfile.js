@@ -19,7 +19,6 @@ import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import EmailIcon from "@material-ui/icons/Email";
-import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
@@ -45,7 +44,13 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SideProfile = ({ as, user, projects, isAuthed = false }) => {
+const SideProfile = ({
+  as,
+  user,
+  projects = [],
+  posts = [],
+  isAuthed = false,
+}) => {
   const classes = useStyles();
   return (
     <Paper style={{ marginRight: "1rem" }} elevation={14}>
@@ -113,6 +118,39 @@ const SideProfile = ({ as, user, projects, isAuthed = false }) => {
             </AccordionDetails>
           </Accordion>
         )}
+        {as.toLowerCase() === "company" && (
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography className={classes.heading}>Posts</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <List
+                component="nav"
+                className={classes.listStyles}
+                aria-label="Posts"
+              >
+                {posts.map((post) => (
+                  <NavLink
+                    to={"/post/" + post._id}
+                    className={classes.linkStyles}
+                    key={post._id}
+                  >
+                    <ListItem button divider>
+                      <ListItemText
+                        primary={
+                          post.text.length > 10
+                            ? post.text.substr(7) + "..."
+                            : post.text
+                        }
+                      />
+                    </ListItem>
+                  </NavLink>
+                ))}
+              </List>
+            </AccordionDetails>
+          </Accordion>
+        )}
+
         {isAuthed && (
           <CardActions>
             <NavLink to="/profile/edit" style={{ textDecoration: "none" }}>

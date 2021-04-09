@@ -32,7 +32,7 @@ const useStyles = makeStyles({
 const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
   const classes = useStyles();
   const history = useHistory();
-
+  if (!!!profile.projects) return <></>;
   const follow = (uid) => {
     followUser(uid)
       .then((res) => {
@@ -63,10 +63,9 @@ const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
         setTimeout(() => {
           props.setModalState(false, "");
         }, 3000);
-        props.setupAuthentication();
+        setupAuthentication();
       })
       .catch((_error) => {
-        console.log(_error);
         props.setModalState(
           true,
           "Something went wrong! try again after some time"

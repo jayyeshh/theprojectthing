@@ -10,8 +10,9 @@ import {
 import { NavLink, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import SearchResultModal from "./SearchResultModal";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
@@ -24,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     backgroundColor: "#0d47a1",
+    transition: "all .4s ease-in-out",
     [theme.breakpoints.down("xs")]: {
       alignItems: "center",
     },
@@ -43,10 +45,6 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer",
     },
   },
-  gridStyles: {
-    display: "flex",
-    alignItems: "center",
-  },
   navlinkStyles: {
     color: "#fff",
     textDecoration: "none",
@@ -61,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(2),
     marginLeft: 0,
     width: "100%",
+    display: "flex",
+    alignSelf: "center",
+    alignContent: "center",
     [theme.breakpoints.up("sm")]: {
       marginLeft: theme.spacing(3),
       width: "auto",
@@ -118,16 +119,17 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: ".4rem",
   },
   linkStyles: {
-    width: '100%',
-    textDecoration: 'none',
-    color: 'black'
-  }
+    width: "100%",
+    textDecoration: "none",
+    color: "black",
+  },
 }));
 
 const Header = (props) => {
   const classes = useStyles();
   const [currPath, setCurrPath] = useState("");
   const location = useLocation();
+  const [searchBarFocused, setSearchBarFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(0);
   const [searchedItems, setSearchedItems] = useState([]);
@@ -135,6 +137,9 @@ const Header = (props) => {
   const searchHandler = (e) => {
     const searchQuery = e.target.value;
     setSearchQuery(searchQuery);
+    if (!!!searchQuery) {
+      return setSearchedItems([]);
+    }
     if (searchTimeout) clearTimeout(searchTimeout);
     setSearchTimeout(
       setTimeout(() => {
@@ -147,7 +152,7 @@ const Header = (props) => {
             setSearchedItems([]);
             console.log("error: ", error);
           });
-      }, 300)
+      }, 100)
     );
   };
 
@@ -158,7 +163,7 @@ const Header = (props) => {
   return (
     <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
-        <Grid className={classes.gridStyles} container>
+        <Grid container item xs={4}>
           <NavLink to="/" className={classes.navlinkStyles}>
             <Typography className={classes.mainHeading}>
               The Project Thing
@@ -167,107 +172,47 @@ const Header = (props) => {
 
           <CodeIcon fontSize="large" />
         </Grid>
-        <div className={classes.search}>
-          <div className={classes.searchIcon}>
-            <SearchIcon />
+        <Grid item container xs={8} justify="center">
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
+            </div>
+            <InputBase
+              placeholder="Search…"
+              onFocus={() => setSearchBarFocused(true)}
+              onBlur={() => {
+                if (!!!searchQuery) {
+                  setSearchedItems([]);
+                }
+                setTimeout(() => {
+                  setSearchBarFocused(false);
+                }, 300);
+              }}
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput,
+              }}
+              inputProps={{ "aria-label": "search" }}
+              value={searchQuery}
+              onChange={searchHandler}
+            />
           </div>
-          <InputBase
-            placeholder="Search…"
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-            inputProps={{ "aria-label": "search" }}
-            value={searchQuery}
-            onChange={searchHandler}
-          />
-        </div>
+        </Grid>
         <div className={classes.grow} />
         {!!searchedItems.length && (
-          <Paper elevation={4} className={classes.searchResults}>
-            <Grid container>
-              {searchedItems.map((item) => {
-                if (item.title) {
-                  return (
-                    <NavLink
-                      to={`/project/${item._id}`}
-                      className={classes.linkStyles}
-                    >
-                      <Grid
-                        xs={12}
-                        item
-                        container
-                        align="center"
-                        alignContent="center"
-                        direction="row"
-                        justify="flex-start"
-                        className={classes.searchResult}
-                      >
-                        <Avatar>
-                          <CodeIcon />
-                        </Avatar>
-                        <Typography className={classes.titleName}>
-                          {item.title}
-                        </Typography>
-                      </Grid>
-                    </NavLink>
-                  );
-                } else if (item.username && !!item.db) {
-                  return (
-                    <NavLink
-                      to={`/company/${item._id}`}
-                      className={classes.linkStyles}
-                    >
-                      <Grid
-                        item
-                        container
-                        align="center"
-                        alignContent="center"
-                        direction="row"
-                        justify="flex-start"
-                      >
-                        <Avatar>
-                          <AccountCircleIcon />
-                        </Avatar>
-                        <Typography className={classes.titleName}>
-                          {item.title}
-                        </Typography>
-                      </Grid>
-                    </NavLink>
-                  );
-                } else if (item.username) {
-                  return (
-                    <NavLink
-                      to={`/dev/${item._id}`}
-                      className={classes.linkStyles}
-                    >
-                      <Grid
-                        item
-                        container
-                        align="center"
-                        alignContent="center"
-                        direction="row"
-                        justify="flex-start"
-                        className={classes.searchResult}
-                      >
-                        <Avatar>{item.username.charAt(0)}</Avatar>
-                        <Typography className={classes.titleName}>
-                          {item.username}
-                        </Typography>
-                      </Grid>
-                    </NavLink>
-                  );
-                }
-              })}
-            </Grid>
-          </Paper>
+          <SearchResultModal
+            isFocused={searchBarFocused}
+            searchedItems={searchedItems}
+          />
         )}
-        {!props.auth.authenticated && !currPath.split("/").includes("auth") && (
-          <NavLink to="/auth" className={classes.navlinkStyles}>
-            <Button className={classes.btn}>Join</Button>
-          </NavLink>
-        )}
-        {props.auth.authenticated && <HeaderMenus />}
+        <Grid item container xs={5} justify="flex-end">
+          {!props.auth.authenticated && !currPath.split("/").includes("auth") && (
+            <NavLink to="/auth" className={classes.navlinkStyles}>
+              <Button className={classes.btn}>Join</Button>
+            </NavLink>
+          )}
+          {props.auth.authenticated && <HeaderMenus />}
+        </Grid>
       </Toolbar>
     </AppBar>
   );
