@@ -2,6 +2,7 @@ import { Avatar, Grid, Typography } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getCompanyById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
+import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { Container } from "@material-ui/core";
 import Spinner from "./Spinner";
 import CompanyPost from "./CompanyPost";
@@ -50,12 +51,19 @@ const CompanyPage = (props) => {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState({});
   const [currLocation, setCurrLocation] = useState("");
+  const [type, setType] = useState("posts");
   const [error, setError] = useState("");
 
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
   }
+
+  const toggleBtnHandler = (event, newValue) => {
+    if (newValue) {
+      setType(newValue);
+    }
+  };
 
   useEffect(() => {
     getCompanyById(props.match.params.id)
@@ -67,6 +75,12 @@ const CompanyPage = (props) => {
         setLoading(false);
       });
   }, []);
+
+  const updatePost = (updatedPost, index) => {
+    const updatedPosts = [...company.posts];
+    updatedPosts[index] = updatedPost;
+    setCompany({ ...company, posts: updatedPosts });
+  };
 
   return (
     <Grid container>
@@ -113,13 +127,21 @@ const CompanyPage = (props) => {
               padding: "2rem 0",
             }}
           >
-            <Typography
-              component="h2"
-              variant="h5"
-              style={{ textDecoration: "underline" }}
+            <ToggleButtonGroup
+              exclusive
+              value={type}
+              onChange={toggleBtnHandler}
+              style={{
+                alignSelf: "center",
+              }}
             >
-              Posts
-            </Typography>
+              <ToggleButton value="posts">
+                <Typography>Posts</Typography>
+              </ToggleButton>
+              <ToggleButton value="reviews">
+                <Typography>Reviews</Typography>
+              </ToggleButton>
+            </ToggleButtonGroup>
             <Grid
               container
               item
@@ -129,12 +151,51 @@ const CompanyPage = (props) => {
                 margin: "1rem 0",
               }}
             >
-              {!!company.posts.length ? (
-                company.posts.map((post) => {
-                  return <CompanyPost post={post} />;
-                })
-              ) : (
-                <Typography style={{fontWeight: 400, fontSize: '1.4rem'}}>No Posts Yet</Typography>
+              {type === "posts" && (
+                <>
+                  {!!company.posts.length ? (
+                    company.posts.map((post, index) => {
+                      return (
+                        <CompanyPost
+                          post={post}
+                          updatePost={(updatedPost) =>
+                            updatePost(updatedPost, index)
+                          }
+                        />
+                      );
+                    })
+                  ) : (
+                    <Typography style={{ fontWeight: 400, fontSize: "1.4rem" }}>
+                      No Posts Yet
+                    </Typography>
+                  )}
+                </>
+              )}
+              {type === "reviews" && (
+                <>
+                  {!!company.reviews.length ? (
+                    company.reviews.map((review, index) => {
+                      return (
+                        <Grid
+                          container
+                          style={{
+                            width: "50%",
+                            backgroundColor: "#eee",
+                            alignSelf:'center',
+                            padding: ".6rem",
+                          }}
+                          align="center"
+                          justify="center"
+                          alignContet="center"
+                        ></Grid>
+                      );
+                    })
+                  ) : (
+                    <Typography style={{ fontWeight: 400, fontSize: "1.4rem" }}>
+                      No Reviews
+                    </Typography>
+                  )}
+                </>
               )}
             </Grid>
           </Grid>

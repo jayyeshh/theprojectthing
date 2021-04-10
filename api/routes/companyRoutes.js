@@ -66,6 +66,7 @@ router.post("/login", async (req, res) => {
   }
   try {
     const token = await company.generateAuthToken();
+    await company.populate("posts").execPopulate();
     res.send({
       company,
       token,
@@ -116,7 +117,22 @@ router.get("/", auth, async (req, res) => {
 //get company by id
 router.get("/:id", async (req, res) => {
   try {
-    let company = await Company.findOne({ _id: req.params.id });
+    let company = await Company.findOne({ _id: req.params.id })
+      .populate({
+        path: "posts",
+        populate: {
+          path: "author",
+        },
+      })
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "by",
+        },
+        populate: {
+          path: "company",
+        },
+      });
     if (!company) {
       return res.status(404).send({
         error: "Not Found! Invalid Id!",

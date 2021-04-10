@@ -1,6 +1,6 @@
 import validator from "validator";
 import jwt from "jsonwebtoken";
-import { Developer } from "../models/";
+import { Company, Developer } from "../models/";
 
 export const trimValues = (obj) => {
   Object.keys(obj).forEach((key) => {
@@ -104,5 +104,30 @@ export const isDev = async (req) => {
     return true;
   } catch (e) {
     return false;
+  }
+};
+
+export const isAuthedAsCompany = async (req, res) => {
+  if (!req.header("Authorization")) return res.sendStatus(401);
+  try {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    const decode = await jwt.verify(token, process.env.JWT_SECRET);
+    const { _id, as } = decode;
+    if (as === "Developer")
+      return res
+        .status(400)
+        .send({ error: "You don't have permission to perform this action!" });
+    const company = await Company.findOne({
+      _id,
+      "tokens.token": token,
+    });
+    if (!company) return false;
+    req.company = company;
+    req.as = as;
+    req.token = token;
+    return true;
+  } catch (e) {
+    console.log(e);
+    return res.sendStatus(500);
   }
 };

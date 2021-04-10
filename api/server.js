@@ -4,21 +4,124 @@ require("./db/mongoose");
 import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import projectRoutes from "./routes/projectRoutes";
+import reviewRoutes from "./routes/reviewRoutes";
 import auth from "./middlewares/auth";
-import { Developer, Project } from "./models";
+import { Company, Developer, Post, Project } from "./models";
 import authAsDev from "./middlewares/authAsDev";
 import { isDev } from "./utils/utilityFunctions";
+import cors from "cors";
+import postRoutes from "./routes/postRoutes";
 // import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 // app.use(cookieParser());
 app.get("/profile", auth, async (req, res) => {
-  await req.user.populate("projects").execPopulate();
-  let profile = req.user.toObject();
-  profile.followers = profile.followers.length;
-  profile.following = profile.following.length;
-  res.send({ profile, as: req.as });
+  let profile = req.user;
+  if (req.as.toLowerCase() === "developer") {
+    await profile.populate("projects").execPopulate();
+    profile = profile.toObject();
+    profile.followers = profile.followers.length;
+    profile.following = profile.following.length;
+  }
+  if (req.as.toLowerCase() === "company") {
+    await profile.populate("posts").execPopulate();
+  }
+  return res.send({ profile, as: req.as });
+});
+
+app.get("/search", async (req, res) => {
+  const { query } = req.query;
+  const queryArray = query.split(/[_\s.]/);
+  const expr = "(" + queryArray.join("|") + ")";
+  let resp = [];
+  const devs = await Developer.find({
+    username: { $regex: expr },
+  });
+  const companies = await Company.find({
+    username: { $regex: expr },
+  });
+  const projects = await Project.find({
+    title: { $regex: expr },
+  });
+  resp = resp.concat(devs, companies, projects);
+  res.send(resp);
+});
+
+app.get("/stats", async (req, res) => {
+  try {
+    const totalCompanies = await Company.find({}).count();
+    const totalDevelopers = await Developer.find({}).count();
+    res.send({
+      totalCompanies,
+      totalDevelopers,
+    });
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+app.get("/home", auth, async (req, res) => {
+  try {
+    if (req.as.toLowerCase() === "developer") {
+      await req.user.populate("following").execPopulate();
+      const followings = req.user.following;
+      let projects = [];
+      followings.forEach((user) => (projects = projects.concat(user.projects)));
+      // const fetchedProjects = await Project.find({
+      //   _id: { $in: projects },
+      // }).populate('developer').sort("-createdAt");
+      const fetchedProjects = await Project.aggregate([
+        {
+          $match: {
+            _id: { $in: projects },
+          },
+        },
+        {
+          $lookup: {
+            from: "developers",
+            localField: "developer",
+            foreignField: "_id",
+            as: "developer",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+        {
+          $sort: {
+            createdAt: 1,
+          },
+        },
+        {
+          $addFields: {
+            upvoted: {
+              $in: [
+                mongoose.Types.ObjectId(req.user._id.toString()),
+                "$upvotes",
+              ],
+            },
+            downvoted: {
+              $in: [
+                mongoose.Types.ObjectId(req.user._id.toString()),
+                "$downvotes",
+              ],
+            },
+            upvotes: { $size: "$upvotes" },
+            downvotes: { $size: "$downvotes" },
+          },
+        },
+      ]);
+      res.send(fetchedProjects);
+    }
+    if (req.as.toLowerCase() === "company") {
+      res.send([]);
+    }
+  } catch (error) {
+    res.sendStatus(500);
+  }
+  res.send();
 });
 
 app.get("/devs", async (req, res) => {
@@ -45,6 +148,15 @@ app.get("/projects", async (req, res) => {
   try {
     const projects = await Project.find({});
     res.send(projects);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
+app.get("/companies", async (req, res) => {
+  try {
+    const companies = await Company.find({});
+    res.send(companies);
   } catch (error) {
     res.sendStatus(500);
   }
@@ -128,14 +240,16 @@ app.post("/unfollow/:uid", authAsDev, async (req, res) => {
 app.use("/developer", developerRoutes);
 app.use("/company", companyRoutes);
 app.use("/project", projectRoutes);
+app.use("/post", postRoutes);
+app.use("/review", reviewRoutes);
 app.use((err, req, res, next) => {
   //to check if request is in valid JSON format or not
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.sendStatus(400); // Bad request
   }
-
   next();
 });
+
 app.get("*", (req, res) => {
   res.status(404).send({
     error: "Endpoint does not exist!",

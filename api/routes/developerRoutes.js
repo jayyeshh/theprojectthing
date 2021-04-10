@@ -1,6 +1,7 @@
 import express from "express";
 import validator from "validator";
 import { Developer } from "../models/index";
+import mongoose from "mongoose";
 import auth from "../middlewares/auth";
 import {
   handlerRegistrationError,
@@ -64,6 +65,7 @@ router.post("/login", async (req, res) => {
   }
   try {
     const token = await developer.generateAuthToken();
+    await developer.populate("projects").execPopulate();
     // res.cookie("token", token, { httpOnly: true });
     developer = developer.toObject();
     developer.followers = developer.followers.length;
@@ -117,7 +119,9 @@ router.get("/", auth, async (req, res) => {
 //get developer by id
 router.get("/:id", async (req, res) => {
   try {
-    const developer = await Developer.findOne({ _id: req.params.id });
+    const developer = await Developer.findOne({ _id: req.params.id }).populate({
+      path: "projects",
+    });
     if (!developer) {
       return res.status(404).send({
         error: "Not Found! Invalid Id!",
@@ -125,6 +129,7 @@ router.get("/:id", async (req, res) => {
     }
     res.send(developer);
   } catch (error) {
+    console.log(error);
     if (error.name === "CastError") {
       return res.status(400).send({
         error: "Invalid Id!",

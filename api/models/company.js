@@ -52,6 +52,18 @@ const companySchema = new Schema(
         ref: "Project",
       },
     ],
+    posts: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    reviews: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "Review",
+      },
+    ],
     tokens: [
       {
         token: {

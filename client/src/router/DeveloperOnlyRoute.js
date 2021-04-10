@@ -7,7 +7,6 @@ const DeveloperOnlyRoute = ({
   component: Component,
   ...rest
 }) => {
-  console.log("rest: ", rest);
   return isAuthenticated && as === "Developer" ? (
     <Component {...rest} />
   ) : (

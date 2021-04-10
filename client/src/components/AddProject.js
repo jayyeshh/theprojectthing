@@ -14,6 +14,10 @@ import { DropzoneArea } from "material-ui-dropzone";
 import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router-dom";
 import { setupAuthentication } from "../actions/authActions";
+import { getProjectById } from "../utility/utilityFunctions/ApiCalls";
+import { setModalStateAction } from "../actions/modalActions";
+import { connect } from "react-redux";
+import Spinner from "./Spinner";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -102,6 +106,10 @@ const initials = {
   about: "",
   github: "",
   site: "",
+  links: {
+    github: "",
+    site: "",
+  },
 };
 
 const errorInitials = {
@@ -113,27 +121,76 @@ const AddProject = (props) => {
   const history = useHistory();
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [fieldValues, setFieldValues] = useState(initials);
   const [task, setTask] = useState("");
+  const [errors, setErrors] = useState(errorInitials);
 
   useEffect(() => {
     if (props.location.pathname.startsWith("/projects/add")) {
       setTask("toadd");
+      setFieldValues(initials);
+      setInitialLoad(false);
     }
     if (props.location.pathname.startsWith("/projects/edit")) {
       setTask("toedit");
-      console.log("id: ", props);
+      const { pid } = props.computedMatch.params;
+      getProjectById(pid)
+        .then((resp) => {
+          setFieldValues({ ...initials, ...resp.data });
+          setLoading(false);
+          setInitialLoad(false);
+        })
+        .catch((error) => {
+          console.log(error.response);
+          setInitialLoad(false);
+          setLoading(false);
+        });
     }
-  }, []);
-
-  const [errors, setErrors] = useState(errorInitials);
+  }, [props.location.pathname]);
 
   const onChangeHandler = (e) => {
     setFieldValues({ ...fieldValues, [e.target.name]: e.target.value });
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const handleDropzoneChange = (file) => {
     setFieldValues({ ...fieldValues, photo: file[0] });
+  };
+
+  const editProduct = (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const data = new FormData();
+    data.append("photo", fieldValues.photo);
+    data.append("title", fieldValues.title);
+    data.append("about", fieldValues.about);
+    data.append("github", fieldValues.github);
+    data.append("site", fieldValues.site);
+    const configs = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
+    axios
+      .patch(`/project/${props.computedMatch.params.pid}`, data, configs)
+      .then((resp) => {
+        setLoading(false);
+        history.push(`/projects/${props.computedMatch.params.pid}`);
+        setupAuthentication();
+      })
+      .catch((err) => {
+        setLoading(false);
+        if (err.response && err.response.data.error) {
+          props.setModalState(true, err.response.data.error);
+        } else {
+          props.setModalState(true, `Something went wrong!`);
+        }
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
   };
 
   const addThisProject = (e) => {
@@ -160,9 +217,41 @@ const AddProject = (props) => {
       })
       .catch((err) => {
         setLoading(false);
-        setErrors({ ...errorInitials, error: err.response.data.error });
+        let errormsg = { ...errorInitials };
+        if (err.response && err.response.data.errors) {
+          errormsg = {
+            ...errormsg,
+            ...err.response.data.errors,
+          };
+
+          props.setModalState(true, errormsg.error);
+        } else {
+          errormsg = {
+            ...errormsg,
+            error: err.response.data.error,
+          };
+          props.setModalState(true, errormsg.error);
+        }
+        setErrors({ ...errormsg });
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
       });
   };
+
+  if (initialLoad) {
+    return (
+      <Grid
+        container
+        align="center"
+        justify="center"
+        alignContent="center"
+        style={{ minWidth: "100vw", minHeight: "70vh" }}
+      >
+        <Spinner />
+      </Grid>
+    );
+  }
 
   return (
     <Paper className={classes.container}>
@@ -172,20 +261,24 @@ const AddProject = (props) => {
         component="h1"
         variant="h4"
       >
-        Add Project
+        {task === "toadd" ? "Add Project" : "Edit Project"}
       </Typography>
       {errors.error && (
         <Typography component="h1" variant="h5" className={classes.errorStyles}>
           {errors.error}
         </Typography>
       )}
-      <form onSubmit={addThisProject} className={classes.formStyles}>
+      <form
+        onSubmit={task === "toadd" ? addThisProject : editProduct}
+        className={classes.formStyles}
+      >
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <TextField
               autoComplete="title"
               name="title"
               error={!!errors.title}
+              value={fieldValues.title}
               variant="outlined"
               onChange={onChangeHandler}
               required
@@ -200,6 +293,7 @@ const AddProject = (props) => {
               autoComplete="github"
               name="github"
               type="url"
+              value={fieldValues.links.github}
               style={{
                 marginBottom: ".8rem",
               }}
@@ -214,6 +308,7 @@ const AddProject = (props) => {
               autoComplete="site"
               name="url"
               type="site"
+              value={fieldValues.links.site}
               error={!!errors.site}
               variant="outlined"
               onChange={onChangeHandler}
@@ -226,6 +321,7 @@ const AddProject = (props) => {
             style={{ marginLeft: ".6rem" }}
             rows={5}
             cols={137}
+            value={fieldValues.links.description}
             style={{
               padding: ".6rem",
               marginLeft: ".6rem",
@@ -255,7 +351,7 @@ const AddProject = (props) => {
             color="secondary"
             className={classes.submitBtnStyles}
           >
-            add project
+            {task === "toadd" ? "add project" : "update"}
           </Button>
           {loading && (
             <CircularProgress size={24} className={classes.buttonProgress} />
@@ -266,4 +362,11 @@ const AddProject = (props) => {
   );
 };
 
-export default AddProject;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setModalState: (modalState, text) =>
+      dispatch(setModalStateAction({ showModal: modalState, text })),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(AddProject);

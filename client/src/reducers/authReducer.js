@@ -10,17 +10,18 @@ const authReducer = (state = initialState, action) => {
   switch (action.type) {
     case LOGGED_IN: {
       const newState = {};
-      let email, username, name, followers, following;
+      let _id, email, username, name, followers, following;
       const { token } = action.payload;
       localStorage.setItem("authToken", token);
       if (action.payload.company) {
         newState.as = "Company";
-        ({ email, username, name } = action.payload.company);
+        ({ _id, email, username, name } = action.payload.company);
       }
       if (action.payload.developer) {
         newState.as = "Developer";
         ({
           email,
+          _id,
           username,
           name,
           followers,
@@ -28,6 +29,7 @@ const authReducer = (state = initialState, action) => {
         } = action.payload.developer);
       }
       const user = {
+        _id,
         email,
         username,
         name,
@@ -46,11 +48,12 @@ const authReducer = (state = initialState, action) => {
     }
     case SETUP_PROFILE: {
       const { profile, as } = action.payload;
-      const { followers, following, email, name, projects, username } = profile;
+      const { _id, followers, following, email, name, username } = profile;
       return {
         authenticated: true,
         as,
         user: {
+          _id,
           username,
           name,
           email,

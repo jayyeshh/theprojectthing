@@ -45,7 +45,6 @@ router.post("/", authAsDev, async (req, res) => {
   const upload = multer({ storage }).single("photo");
   await upload(req, res, async function (err) {
     const { title, about, github, site } = req.body;
-    console.log("=> ", about);
     if (!title)
       return res
         .status(400)
@@ -57,8 +56,10 @@ router.post("/", authAsDev, async (req, res) => {
     );
     if (alreadyExist) {
       return res.status(400).send({
-        error:
-          "You have already posted a project with same title. Choose a different title!",
+        errors: {
+          title:
+            "You have already posted a project with same title. Choose a different title!",
+        },
       });
     }
     const project = new Project({
@@ -188,14 +189,9 @@ router.post("/vote", authAsDev, async (req, res) => {
     }
     res.sendStatus(200);
   } catch (error) {
+    console.log(error);
     res.sendStatus(500);
   }
-});
-
-router.get("/home", authAsDev, async (req, res) => {
-  // req.developer.following.forEach(devId=>{
-  //   await Developer.findById(devId).populate('projects');
-  // })
 });
 
 router.delete("/:pid", authAsDev, async (req, res) => {
@@ -220,33 +216,68 @@ router.delete("/:pid", authAsDev, async (req, res) => {
 
 router.patch("/:pid", authAsDev, async (req, res) => {
   const { pid } = req.params;
-  req.body = trimValues(req.body);
-  const { title, about, github, site } = req.body;
-  const project = await Project.findById(pid);
-  if (!project)
-    return res.status(404).send({
-      error: "Invalid Project Id",
-    });
-  if (project.developer.toString() !== req.developer._id.toString())
-    return res.send(400).send({
-      error: "You don't have permission to perform this action!",
-    });
-  try {
+  const upload = multer({ storage }).single("photo");
+  await upload(req, res, async function (err) {
+    if (err) return res.send(err);
+    let { title, about, github, site, photo } = req.body;
+    if (!title)
+      return res
+        .status(400)
+        .send({ error: "title is required for a project!" });
+
+    const project = await Project.findById(pid);
+    if (!project)
+      return res.status(404).send({
+        error: "Invalid Project Id",
+      });
+    if (project.developer.toString() !== req.developer._id.toString())
+      return res.send(400).send({
+        error: "You don't have permission to perform this action!",
+      });
     const links = {
       github: !!github ? github : project.links.github,
       site: !!site ? site : project.links.site,
     };
-    const updates = {
-      title: !!title ? title : project.title,
-      about: !!about ? about : project.about,
-      links,
-    };
-    await project.updateOne({ ...updates });
-    res.sendStatus(200);
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
+    const duplicateTitle = await Project.find({
+      title,
+      developer: req.developer._id,
+      _id: { $ne: project._id },
+    });
+    if (duplicateTitle.length)
+      return res
+        .status(400)
+        .send({ error: "You already have a project with same title!" });
+    if (req.file) {
+      await cloudinary.uploader.upload(
+        req.file.path,
+        {
+          public_id: `project-images/${req.developer.username}:${project._id}`,
+          tags: "projectphoto",
+        },
+        async function (err, image) {
+          if (err) return res.status(400).send(err);
+          fs.unlinkSync(req.file.path);
+          photo = image.url;
+        }
+      );
+    }
+    try {
+      const updates = {
+        title: !!title ? title : project.title,
+        about: !!about ? about : project.about,
+        links,
+      };
+      if (!!photo) {
+        updates.photo = photo;
+      }
+      await project.updateOne({ ...updates });
+      res.sendStatus(200);
+    } catch (error) {
+      res.status(400).send({
+        error: error.message,
+      });
+    }
+  });
 });
 
 router.patch("/:pid/photo", authAsDev, async (req, res) => {

@@ -5,7 +5,7 @@ const GlobalModal = ({ modalText, ...props }) => {
   return (
     <div
       style={{
-        position: "absolute",
+        position: "fixed",
         top: "1rem",
         left: "28%",
         zIndex: "9999",

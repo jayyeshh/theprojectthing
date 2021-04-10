@@ -9,7 +9,13 @@ const commentSchema = new Schema(
     },
     by: {
       type: mongoose.Types.ObjectId,
-      ref: "User",
+      refPath: "onModel",
+      required: true,
+    },
+    onModel: {
+      type: String,
+      enum: ["Developer", "Company"],
+      required: true,
     },
     project: {
       type: mongoose.Types.ObjectId,
