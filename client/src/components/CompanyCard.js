@@ -56,6 +56,10 @@ const CompanyCard = ({ profile, setError }) => {
             <Typography style={{ fontWeight: 600 }}>Posts:</Typography>
             <Typography>{profile.posts.length}</Typography>
           </Grid>
+          <Grid container direction="row">
+            <Typography style={{ fontWeight: 600 }}>Reviews:</Typography>
+            <Typography>{profile.reviews.length}</Typography>
+          </Grid>
         </CardContent>
       </CardActionArea>
     </Card>

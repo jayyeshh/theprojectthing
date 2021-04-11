@@ -24,7 +24,6 @@ const defaultImage =
 const truncate = (str = "") =>
   str.length > 20 ? str.substr(0, 17) + "..." : str;
 const onMediaFallback = (event) => {
-  console.log(event);
   event.target.src = defaultImage;
 };
 

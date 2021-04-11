@@ -1,4 +1,11 @@
-import { Avatar, Grid, Typography } from "@material-ui/core";
+import {
+  Avatar,
+  Button,
+  Divider,
+  Grid,
+  TextareaAutosize,
+  Typography,
+} from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getCompanyById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
@@ -6,6 +13,10 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { Container } from "@material-ui/core";
 import Spinner from "./Spinner";
 import CompanyPost from "./CompanyPost";
+import moment from "moment";
+import { NavLink } from "react-router-dom";
+import { connect } from "react-redux";
+import AddReviewPopupModal from "./AddReviewPopupModal";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -53,6 +64,7 @@ const CompanyPage = (props) => {
   const [currLocation, setCurrLocation] = useState("");
   const [type, setType] = useState("posts");
   const [error, setError] = useState("");
+  const [addReviewPopup, setAddReviewPopup] = useState(false);
 
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
@@ -63,6 +75,14 @@ const CompanyPage = (props) => {
     if (newValue) {
       setType(newValue);
     }
+  };
+
+  const updateReviews = (review) => {
+    console.log(review)
+    const updatedCompany = { ...company };
+    updatedCompany.reviews = [...updatedCompany.reviews, review];
+    setCompany(updatedCompany);
+    setAddReviewPopup(false);
   };
 
   useEffect(() => {
@@ -84,6 +104,12 @@ const CompanyPage = (props) => {
 
   return (
     <Grid container>
+      <AddReviewPopupModal
+        companyId={props.match.params.id}
+        addReviewPopup={addReviewPopup}
+        setAddReviewPopup={setAddReviewPopup}
+        updateReviews={updateReviews}
+      />
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading && (
         <Container className={classes.containerStyles}>
@@ -173,28 +199,76 @@ const CompanyPage = (props) => {
               )}
               {type === "reviews" && (
                 <>
-                  {!!company.reviews.length ? (
-                    company.reviews.map((review, index) => {
-                      return (
-                        <Grid
-                          container
-                          style={{
-                            width: "50%",
-                            backgroundColor: "#eee",
-                            alignSelf:'center',
-                            padding: ".6rem",
-                          }}
-                          align="center"
-                          justify="center"
-                          alignContet="center"
-                        ></Grid>
-                      );
-                    })
-                  ) : (
-                    <Typography style={{ fontWeight: 400, fontSize: "1.4rem" }}>
-                      No Reviews
-                    </Typography>
+                  {props.authedAs.toLowerCase() === "developer" && (
+                    <Grid>
+                      <Button
+                        color="primary"
+                        variant="outlined"
+                        onClick={() => setAddReviewPopup(true)}
+                      >
+                        Add Review
+                      </Button>
+                    </Grid>
                   )}
+                  <Grid>
+                    {!!company.reviews.length ? (
+                      company.reviews.map((review, index) => {
+                        return (
+                          <Grid
+                            container
+                            style={{
+                              width: "60%",
+                              backgroundColor: "#eee",
+                              padding: ".6rem",
+                              margin: "1rem",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <Grid container direction="column">
+                              <Grid
+                                container
+                                align="space-between"
+                                justify="space-between"
+                                alignContent="space-between"
+                                alignItems="space-between"
+                                style={{
+                                  margin: ".5rem 0",
+                                }}
+                              >
+                                <NavLink
+                                  to={`/dev/${review.by._id}`}
+                                  style={{ textDecoration: "none" }}
+                                >
+                                  @{review.by.username}
+                                </NavLink>
+                                <div style={{ color: "grey" }}>
+                                  {"reviewed on "}
+                                  {new moment(review.createdAt).format(
+                                    "ddd,DD MMM"
+                                  )}
+                                </div>
+                              </Grid>
+                              <Divider />
+                              <Grid
+                                container
+                                style={{
+                                  padding: ".6rem 0",
+                                }}
+                              >
+                                {review.text}
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        );
+                      })
+                    ) : (
+                      <Typography
+                        style={{ fontWeight: 400, fontSize: "1.4rem" }}
+                      >
+                        No Reviews
+                      </Typography>
+                    )}
+                  </Grid>
                 </>
               )}
             </Grid>
@@ -205,4 +279,11 @@ const CompanyPage = (props) => {
   );
 };
 
-export default CompanyPage;
+const mapStateToProps = (state) => {
+  return {
+    authedAs: state.authReducer.as,
+    uid: state.authReducer.user._id,
+  };
+};
+
+export default connect(mapStateToProps, null)(CompanyPage);
