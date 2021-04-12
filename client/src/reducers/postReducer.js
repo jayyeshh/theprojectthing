@@ -1,4 +1,9 @@
-import { LOGGED_IN, LOGOUT, SETUP_PROFILE } from "../actions/action-types";
+import {
+  LOGGED_IN,
+  LOGOUT,
+  SETUP_PROFILE,
+  ADD_NEW_POST,
+} from "../actions/action-types";
 
 const initialState = {
   posts: [],
@@ -20,6 +25,12 @@ const postReducer = (state = initialState, action) => {
       return {
         ...state,
         posts: action.payload.profile.posts,
+      };
+    }
+    case ADD_NEW_POST: {
+      return {
+        ...state,
+        posts: [...state.posts, action.payload.post],
       };
     }
     default:

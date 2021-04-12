@@ -6,6 +6,7 @@ import CardActions from "@material-ui/core/CardActions";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Button from "@material-ui/core/Button";
+import { useHistory } from "react-router-dom";
 import Typography from "@material-ui/core/Typography";
 import CodeIcon from "@material-ui/icons/Code";
 
@@ -29,12 +30,11 @@ const onMediaFallback = (event) => {
 
 const ProjectCard = ({ project }) => {
   const classes = useStyles();
+  const history = useHistory();
   if (!!!project.title) return <></>;
   return (
     <Card className={classes.root}>
-      <CardActionArea
-        onClick={() => (window.location.href = `/projects/${project._id}`)}
-      >
+      <CardActionArea onClick={() => history.push(`/projects/${project._id}`)}>
         <CardMedia
           component="img"
           alt="project snapshot"

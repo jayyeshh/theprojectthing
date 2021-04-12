@@ -1,13 +1,31 @@
-import { Button, Grid, TextareaAutosize } from "@material-ui/core";
+import {
+  CircularProgress,
+  Button,
+  Grid,
+  TextareaAutosize,
+  makeStyles,
+} from "@material-ui/core";
 import axios from "../utility/axios/apiInstance";
 import React, { useState } from "react";
 import { setModalStateAction } from "../actions/modalActions";
+import { green } from "@material-ui/core/colors";
 import { connect } from "react-redux";
+import { ADD_NEW_POST } from "../actions/action-types";
+
+const useStyles = makeStyles({
+  buttonProgress: {
+    color: green[500],
+  },
+});
 
 const PostBlock = (props) => {
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const classes = useStyles();
 
   const addPost = () => {
+    setLoading(true);
     const configs = {
       headers: {
         authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -17,10 +35,12 @@ const PostBlock = (props) => {
       .post("/post/", { text }, configs)
       .then((resp) => {
         setText("");
+        setLoading(false);
+        props.addNewPost(resp.data);
         props.setModalState(true, "post added");
         setTimeout(() => {
           props.setModalState(false, "");
-        },3000);
+        }, 3000);
       })
       .catch((error) => {
         let errorText = "Something went wrong! Try again later.";
@@ -28,6 +48,7 @@ const PostBlock = (props) => {
           errorText = error.response.data.error;
         }
         props.setModalState(true, errorText);
+        setLoading(false);
         setTimeout(() => {
           props.setModalState(false, "");
         }, 3000);
@@ -39,6 +60,7 @@ const PostBlock = (props) => {
       <Grid item container xs={12}>
         <TextareaAutosize
           rowsMin={4}
+          rowsMax={4}
           cols={60}
           aria-label="post input box"
           placeholder="write post..."
@@ -65,8 +87,17 @@ const PostBlock = (props) => {
           margin: ".6rem 2rem",
         }}
       >
-        <Button variant="contained" color="primary" onClick={addPost}>
-          Post
+        <Button
+          disabled={loading}
+          variant="contained"
+          color="primary"
+          onClick={addPost}
+        >
+          {loading ? (
+            <CircularProgress size={14} className={classes.buttonProgress} />
+          ) : (
+            "POST"
+          )}
         </Button>
         <Button
           variant="contained"
@@ -86,6 +117,9 @@ const mapDispatchToProps = (dispatch) => {
   return {
     setModalState: (modalState, text) =>
       dispatch(setModalStateAction({ showModal: modalState, text })),
+    addNewPost: (post) => {
+      dispatch({ type: ADD_NEW_POST, payload: { post } });
+    },
   };
 };
 

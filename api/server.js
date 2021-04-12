@@ -5,6 +5,7 @@ import developerRoutes from "./routes/developerRoutes";
 import companyRoutes from "./routes/companyRoutes";
 import projectRoutes from "./routes/projectRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
+import commentRoutes from "./routes/commentRoutes";
 import auth from "./middlewares/auth";
 import { Company, Developer, Post, Project } from "./models";
 import authAsDev from "./middlewares/authAsDev";
@@ -242,6 +243,7 @@ app.use("/company", companyRoutes);
 app.use("/project", projectRoutes);
 app.use("/post", postRoutes);
 app.use("/review", reviewRoutes);
+app.use("/comment", commentRoutes);
 app.use((err, req, res, next) => {
   //to check if request is in valid JSON format or not
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {

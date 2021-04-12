@@ -39,6 +39,7 @@ router.post("/", authAsDev, async (req, res) => {
     });
     await review.save();
     await company.updateOne({ $addToSet: { reviews: review._id } });
+    await review.populate(["by", "company"]).execPopulate();
     res.send({ review });
   } catch (error) {
     console.log(error);
@@ -53,7 +54,7 @@ router.patch("/:id", authAsDev, async (req, res) => {
     if (!mongoose.isValidObjectId(id))
       return res.status(400).send({ error: "Invalid Review Id" });
     const { text } = req.body;
-    if (!!!text.trim())
+    if (!text || !!!text.trim())
       return res.status(400).send({ error: "Empty reviews are not allowed!" });
     const review = await Review.findById(id);
     if (!review) return res.status(404).send({ error: "Review not found!" });

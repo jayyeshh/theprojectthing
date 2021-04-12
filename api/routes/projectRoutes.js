@@ -106,21 +106,23 @@ router.get("/:pid", async (req, res) => {
   const { pid } = req.params;
   let project;
   try {
-    project = await Project.findById(pid).populate([
-      {
-        path: "developer",
-        select: "-tokens",
-        populate: {
-          path: "projects",
+    project = await Project.findById(pid)
+      .populate([
+        {
+          path: "developer",
+          select: "-tokens",
+          populate: {
+            path: "projects",
+          },
         },
-      },
-      {
-        path: "comments",
-        populate: {
-          path: "by",
+        {
+          path: "comments",
+          populate: {
+            path: "by",
+            select: "-tokens",
+          },
         },
-      },
-    ]);
+      ])
   } catch (error) {
     return res.status(500).send();
   }

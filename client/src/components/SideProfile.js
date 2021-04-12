@@ -78,12 +78,18 @@ const SideProfile = ({
         {as.toLowerCase() === "developer" && (
           <CardActionArea style={{ borderTop: "1px solid #abb0ac" }}>
             <CardContent style={{ display: "flex", flexDirection: "column" }}>
-              <NavLink to="/followers" className={classes.linkStyles}>
+              <NavLink
+                to={`/dev/${user._id}/followers`}
+                className={classes.linkStyles}
+              >
                 <Typography style={{ marginLeft: ".4rem" }} component="p">
                   Followers: {user.followers}
                 </Typography>
               </NavLink>
-              <NavLink to="/followings" className={classes.linkStyles}>
+              <NavLink
+                to={`/dev/${user._id}/following`}
+                className={classes.linkStyles}
+              >
                 <Typography style={{ marginLeft: ".4rem" }} component="p">
                   Following: {user.following}
                 </Typography>
@@ -91,7 +97,6 @@ const SideProfile = ({
             </CardContent>
           </CardActionArea>
         )}
-
         {as.toLowerCase() === "developer" && (
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -139,7 +144,7 @@ const SideProfile = ({
                       <ListItemText
                         primary={
                           post.text.length > 10
-                            ? post.text.substr(7) + "..."
+                            ? post.text.substr(0, 10) + "..."
                             : post.text
                         }
                       />

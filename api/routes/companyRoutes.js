@@ -126,12 +126,14 @@ router.get("/:id", async (req, res) => {
       })
       .populate({
         path: "reviews",
-        populate: {
-          path: "by",
-        },
-        populate: {
-          path: "company",
-        },
+        populate: [
+          {
+            path: "by",
+          },
+          {
+            path: "company",
+          },
+        ],
       });
     if (!company) {
       return res.status(404).send({

@@ -119,9 +119,11 @@ router.get("/", auth, async (req, res) => {
 //get developer by id
 router.get("/:id", async (req, res) => {
   try {
-    const developer = await Developer.findOne({ _id: req.params.id }).populate({
-      path: "projects",
-    });
+    const developer = await Developer.findOne({ _id: req.params.id }).populate([
+      "projects",
+      "followers",
+      "following",
+    ]);
     if (!developer) {
       return res.status(404).send({
         error: "Not Found! Invalid Id!",

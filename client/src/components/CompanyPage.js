@@ -252,6 +252,7 @@ const CompanyPage = (props) => {
                               <Grid
                                 container
                                 style={{
+                                  textAlign:"left",
                                   padding: ".6rem 0",
                                 }}
                               >

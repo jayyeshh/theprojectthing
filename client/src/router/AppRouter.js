@@ -13,7 +13,6 @@ import CompanyOnlyRoute from "./CompanyOnlyRoute";
 import Header from "../components/Header";
 import AddProject from "../components/AddProject";
 import ProjectPage from "../components/ProjectPage";
-import MemberListPage from "../components/MemberListPage";
 import Explore from "../components/Explore";
 import EditProject from "../components/EditProject";
 import DevPage from "../components/DevPage";
@@ -40,20 +39,10 @@ const AppRouter = (props) => {
           exact
         />
         <DeveloperOnlyRoute path="/projects/add" component={AddProject} exact />
-        <DeveloperOnlyRoute
-          path="/followers"
-          component={MemberListPage}
-          exact
-        />
-        <DeveloperOnlyRoute
-          path="/followings"
-          component={MemberListPage}
-          exact
-        />
         <Route path="/explore" component={Explore} exact />
         <Route path="/projects/:id" component={ProjectPage} exact />
         <Route path="/post/:id" component={PostPage} exact />
-        <Route path="/dev/:id" component={DevPage} exact />
+        <Route path="/dev/:id" component={DevPage} />
         <Route path="/company/:id" component={CompanyPage} exact />
         <PrivateRoute path="/dashboard" component={Dashboard} exact />
         <DeveloperOnlyRoute

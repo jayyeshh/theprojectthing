@@ -3,8 +3,10 @@ import React, { useState, useEffect } from "react";
 import { getDeveloperById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container } from "@material-ui/core";
+import { useHistory, NavLink } from "react-router-dom";
 import Spinner from "./Spinner";
 import ExpandableProjectCard from "./ExpandableProjectCard";
+import ListModal from "./ListModal";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -43,6 +45,9 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "400",
     marginRight: ".3rem",
   },
+  linkStyles: {
+    textDecoration: "none",
+  },
 }));
 
 const DevPage = (props) => {
@@ -51,25 +56,64 @@ const DevPage = (props) => {
   const [developer, setDeveloper] = useState({});
   const [currLocation, setCurrLocation] = useState("");
   const [error, setError] = useState("");
+  const [popupOf, setPopupOf] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const history = useHistory();
 
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
+    setLoading(true);
+    setShowModal(false);
+    setPopupOf("");
   }
 
   useEffect(() => {
+    const viewPath = props.location.pathname.replace(props.match.url, "");
+    if (
+      viewPath !== "/followers" &&
+      viewPath !== "/following" &&
+      viewPath !== ""
+    ) {
+      history.replace(props.match.url);
+    }
     getDeveloperById(props.match.params.id)
       .then((resp) => {
         setDeveloper(resp.data);
         setLoading(false);
+        if (viewPath === "/followers") {
+          setPopupOf("followers");
+          setShowModal(true);
+        } else if (viewPath === "/following") {
+          setPopupOf("following");
+          setShowModal(true);
+        }
       })
       .catch((error) => {
         setLoading(false);
       });
-  }, []);
+  }, [currLocation]);
 
   return (
-    <Grid container>
+    <Grid container style={{ overflowX: "hidden" }}>
+      {popupOf === "followers" && (
+        <ListModal
+          showModal={showModal}
+          id={props.match.params.id}
+          title={"Followers"}
+          list={developer.followers}
+          setShowModal={setShowModal}
+        />
+      )}
+      {popupOf === "following" && (
+        <ListModal
+          id={props.match.params.id}
+          title={"Following"}
+          showModal={showModal}
+          setShowModal={setShowModal}
+          list={developer.following}
+        />
+      )}
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading && (
         <Container className={classes.containerStyles}>
@@ -101,30 +145,41 @@ const DevPage = (props) => {
                 <Typography>Email:</Typography>
                 <Typography> {developer.email}</Typography>
               </div>
-              <div
-                style={{
-                  margin: ".7rem 0",
-                  display: "flex",
-                  flexDirection: "row",
-                }}
+              <NavLink
+                to={`/dev/${developer._id}/followers`}
+                className={classes.linkStyles}
               >
-                <Typography className={classes.labelStyle}>
-                  Followers:
-                </Typography>
-                <Typography> {developer.followers.length}</Typography>
-              </div>
-              <div
-                style={{
-                  margin: ".7rem 0",
-                  display: "flex",
-                  flexDirection: "row",
-                }}
+                <div
+                  style={{
+                    margin: ".7rem 0",
+                    display: "flex",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Typography className={classes.labelStyle}>
+                    Followers:
+                  </Typography>
+                  <Typography> {developer.followers.length}</Typography>
+                </div>
+              </NavLink>
+
+              <NavLink
+                to={`/dev/${developer._id}/following`}
+                className={classes.linkStyles}
               >
-                <Typography className={classes.labelStyle}>
-                  Following:
-                </Typography>
-                <Typography> {developer.following.length}</Typography>
-              </div>
+                <div
+                  style={{
+                    margin: ".7rem 0",
+                    display: "flex",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Typography className={classes.labelStyle}>
+                    Following:
+                  </Typography>
+                  <Typography> {developer.following.length}</Typography>
+                </div>
+              </NavLink>
             </div>
           </Grid>
           <Grid
@@ -140,7 +195,7 @@ const DevPage = (props) => {
             <Typography
               component="h2"
               variant="h5"
-              style={{ textDecoration: "underline" }}
+              style={{ width: "100%", textDecoration: "underline" }}
             >
               Projects
             </Typography>
