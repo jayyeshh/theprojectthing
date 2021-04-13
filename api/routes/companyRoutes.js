@@ -162,7 +162,6 @@ router.patch("/", auth, async (req, res) => {
     username = req.user.username,
     name = req.user.name,
     email = req.user.email,
-    password = req.user.password,
     website = req.user.websites.website,
     linkedIn = req.user.websites.linkedIn,
   } = req.body;
@@ -175,13 +174,12 @@ router.patch("/", auth, async (req, res) => {
       username,
       name,
       email,
-      password,
       websites,
     };
     await req.user.updateOne({ ...updates });
     const updatedProfile = await Company.findOne({
       _id: req.user._id,
-    });
+    }).populate("posts");
     res.status(200).send({
       profile: updatedProfile,
     });
@@ -192,21 +190,15 @@ router.patch("/", auth, async (req, res) => {
           "user with same identity already exist! check username and email again!",
       });
     }
-    if (error.name === "Password Invalidation") {
-      return res.status(400).send({
-        error: error.message,
-      });
-    }
     if (!error.errors) {
       return res.status(500).send({
         error: "Internal Server Error!",
       });
     }
-    const { email, name, username, password } = error.errors;
+    const { email, name, username } = error.errors;
     const resp = {};
     if (email) resp["email"] = email.message;
     if (name) resp["name"] = name.message;
-    if (password) resp["password"] = password.message;
     if (username) resp["username"] = username.message;
     res.status(400).send(resp);
   }

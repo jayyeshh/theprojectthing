@@ -12,6 +12,7 @@ import authAsDev from "./middlewares/authAsDev";
 import { isDev } from "./utils/utilityFunctions";
 import cors from "cors";
 import postRoutes from "./routes/postRoutes";
+import bcrypt from "bcryptjs";
 // import cookieParser from "cookie-parser";
 
 const app = express();
@@ -30,6 +31,25 @@ app.get("/profile", auth, async (req, res) => {
     await profile.populate("posts").execPopulate();
   }
   return res.send({ profile, as: req.as });
+});
+
+app.patch("/password", auth, async (req, res) => {
+  let { oldPassword, newPassword } = req.body;
+  const isMatch = await bcrypt.compare(oldPassword, req.user.password);
+  if (!isMatch)
+    return res.status(400).send({ oldPassword: "Incorrect Password!" });
+  try {
+    await req.user.updateOne({ password: newPassword });
+    await req.user.updateOne({ $set: { tokens: [] } });
+    return res.send();
+  } catch (error) {
+    if (error.name === "Password Invalidation") {
+      return res
+        .status(400)
+        .send({ newPassword: true, message: error.message });
+    }
+    return res.sendStatus(500);
+  }
 });
 
 app.get("/search", async (req, res) => {

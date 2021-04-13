@@ -4,6 +4,7 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Spinner from "./Spinner";
+import moment from "moment";
 import {
   Grid,
   Container,
@@ -57,6 +58,9 @@ const useStyles = makeStyles({
   },
   commentStyle: {
     margin: ".6rem 0",
+  },
+  buttonProgress: {
+    padding: "0rem 1.5rem",
   },
 });
 
@@ -353,6 +357,7 @@ const ProjectPage = (props) => {
                 {project.comments.map((comment) => {
                   return (
                     <Grid
+                      key={comment._id}
                       container
                       direction="row"
                       className={classes.commentStyle}
@@ -372,9 +377,31 @@ const ProjectPage = (props) => {
                           marginLeft: "1rem",
                         }}
                       >
-                        <Typography>
-                          <b>{comment.by.name}</b>
-                        </Typography>
+                        <Grid container direction="row">
+                          <NavLink
+                            to={
+                              comment.onModel === "Developer"
+                                ? `/dev/${comment.by._id}`
+                                : `/company/${comment.by._id}`
+                            }
+                            style={{ color: "black", textDecoration: "none" }}
+                          >
+                            <Typography>
+                              <b>{comment.by.name}</b>
+                            </Typography>
+                          </NavLink>
+                          <Typography
+                            color="textSecondary"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              fontSize: ".9rem",
+                              marginLeft: ".3rem",
+                            }}
+                          >
+                            {new moment(comment.createdAt).fromNow()}
+                          </Typography>
+                        </Grid>
                         <Typography>{comment.text}</Typography>
                       </Grid>
                     </Grid>

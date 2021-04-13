@@ -177,25 +177,28 @@ const Header = (props) => {
             <div className={classes.searchIcon}>
               <SearchIcon />
             </div>
-            <InputBase
-              placeholder="Search…"
-              onFocus={() => setSearchBarFocused(true)}
-              onBlur={() => {
-                if (!!!searchQuery) {
-                  setSearchedItems([]);
-                }
-                setTimeout(() => {
-                  setSearchBarFocused(false);
-                }, 300);
-              }}
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              inputProps={{ "aria-label": "search" }}
-              value={searchQuery}
-              onChange={searchHandler}
-            />
+            <form noValidate>
+              <InputBase
+                placeholder="Search…"
+                autoComplete="off"
+                onFocus={() => setSearchBarFocused(true)}
+                onBlur={() => {
+                  if (!!!searchQuery) {
+                    setSearchedItems([]);
+                  }
+                  setTimeout(() => {
+                    setSearchBarFocused(false);
+                  }, 300);
+                }}
+                classes={{
+                  root: classes.inputRoot,
+                  input: classes.inputInput,
+                }}
+                inputProps={{ "aria-label": "search" }}
+                value={searchQuery}
+                onChange={searchHandler}
+              />
+            </form>
           </div>
         </Grid>
         <div className={classes.grow} />

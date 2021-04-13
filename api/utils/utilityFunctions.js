@@ -4,7 +4,7 @@ import { Company, Developer } from "../models/";
 
 export const trimValues = (obj) => {
   Object.keys(obj).forEach((key) => {
-    obj[key] = obj[key].trim();
+    if (obj[key]) obj[key] = obj[key].trim();
   });
   return obj;
 };

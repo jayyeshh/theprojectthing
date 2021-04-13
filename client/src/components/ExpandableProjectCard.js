@@ -11,6 +11,7 @@ const defaultImage =
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
+    height: 300
   },
   media: {
     height: 0,
@@ -50,11 +51,15 @@ const ExpandableProjectCard = ({ project }) => {
           image={!!project.photo ? project.photo : defaultImage}
           title={project.title}
         />
-        <CardContent>
-          <Typography variant="body2" color="textSecondary" component="p">
-            {project.about}
-          </Typography>
-        </CardContent>
+        {project.about && (
+          <CardContent>
+            <Typography variant="body2" color="textSecondary" component="p">
+              {project.about.length < 30
+                ? project.about
+                : project.about.substr(0, 27) + "..."}
+            </Typography>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

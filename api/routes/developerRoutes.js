@@ -1,7 +1,6 @@
 import express from "express";
 import validator from "validator";
 import { Developer } from "../models/index";
-import mongoose from "mongoose";
 import auth from "../middlewares/auth";
 import {
   handlerRegistrationError,
@@ -149,7 +148,6 @@ router.patch("/", auth, async (req, res) => {
     username = req.user.username,
     name = req.user.name,
     email = req.user.email,
-    password = req.user.password,
     github = req.user.websites.github,
     website = req.user.websites.website,
     portfolio = req.user.websites.portfolio,
@@ -166,13 +164,18 @@ router.patch("/", auth, async (req, res) => {
       username,
       name,
       email,
-      password,
       websites,
     };
     await req.user.updateOne({ ...updates });
-    const updatedProfile = await Developer.findOne({
+    let updatedProfile = await Developer.findOne({
       _id: req.user._id,
-    });
+    }).populate("projects");
+    // res.cookie("token", token, { httpOnly: true });
+    updatedProfile = updatedProfile.toObject();
+    updatedProfile.followers = updatedProfile.followers.length;
+    updatedProfile.following = updatedProfile.following.length;
+    delete updatedProfile.tokens;
+
     res.status(200).send({
       profile: updatedProfile,
     });
@@ -193,21 +196,13 @@ router.patch("/", auth, async (req, res) => {
         error: "Internal Server Error!",
       });
     }
-    const { email, name, username, password } = error.errors;
+    const { email, name, username } = error.errors;
     const resp = {};
     if (email) resp["email"] = email.message;
     if (name) resp["name"] = name.message;
-    if (password) resp["password"] = password.message;
     if (username) resp["username"] = username.message;
     res.status(400).send(resp);
   }
 });
-
-/*
-expected routes:
-/follow/:id
-/unfollow/:id
-/dashboard?sort => show project of following developer
-*/
 
 export default router;

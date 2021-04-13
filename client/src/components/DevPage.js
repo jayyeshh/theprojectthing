@@ -1,9 +1,13 @@
-import { Avatar, Grid, Typography } from "@material-ui/core";
+import { Avatar, Grid, Hidden, Typography } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getDeveloperById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
-import { Container } from "@material-ui/core";
+import { Container, Button, IconButton } from "@material-ui/core";
 import { useHistory, NavLink } from "react-router-dom";
+import GitHubIcon from "@material-ui/icons/GitHub";
+import LinkedInIcon from "@material-ui/icons/LinkedIn";
+import HttpIcon from "@material-ui/icons/Http";
+import AssignmentIndIcon from "@material-ui/icons/AssignmentInd";
 import Spinner from "./Spinner";
 import ExpandableProjectCard from "./ExpandableProjectCard";
 import ListModal from "./ListModal";
@@ -13,6 +17,18 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "50%",
     left: "50%",
+  },
+  mainContainer: {
+    [theme.breakpoints.down("sm")]: {
+      justifyContent: "center",
+    },
+  },
+  smProfile: {
+    backgroundColor: "#e1e1e1",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: "1rem",
   },
   root: {
     maxWidth: 345,
@@ -40,6 +56,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "4rem",
     overflow: "hidden",
     position: "sticky",
+    borderRight: "1px solid #e1e1e1",
   },
   labelStyle: {
     fontWeight: "400",
@@ -47,6 +64,9 @@ const useStyles = makeStyles((theme) => ({
   },
   linkStyles: {
     textDecoration: "none",
+  },
+  userField: {
+    marginBottom: "8px",
   },
 }));
 
@@ -121,21 +141,29 @@ const DevPage = (props) => {
         </Container>
       )}
       {!!Object.keys(developer).length && (
-        <Grid container item xs={12}>
-          <Grid item xs={4} className={classes.profile}>
-            <div
-              style={{
-                position: "fixed",
-                display: "flex",
-                flexDirection: "column",
-              }}
+        <Grid container item xs={12} className={classes.mainContainer}>
+          <Hidden smUp>
+            <Grid
+              item
+              xs={12}
+              container
+              direction="column"
+              className={classes.smProfile}
             >
-              <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
-                {developer.name.charAt(0)}
-              </Avatar>
-              <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
-                @{developer.username}
-              </Typography>
+              <Grid
+                item
+                container
+                align="center"
+                justify="center"
+                alignItems="center"
+              >
+                <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                  {developer.name.charAt(0)}
+                </Avatar>
+                <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
+                  @{developer.username}
+                </Typography>
+              </Grid>
               <Typography>{developer.name}</Typography>
               <div
                 style={{
@@ -156,9 +184,9 @@ const DevPage = (props) => {
                     flexDirection: "row",
                   }}
                 >
-                  <Typography className={classes.labelStyle}>
+                  <div variant="contained" className={classes.labelStyle}>
                     Followers:
-                  </Typography>
+                  </div>
                   <Typography> {developer.followers.length}</Typography>
                 </div>
               </NavLink>
@@ -180,23 +208,113 @@ const DevPage = (props) => {
                   <Typography> {developer.following.length}</Typography>
                 </div>
               </NavLink>
-            </div>
-          </Grid>
+            </Grid>
+          </Hidden>
+          <Hidden smDown>
+            <Grid item xs={3} className={classes.profile}>
+              <div
+                style={{
+                  position: "fixed",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <Grid container direction="column">
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignContent: "center",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      margin: ".5rem",
+                    }}
+                  >
+                    <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                      {developer.name.charAt(0)}
+                    </Avatar>
+                    <Typography
+                      color="textSecondary"
+                      style={{ margin: ".1rem 0" }}
+                    >
+                      @{developer.username}
+                    </Typography>
+                  </div>
+                  <Typography className={classes.userField}>
+                    <b>Name: </b>
+                    {developer.name}
+                  </Typography>
+                  <Typography className={classes.userField}>
+                    <b style={{ marginRight: ".3rem" }}> Email:</b>
+                    {developer.email}
+                  </Typography>
+                </Grid>
+                <NavLink
+                  to={`/dev/${developer._id}/followers`}
+                  className={classes.linkStyles}
+                >
+                  <Button
+                    variant="outlined"
+                    style={{
+                      margin: ".7rem 0",
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <Typography className={classes.labelStyle}>
+                      Followers:
+                    </Typography>
+                    <Typography> {developer.followers.length}</Typography>
+                  </Button>
+                </NavLink>
+
+                <NavLink
+                  to={`/dev/${developer._id}/following`}
+                  className={classes.linkStyles}
+                >
+                  <Button
+                    variant="outlined"
+                    style={{
+                      margin: ".7rem 0",
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <Typography className={classes.labelStyle}>
+                      Following:
+                    </Typography>
+                    <Typography> {developer.following.length}</Typography>
+                  </Button>
+                </NavLink>
+                <Grid container direction="row">
+                  <IconButton aria-label="github" size="small">
+                    <GitHubIcon fontSize="medium" />
+                  </IconButton>
+                  <IconButton aria-label="linkedIn" size="medium">
+                    <LinkedInIcon fontSize="medium" />
+                  </IconButton>
+                  <IconButton aria-label="website" size="medium">
+                    <HttpIcon fontSize="medium" />
+                  </IconButton>
+                  <IconButton aria-label="portfolio" size="medium">
+                    <AssignmentIndIcon fontSize="medium" />
+                  </IconButton>
+                </Grid>
+              </div>
+            </Grid>
+          </Hidden>
           <Grid
             container
             item
             align="center"
             direction="column"
-            xs={8}
+            xs={9}
             style={{
               padding: "2rem 0",
+              minHeight: "90vh",
             }}
           >
-            <Typography
-              component="h2"
-              variant="h5"
-              style={{ width: "100%", textDecoration: "underline" }}
-            >
+            <Typography component="h2" variant="h4" style={{ width: "100%" }}>
               Projects
             </Typography>
             <Grid container item direction="row" xs={12}>
@@ -205,7 +323,8 @@ const DevPage = (props) => {
                   return (
                     <Grid
                       item
-                      xs={5}
+                      md={5}
+                      xs={12}
                       key={project._id}
                       style={{
                         margin: "1rem",
