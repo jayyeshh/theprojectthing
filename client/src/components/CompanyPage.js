@@ -3,7 +3,7 @@ import {
   Button,
   Divider,
   Grid,
-  TextareaAutosize,
+  Hidden,
   Typography,
 } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
@@ -17,12 +17,17 @@ import moment from "moment";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import AddReviewPopupModal from "./AddReviewPopupModal";
+import ListModal from "./ListModal";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
     position: "absolute",
     top: "50%",
-    left: "50%",
+    left: "45%",
+    [theme.breakpoints.down("xs")]: {
+      top: "40%",
+      left: "35%",
+    },
   },
   root: {
     maxWidth: 345,
@@ -50,6 +55,24 @@ const useStyles = makeStyles((theme) => ({
     padding: "4rem",
     overflow: "hidden",
     position: "sticky",
+    [theme.breakpoints.down("xs")]: {
+      position: "relative",
+      minWidth: "100%",
+      backgroundColor: "#e1e1e1",
+      height: "12rem",
+      margin: 0,
+      padding: 0,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  },
+  profileSubContainer: {
+    position: "fixed",
+    display: "flex",
+    flexDirection: "column",
+    [theme.breakpoints.down("xs")]: {
+      position: "relative",
+    },
   },
   labelStyle: {
     fontWeight: "400",
@@ -65,6 +88,8 @@ const CompanyPage = (props) => {
   const [type, setType] = useState("posts");
   const [error, setError] = useState("");
   const [addReviewPopup, setAddReviewPopup] = useState(false);
+  const [showInterestedDevs, setShowInterestedDevs] = useState(false);
+  const [list, setList] = useState([]);
 
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
@@ -78,7 +103,6 @@ const CompanyPage = (props) => {
   };
 
   const updateReviews = (review) => {
-    console.log(review)
     const updatedCompany = { ...company };
     updatedCompany.reviews = [...updatedCompany.reviews, review];
     setCompany(updatedCompany);
@@ -102,8 +126,20 @@ const CompanyPage = (props) => {
     setCompany({ ...company, posts: updatedPosts });
   };
 
+  const handleShowInterestedDevs = (index) => {
+    setList(company.posts[index].interested);
+    setShowInterestedDevs(true);
+  };
+
   return (
     <Grid container>
+      <ListModal
+        showModal={showInterestedDevs}
+        title={"Interested Developers"}
+        list={list}
+        setShowModal={setShowInterestedDevs}
+      />
+
       <AddReviewPopupModal
         companyId={props.match.params.id}
         addReviewPopup={addReviewPopup}
@@ -118,14 +154,8 @@ const CompanyPage = (props) => {
       )}
       {!!Object.keys(company).length && (
         <Grid container item xs={12}>
-          <Grid item xs={4} className={classes.profile}>
-            <div
-              style={{
-                position: "fixed",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+          <Grid item xs={12} md={4} className={classes.profile}>
+            <div className={classes.profileSubContainer}>
               <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
                 {company.name.charAt(0)}
               </Avatar>
@@ -148,7 +178,8 @@ const CompanyPage = (props) => {
             item
             align="center"
             direction="column"
-            xs={8}
+            md={8}
+            xs={12}
             style={{
               padding: "2rem 0",
             }}
@@ -183,7 +214,10 @@ const CompanyPage = (props) => {
                     company.posts.map((post, index) => {
                       return (
                         <CompanyPost
+                          handleShowInterestedDevs={handleShowInterestedDevs}
                           post={post}
+                          index={index}
+                          key={post._id}
                           updatePost={(updatedPost) =>
                             updatePost(updatedPost, index)
                           }
@@ -200,7 +234,7 @@ const CompanyPage = (props) => {
               {type === "reviews" && (
                 <>
                   {props.authedAs.toLowerCase() === "developer" && (
-                    <Grid>
+                    <Grid key="add_review">
                       <Button
                         color="primary"
                         variant="outlined"
@@ -216,6 +250,7 @@ const CompanyPage = (props) => {
                         return (
                           <Grid
                             container
+                            key={review._id}
                             style={{
                               width: "60%",
                               backgroundColor: "#eee",
@@ -230,7 +265,6 @@ const CompanyPage = (props) => {
                                 align="space-between"
                                 justify="space-between"
                                 alignContent="space-between"
-                                alignItems="space-between"
                                 style={{
                                   margin: ".5rem 0",
                                 }}
@@ -252,7 +286,7 @@ const CompanyPage = (props) => {
                               <Grid
                                 container
                                 style={{
-                                  textAlign:"left",
+                                  textAlign: "left",
                                   padding: ".6rem 0",
                                 }}
                               >

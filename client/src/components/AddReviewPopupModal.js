@@ -20,8 +20,11 @@ const useStyles = makeStyles((theme) => ({
     outline: "none",
     borderRadius: "3px",
     padding: theme.spacing(2, 4, 3),
-    transition: "all .8s ease-in-out",
+    transition: "all .6s ease-in-out",
     padding: "1rem 2rem",
+    [theme.breakpoints.down("xs")]: {
+      width: "90%",
+    },
   },
   buttonProgress: {
     color: green[500],
@@ -66,7 +69,7 @@ const AddReviewPopupModal = (props) => {
         open={props.addReviewPopup}
         onClose={() => props.setAddReviewPopup(false)}
         aria-labelledby="add review popup"
-        aria-aria-describedby="add review popup"
+        aria-describedby="add review popup"
         style={{
           display: "flex",
           flexDirection: "row",

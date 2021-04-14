@@ -20,7 +20,7 @@ import { setModalStateAction } from "../actions/modalActions";
 const useStyles = makeStyles({
   root: {
     margin: "1rem",
-    height: "15rem",
+    minHeight: "15rem",
     "&:hover": {
       cursor: "pointer",
       boxShadow: "5px 20px 12px",

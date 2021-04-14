@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Paper, makeStyles, Grid } from "@material-ui/core";
+import { Paper, Grid, Typography } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import axios from "../utility/axios/apiInstance";
 import Post from "../components/Post";
 import Spinner from "./Spinner";
 import PostBlock from "./PostBlock";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   paperStyles: {
-    width: "100%",
-    padding: "2rem",
+    maxWidth: "100%",
+    padding: "2rem 0",
     overflow: "hidden",
     //   overflowY: "auto",
     //   "&::-webkit-scrollbar": {
@@ -18,8 +19,19 @@ const useStyles = makeStyles({
     //     display: 'none'
     //   },
     //   scrollbarWidth: 'none'
+    [theme.breakpoints.down("xs")]: {
+      padding: 0,
+    },
   },
-});
+  homeContainer: {
+    width: "100%",
+    overflowY: "auto",
+    paddingLeft: "2rem",
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
+  },
+}));
 
 const Home = (props) => {
   const classes = useStyles();
@@ -57,34 +69,44 @@ const Home = (props) => {
   }, []);
 
   return (
-    <div className={classes.paperStyles}>
+    <Grid container className={classes.paperStyles}>
       {loading ? (
         <Grid
+          item
           xs={12}
+          container
+          style={{ minHeight: "70vh" }}
+          justify="center"
+          alignItems="center"
           align="center"
           alignContent="center"
-          style={{
-            display: "flex",
-            width: "100%",
-            minHeigth: "100%",
-            alignSelf: "center",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
         >
           <Spinner />
         </Grid>
       ) : (
-        <Grid
-          style={{
-            overflowY: "auto",
-            paddingLeft: "2rem",
-          }}
-        >
+        <Grid className={classes.homeContainer}>
           {props.authedAs.toLowerCase() === "company" && <PostBlock />}
+          {props.authedAs.toLowerCase() === "developer" && posts.length === 0 && (
+            <Grid
+              container
+              justify="center"
+              alignItems="center"
+              align="center"
+              style={{
+                minWidth: "100%",
+                minHeight: "50vh",
+              }}
+            >
+              <Typography>
+                No posts to show. Go to explore section to view other
+                developer's work.
+              </Typography>
+            </Grid>
+          )}
           {posts.map((post, index) => {
             return (
               <Post
+                key={post._id}
                 post={post}
                 updatePost={(updatedPost) => updatePost(index, updatedPost)}
               />
@@ -92,7 +114,7 @@ const Home = (props) => {
           })}
         </Grid>
       )}
-    </div>
+    </Grid>
   );
 };
 

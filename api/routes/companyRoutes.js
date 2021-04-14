@@ -19,6 +19,12 @@ router.post("/register", async (req, res) => {
       error: "Required fields must be filled for registration!",
     });
   }
+  const usernameExpr = new RegExp(
+    /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+    "i"
+  );
+  if (!usernameExpr.test(username))
+    return res.status(400).send({ error: "Invalid Username String!" });
   const company = new Company({
     username,
     email,
@@ -120,9 +126,14 @@ router.get("/:id", async (req, res) => {
     let company = await Company.findOne({ _id: req.params.id })
       .populate({
         path: "posts",
-        populate: {
-          path: "author",
-        },
+        populate: [
+          {
+            path: "author",
+          },
+          {
+            path: "interested",
+          },
+        ],
       })
       .populate({
         path: "reviews",

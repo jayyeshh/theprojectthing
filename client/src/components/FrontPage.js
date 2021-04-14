@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Typography, Button, Card } from "@material-ui/core";
+import { Grid, Typography, Button, Card, Hidden } from "@material-ui/core";
 import { useHistory } from "react-router";
 import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
@@ -26,11 +26,17 @@ const useStyles = makeStyles((theme) => ({
   },
   btnStyles: {
     margin: ".4rem 0",
-    width: '100%'
+    width: "100%",
   },
   linkStyles: {
     textDecoration: "none",
     color: "black",
+  },
+  mainBlock: {
+    marginTop: "4rem",
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
   },
 }));
 
@@ -69,33 +75,37 @@ const FrontPage = (props) => {
         boxShadow: "4px 4px 4px",
       }}
     >
-      <Grid item container justify="space-evenly" xs={12}>
-        <Card
-          variant="outline"
-          style={{
-            padding: "1rem",
-          }}
-        >
-          <Typography>Companies on platform: {stats.totalCompanies}</Typography>
-        </Card>
-        <Card
-          variant="outline"
-          style={{
-            padding: "1rem",
-          }}
-        >
-          <Typography>
-            Developers on platform: {stats.totalDevelopers}
-          </Typography>
-        </Card>
-      </Grid>
+      <Hidden xsDown>
+        <Grid item xs={12} container justify="space-evenly">
+          <Card
+            variant="outline"
+            style={{
+              padding: "1rem",
+            }}
+          >
+            <Typography>
+              Companies on platform: {stats.totalCompanies}
+            </Typography>
+          </Card>
+          <Card
+            variant="outline"
+            style={{
+              padding: "1rem",
+            }}
+          >
+            <Typography>
+              Developers on platform: {stats.totalDevelopers}
+            </Typography>
+          </Card>
+        </Grid>
+      </Hidden>
       <Grid
         item
         container
         align="center"
         justify="center"
         xs={12}
-        style={{ marginTop: "4rem" }}
+        className={classes.mainBlock}
       >
         <Typography className={classes.mainHeading}>
           The Project Thing
@@ -117,12 +127,12 @@ const FrontPage = (props) => {
           {" "}
           Or Join to show your skills and get in touch with your dream company
         </Typography>
-          <NavLink className={classes.linkStyles} to="/explore">
-        <Button className={classes.btnStyles} variant="outlined">
+        <NavLink className={classes.linkStyles} to="/explore">
+          <Button className={classes.btnStyles} variant="outlined">
             Explore as Guest
-        </Button>
-          </NavLink>
-        <NavLink to="/auth" className={classes.linkStyles} >
+          </Button>
+        </NavLink>
+        <NavLink to="/auth" className={classes.linkStyles}>
           <Button className={classes.btnStyles} variant="outlined">
             Join
           </Button>

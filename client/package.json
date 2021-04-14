@@ -13,6 +13,7 @@
     "axios": "^0.21.1",
     "clsx": "^1.1.1",
     "history": "^5.0.0",
+    "material-ui-confirm": "^2.1.2",
     "material-ui-dropzone": "^3.5.0",
     "moment": "^2.29.1",
     "react": "^17.0.2",

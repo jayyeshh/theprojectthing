@@ -4,12 +4,22 @@ import ExposureNeg1Icon from "@material-ui/icons/ExposureNeg1";
 import ExposurePlus1OutlinedIcon from "@material-ui/icons/ExposurePlus1Outlined";
 import { connect } from "react-redux";
 import axios from "../utility/axios/apiInstance";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles({
+  listviewerBtn: {
+    fontSize: ".978rem",
+    "&:hover": {
+      cursor: "pointer",
+      color: '#616151'
+    },
+  },
+});
 
 const CompanyPost = ({ post, ...props }) => {
+  const classes = useStyles();
   const [authedDevInteresed, setAuthedDevInterested] = useState(false);
-  console.log(props.uid, post.interested);
   useEffect(() => {
-    console.log(post);
     const checkState = post.interested.some((item) => {
       if (typeof item === "string") {
         return item.toString() === props.uid.toString();
@@ -75,7 +85,10 @@ const CompanyPost = ({ post, ...props }) => {
             <ExposurePlus1OutlinedIcon style={{ fontSize: "1.3rem" }} />
           )}
         </IconButton>
-        <Typography style={{ fontSize: ".978rem" }}>
+        <Typography
+          onClick={() => props.handleShowInterestedDevs(props.index)}
+          className={classes.listviewerBtn}
+        >
           {post.interested.length}
         </Typography>
       </Paper>

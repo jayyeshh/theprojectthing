@@ -4,14 +4,44 @@ import { Grid, Typography } from "@material-ui/core";
 import moment from "moment";
 import { NavLink } from "react-router-dom";
 import Spinner from "./Spinner";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  mainContainer: {
+    padding: "4rem 0",
+    [theme.breakpoints.down("xs")]: {
+      padding: "2rem 0",
+      width: "100%",
+    },
+  },
+  subContainer: {
+    padding: "0 4rem",
+    [theme.breakpoints.down("xs")]: {
+      padding: "0 1rem",
+    },
+  },
+  postText: {
+    padding: "1.4rem .8rem",
+    backgroundColor: "#eee",
+    margin: ".8rem 0",
+    borderRadius: "2px",
+  },
+  devList: {
+    overflowX: "hidden",
+    overflowY: "auto",
+    [theme.breakpoints.down("xs")]: {
+      padding: "0 1rem",
+    },
+  },
+}));
 
 const PostPage = (props) => {
+  const classes = useStyles();
   const [post, setPost] = useState({});
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     getPostById(props.match.params.id)
       .then((resp) => {
-        console.log(resp.data);
         setPost(resp.data);
         setLoading(false);
       })
@@ -39,23 +69,16 @@ const PostPage = (props) => {
   }
 
   return (
-    <Grid
-      container
-      direction="row"
-      style={{
-        padding: "4rem 0",
-      }}
-    >
+    <Grid container direction="row" className={classes.mainContainer}>
       <Grid
         item
         container
-        xs={8}
+        xs={12}
+        sm={8}
         direction="column"
         align="center"
         justify="center"
-        style={{
-          padding: "0 4rem",
-        }}
+        className={classes.subContainer}
       >
         <Grid item xs={12} container justify="space-between">
           <Typography>
@@ -77,12 +100,7 @@ const PostPage = (props) => {
           xs={12}
           container
           direction="row"
-          style={{
-            padding: "1.4rem .8rem",
-            backgroundColor: "#eee",
-            margin: ".8rem 0",
-            borderRadius: "2px",
-          }}
+          className={classes.postText}
         >
           {post.text}
         </Grid>
@@ -90,12 +108,10 @@ const PostPage = (props) => {
       <Grid
         container
         item
-        xs={4}
+        sm={4}
+        xs={12}
         direction="column"
-        style={{
-          overflowX: "hidden",
-          overflowY: "auto",
-        }}
+        className={classes.devList}
       >
         <Grid>
           <Typography variant="h5">Interested Developers</Typography>
@@ -106,7 +122,7 @@ const PostPage = (props) => {
               <Grid key={dev._id}>
                 <NavLink
                   to={`/dev/${dev._id}`}
-                  style={{ textDecoration: "none" }}
+                  style={{ textDecoration: "none", color: "grey" }}
                 >
                   <Typography variant="h6">@{dev.username}</Typography>
                 </NavLink>

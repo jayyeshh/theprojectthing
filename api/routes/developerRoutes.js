@@ -18,6 +18,13 @@ router.post("/register", async (req, res) => {
       error: "Required fields must be filled for registration!",
     });
   }
+  const usernameExpr = new RegExp(
+    /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+    "i"
+  );
+  if (!usernameExpr.test(username))
+    return res.status(400).send({ error: "Invalid Username String!" });
+
   const developer = new Developer({
     username,
     email,

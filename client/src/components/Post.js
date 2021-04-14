@@ -18,6 +18,12 @@ const useStyles = makeStyles((theme) => ({
     border: ".1px solid #b1bdb4",
     borderRadius: "3px",
     margin: "2rem",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+      margin: "2rem 0",
+      alignSelf: "center",
+      justifyContent: "center",
+    },
   },
   postHeader: {
     maxHeight: "4rem",
@@ -73,10 +79,10 @@ const Post = ({ post, ...props }) => {
     }
   };
   return (
-    <Grid container direction="row" className={classes.container} xs={10}>
+    <Grid container direction="row" className={classes.container}>
       <Grid
-        xs={12}
         item
+        xs={12}
         container
         direction="row"
         className={classes.postHeader}
@@ -116,6 +122,7 @@ const Post = ({ post, ...props }) => {
       </Grid>
       <Grid
         container
+        item
         xs={12}
         style={{
           display: "flex",
@@ -139,8 +146,8 @@ const Post = ({ post, ...props }) => {
         )}
       </Grid>
       <Grid
-        xs={12}
         item
+        xs={12}
         container
         direction="row"
         className={classes.footerStyles}

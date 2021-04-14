@@ -26,24 +26,20 @@ const HeaderMenus = (props) => {
   return (
     <>
       <Grid style={{ justifyContent: "flex-end" }} container>
-        {true && (
-          <Grid item style={{ margin: ".4rem" }}>
-            <NavLink className={classes.navlinkStyles} to="/dashboard/">
-              <Tooltip title="home">
-                <HomeIcon />
-              </Tooltip>
-            </NavLink>
-          </Grid>
-        )}
-        {true && (
-          <Grid item style={{ margin: ".4rem" }}>
-            <NavLink className={classes.navlinkStyles} to="/explore/">
-              <Tooltip title="explore">
-                <ExploreIcon />
-              </Tooltip>
-            </NavLink>
-          </Grid>
-        )}
+        <Grid item style={{ margin: ".4rem" }}>
+          <NavLink className={classes.navlinkStyles} to="/dashboard/">
+            <Tooltip title="home">
+              <HomeIcon />
+            </Tooltip>
+          </NavLink>
+        </Grid>
+        <Grid item style={{ margin: ".4rem" }}>
+          <NavLink className={classes.navlinkStyles} to="/explore/">
+            <Tooltip title="explore">
+              <ExploreIcon />
+            </Tooltip>
+          </NavLink>
+        </Grid>
         {props.auth.as === "Developer" && (
           <Grid item style={{ margin: ".4rem" }}>
             <NavLink className={classes.navlinkStyles} to="/projects/add">

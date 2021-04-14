@@ -137,7 +137,46 @@ app.get("/home", auth, async (req, res) => {
       res.send(fetchedProjects);
     }
     if (req.as.toLowerCase() === "company") {
-      res.send([]);
+      const fetchedProjects = await Project.aggregate([
+        {
+          $sample: { size: 30 },
+        },
+        {
+          $lookup: {
+            from: "developers",
+            localField: "developer",
+            foreignField: "_id",
+            as: "developer",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+        {
+          $sort: {
+            createdAt: 1,
+          },
+        },
+        {
+          $addFields: {
+            upvoted: {
+              $in: [
+                mongoose.Types.ObjectId(req.user._id.toString()),
+                "$upvotes",
+              ],
+            },
+            downvoted: {
+              $in: [
+                mongoose.Types.ObjectId(req.user._id.toString()),
+                "$downvotes",
+              ],
+            },
+            upvotes: { $size: "$upvotes" },
+            downvotes: { $size: "$downvotes" },
+          },
+        },
+      ]);
+      res.send(fetchedProjects);
     }
   } catch (error) {
     res.sendStatus(500);

@@ -6,18 +6,31 @@ import {
   Button,
   Paper,
   Avatar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Hidden,
 } from "@material-ui/core";
 import { NavLink, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
 import React, { useEffect, useRef, useState } from "react";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import HomeIcon from "@material-ui/icons/Home";
+import ExploreIcon from "@material-ui/icons/Explore";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
 import SearchResultModal from "./SearchResultModal";
+import MenuIcon from "@material-ui/icons/Menu";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import { connect } from "react-redux";
 import axios from "../utility/axios/apiInstance";
+import { logoutAction } from "../actions/authActions";
 
 const useStyles = makeStyles((theme) => ({
   grow: {
@@ -28,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
     transition: "all .4s ease-in-out",
     [theme.breakpoints.down("xs")]: {
       alignItems: "center",
+      maxWidth: "100%",
+      overflow: "hidden",
+      alignItems: "flex-start",
     },
   },
   mainHeading: {
@@ -125,6 +141,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const getIcon = (text) => {
+  switch (text.toUpperCase()) {
+    case "HOME":
+      return <HomeIcon />;
+    case "EXPLORE":
+      return <ExploreIcon />;
+    case "ADD PROJECT":
+      return <AddCircleIcon />;
+    case "PROFILE":
+      return <AccountCircleIcon />;
+    case "LOGOUT":
+      return <PowerSettingsNewIcon />;
+  }
+};
+
 const Header = (props) => {
   const classes = useStyles();
   const [currPath, setCurrPath] = useState("");
@@ -133,6 +164,13 @@ const Header = (props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(0);
   const [searchedItems, setSearchedItems] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const menusItems = {
+    home: "/",
+    explore: "/explore",
+    "add project": "/projects/add",
+  };
 
   const searchHandler = (e) => {
     const searchQuery = e.target.value;
@@ -163,16 +201,66 @@ const Header = (props) => {
   return (
     <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
+        <Hidden smUp>
+          <MenuIcon onClick={() => setDrawerOpen(true)} />
+          <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+            <List style={{ backgroundColor: "#efefef", height: "100%" }}>
+              {Object.keys(menusItems)
+                .filter(
+                  (menu) =>
+                    menu !== "add project" ||
+                    (props.auth.authenticated &&
+                      props.auth.as.toLowerCase() === "developer")
+                )
+                .map((text, index) => (
+                  <NavLink
+                    key={text}
+                    to={menusItems[text]}
+                    style={{ color: "black", textDecoration: "none" }}
+                  >
+                    <ListItem button onClick={() => setDrawerOpen(false)}>
+                      <ListItemIcon>{getIcon(text)}</ListItemIcon>
+                      <ListItemText primary={text.toUpperCase()} />
+                    </ListItem>
+                  </NavLink>
+                ))}
+              {props.auth.authenticated && (
+                <>
+                  <NavLink
+                    to={
+                      props.auth.as.toLowerCase() === "developer"
+                        ? `/dev/${props.auth.user._id}`
+                        : `/company/${props.auth.user._id}`
+                    }
+                    key="profile"
+                    style={{ color: "black", textDecoration: "none" }}
+                  >
+                    <ListItem button onClick={() => setDrawerOpen(false)}>
+                      <ListItemIcon>{getIcon("profile")}</ListItemIcon>
+                      <ListItemText primary="PROFILE" />
+                    </ListItem>
+                  </NavLink>
+                  <ListItem button key="logout" onClick={props.logout}>
+                    <ListItemIcon>{getIcon("LOGOUT")}</ListItemIcon>
+                    <ListItemText primary="LOGOUT" />
+                  </ListItem>
+                </>
+              )}
+            </List>
+            <Divider />
+          </Drawer>
+        </Hidden>
         <Grid container item xs={4}>
-          <NavLink to="/" className={classes.navlinkStyles}>
-            <Typography className={classes.mainHeading}>
-              The Project Thing
-            </Typography>
-          </NavLink>
-
-          <CodeIcon fontSize="large" />
+          <Hidden smDown>
+            <NavLink to="/" className={classes.navlinkStyles}>
+              <Typography className={classes.mainHeading}>
+                The Project Thing
+              </Typography>
+            </NavLink>
+            <CodeIcon fontSize="large" />
+          </Hidden>
         </Grid>
-        <Grid item container xs={8} justify="center">
+        <Grid item container xs={12} md={8} justify="center">
           <div className={classes.search}>
             <div className={classes.searchIcon}>
               <SearchIcon />
@@ -214,7 +302,8 @@ const Header = (props) => {
               <Button className={classes.btn}>Join</Button>
             </NavLink>
           )}
-          {props.auth.authenticated && <HeaderMenus />}
+
+          <Hidden xsDown>{props.auth.authenticated && <HeaderMenus />}</Hidden>
         </Grid>
       </Toolbar>
     </AppBar>
@@ -227,4 +316,13 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps)(Header);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    logout: () => {
+      dispatch(logoutAction());
+      window.location.href = "/";
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);

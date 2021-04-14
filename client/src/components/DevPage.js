@@ -1,4 +1,4 @@
-import { Avatar, Grid, Hidden, Typography } from "@material-ui/core";
+import { Avatar, Grid, Hidden, Tooltip, Typography } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getDeveloperById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
@@ -99,6 +99,20 @@ const DevPage = (props) => {
     }
     getDeveloperById(props.match.params.id)
       .then((resp) => {
+        const dummyLinks = {
+          website: "",
+          linkedIn: "",
+          portfolio: "",
+          github: "",
+        };
+        if (!resp.data.websites) {
+          resp.data.websites = dummyLinks;
+        }
+        Object.keys(dummyLinks).forEach((link) => {
+          if (!resp.data.websites[link]) {
+            resp.data.websites[link] = "";
+          }
+        });
         setDeveloper(resp.data);
         setLoading(false);
         if (viewPath === "/followers") {
@@ -142,7 +156,7 @@ const DevPage = (props) => {
       )}
       {!!Object.keys(developer).length && (
         <Grid container item xs={12} className={classes.mainContainer}>
-          <Hidden smUp>
+          <Hidden mdUp>
             <Grid
               item
               xs={12}
@@ -164,38 +178,40 @@ const DevPage = (props) => {
                   @{developer.username}
                 </Typography>
               </Grid>
-              <Typography>{developer.name}</Typography>
-              <div
-                style={{
-                  margin: ".7rem 0",
-                }}
-              >
-                <Typography>Email:</Typography>
-                <Typography> {developer.email}</Typography>
-              </div>
+
+              <Typography className={classes.userField}>
+                <b>Name: </b>
+                {developer.name}
+              </Typography>
+              <Typography className={classes.userField}>
+                <b style={{ marginRight: ".3rem" }}> Email:</b>
+                {developer.email}
+              </Typography>
               <NavLink
                 to={`/dev/${developer._id}/followers`}
                 className={classes.linkStyles}
               >
-                <div
+                <Button
+                  variant="outlined"
                   style={{
                     margin: ".7rem 0",
                     display: "flex",
                     flexDirection: "row",
                   }}
                 >
-                  <div variant="contained" className={classes.labelStyle}>
+                  <Typography className={classes.labelStyle}>
                     Followers:
-                  </div>
+                  </Typography>
                   <Typography> {developer.followers.length}</Typography>
-                </div>
+                </Button>
               </NavLink>
 
               <NavLink
                 to={`/dev/${developer._id}/following`}
                 className={classes.linkStyles}
               >
-                <div
+                <Button
+                  variant="outlined"
                   style={{
                     margin: ".7rem 0",
                     display: "flex",
@@ -206,8 +222,61 @@ const DevPage = (props) => {
                     Following:
                   </Typography>
                   <Typography> {developer.following.length}</Typography>
-                </div>
+                </Button>
               </NavLink>
+              <Grid
+                container
+                direction="row"
+                style={{
+                  alignSelf: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconButton
+                  disabled={!developer.websites.github}
+                  aria-label="github"
+                  size="small"
+                  href={developer.websites.github}
+                  target="_blank"
+                >
+                  <Tooltip title="github">
+                    <GitHubIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={!developer.websites.linkedIn}
+                  aria-label="linkedIn"
+                  size="medium"
+                  href={developer.websites.linkedIn}
+                  target="_blank"
+                >
+                  <Tooltip title="linkedIn">
+                    <LinkedInIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={!developer.websites.website}
+                  aria-label="website"
+                  size="medium"
+                  href={developer.websites.website}
+                  target="_blank"
+                >
+                  <Tooltip title="website">
+                    <HttpIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={!developer.websites.portfolio}
+                  aria-label="portfolio"
+                  size="medium"
+                  href={developer.websites.portfolio}
+                  target="_blank"
+                >
+                  <Tooltip title="portfolio">
+                    <AssignmentIndIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+              </Grid>
             </Grid>
           </Hidden>
           <Hidden smDown>
@@ -287,17 +356,49 @@ const DevPage = (props) => {
                   </Button>
                 </NavLink>
                 <Grid container direction="row">
-                  <IconButton aria-label="github" size="small">
-                    <GitHubIcon fontSize="medium" />
+                  <IconButton
+                    disabled={!developer.websites.github}
+                    aria-label="github"
+                    size="small"
+                    href={developer.websites.github}
+                    target="_blank"
+                  >
+                    <Tooltip title="github">
+                      <GitHubIcon style={{fontSize: '1.2rem'}}/>
+                    </Tooltip>
                   </IconButton>
-                  <IconButton aria-label="linkedIn" size="medium">
-                    <LinkedInIcon fontSize="medium" />
+                  <IconButton
+                    disabled={!developer.websites.linkedIn}
+                    aria-label="linkedIn"
+                    size="medium"
+                    href={developer.websites.linkedIn}
+                    target="_blank"
+                  >
+                    <Tooltip title="linkedIn">
+                      <LinkedInIcon style={{fontSize: '1.2rem'}}/>
+                    </Tooltip>
                   </IconButton>
-                  <IconButton aria-label="website" size="medium">
-                    <HttpIcon fontSize="medium" />
+                  <IconButton
+                    disabled={!developer.websites.website}
+                    aria-label="website"
+                    size="medium"
+                    href={developer.websites.website}
+                    target="_blank"
+                  >
+                    <Tooltip title="website">
+                      <HttpIcon style={{fontSize: '1.2rem'}}/>
+                    </Tooltip>
                   </IconButton>
-                  <IconButton aria-label="portfolio" size="medium">
-                    <AssignmentIndIcon fontSize="medium" />
+                  <IconButton
+                    disabled={!developer.websites.portfolio}
+                    aria-label="portfolio"
+                    size="medium"
+                    href={developer.websites.portfolio}
+                    target="_blank"
+                  >
+                    <Tooltip title="portfolio">
+                      <AssignmentIndIcon style={{fontSize: '1.2rem'}}/>
+                    </Tooltip>
                   </IconButton>
                 </Grid>
               </div>
@@ -318,7 +419,7 @@ const DevPage = (props) => {
               Projects
             </Typography>
             <Grid container item direction="row" xs={12}>
-              {!!developer.projects &&
+              {!!developer.projects.length ? (
                 developer.projects.map((project) => {
                   return (
                     <Grid
@@ -333,7 +434,19 @@ const DevPage = (props) => {
                       <ExpandableProjectCard project={project} />
                     </Grid>
                   );
-                })}
+                })
+              ) : (
+                <Typography
+                  style={{
+                    textAlign: "center",
+                    width: "100%",
+                    margin: "4rem 0",
+                    color: "#7f7f7f",
+                  }}
+                >
+                  No Projects to show
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </Grid>

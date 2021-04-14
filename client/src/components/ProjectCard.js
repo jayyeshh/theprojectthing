@@ -12,7 +12,7 @@ import CodeIcon from "@material-ui/icons/Code";
 
 const useStyles = makeStyles({
   root: {
-    height: 300,
+    minHeight: 300,
     margin: "1rem",
     "&:hover": {
       boxShadow: "5px 20px 12px",

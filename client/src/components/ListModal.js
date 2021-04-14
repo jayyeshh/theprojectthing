@@ -36,15 +36,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const ListModal = (props) => {
-  console.log(props);
   const classes = useStyles();
   const history = useHistory();
   const handleClose = () => {
-    history.push(`/dev/${props.id}`);
+    if (props.id) history.push(`/dev/${props.id}`);
     props.setShowModal(false);
   };
 
-  console.log(props);
   return (
     <div>
       <Modal

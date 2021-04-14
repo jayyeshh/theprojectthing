@@ -3,6 +3,8 @@ import axios from "../utility/axios/apiInstance";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import DeleteIcon from "@material-ui/icons/Delete";
+import IconButton from "@material-ui/core/IconButton";
 import Spinner from "./Spinner";
 import moment from "moment";
 import {
@@ -14,22 +16,32 @@ import {
   CircularProgress,
   Divider,
   Avatar,
+  Hidden,
+  Tooltip,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import SideProfile from "./SideProfile";
 import { connect } from "react-redux";
 import EditOutlinedIcon from "@material-ui/icons/EditOutlined";
+import EditIcon from "@material-ui/icons/Edit";
 import {
   voteProject,
   getProjectById,
 } from "../utility/utilityFunctions/ApiCalls";
 import { NavLink } from "react-router-dom";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   containerStyles: {
     position: "absolute",
     top: "50%",
     left: "50%",
+  },
+  projectContainer: {
+    margin: "2rem",
+    [theme.breakpoints.down("xs")]: {
+      margin: "0",
+      marginTop: "2rem",
+    },
   },
   img: {
     height: "22rem",
@@ -62,7 +74,7 @@ const useStyles = makeStyles({
   buttonProgress: {
     padding: "0rem 1.5rem",
   },
-});
+}));
 
 const ProjectPage = (props) => {
   const [currLocation, setCurrLocation] = useState("");
@@ -73,6 +85,9 @@ const ProjectPage = (props) => {
   const [commentText, setCommentText] = useState("");
   const [focused, setFocused] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
+  const [editingComment, setEditingComment] = useState("");
+  const [editingCommentText, setEditingCommentText] = useState("");
+  const [updatingComment, setUpdatingComment] = useState(false);
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
@@ -153,14 +168,33 @@ const ProjectPage = (props) => {
     setCommentText("");
   };
 
+  const setUpdatingStates = (index) => {
+    setEditingComment(project.comments[index]._id);
+    setEditingCommentText(project.comments[index].text);
+  };
+
+  const cancelCommentEditing = () => {
+    setEditingComment("");
+    setEditingCommentText("");
+  };
+
+  const updateComment = () => {
+    setUpdatingComment(true);
+    axios.patch(`/comment/${editingComment}`).then(resp=>{
+
+    }).catch(error=>{
+
+    })
+  };
+
   return (
     <Grid
       container
+      item
       xs={12}
       style={{
         height: "100%",
         width: "100%",
-        padding: "1rem",
       }}
     >
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
@@ -181,8 +215,21 @@ const ProjectPage = (props) => {
           spacing={2}
           container
         >
-          <Grid item container xs={8} direction="column">
-            <Grid container xs={12} direction="row" justify="space-between">
+          <Grid
+            container
+            item
+            xs={12}
+            sm={8}
+            direction="column"
+            className={classes.projectContainer}
+          >
+            <Grid
+              container
+              item
+              xs={12}
+              direction="row"
+              justify="space-between"
+            >
               <Typography component="h1" variant="h4">
                 {project.title}
               </Typography>
@@ -232,7 +279,7 @@ const ProjectPage = (props) => {
               width="100%"
               className={classes.img}
             />
-            <Grid xs={12}>
+            <Grid item xs={12}>
               <Button
                 disabled={
                   !(
@@ -354,90 +401,186 @@ const ProjectPage = (props) => {
                 </Grid>
               )}
               <Grid container direction="row">
-                {project.comments.map((comment) => {
-                  return (
-                    <Grid
-                      key={comment._id}
-                      container
-                      direction="row"
-                      className={classes.commentStyle}
-                    >
-                      <Avatar
-                        aria-label={comment.by.username}
-                        className={classes.avatar}
-                      >
-                        {comment.by.username.charAt(0).toUpperCase()}
-                      </Avatar>
+                {project.comments.map((comment, index) => {
+                  if (editingComment.toString() === comment._id.toString()) {
+                    return (
                       <Grid
+                        key={comment._id}
                         item
-                        xs={8}
+                        xs={9}
                         container
                         direction="column"
+                        className={classes.commentStyle}
                         style={{
-                          marginLeft: "1rem",
+                          border: "1px solid black",
                         }}
                       >
-                        <Grid container direction="row">
-                          <NavLink
-                            to={
-                              comment.onModel === "Developer"
-                                ? `/dev/${comment.by._id}`
-                                : `/company/${comment.by._id}`
+                        <Grid item xs={12} container direction="row">
+                          <Avatar
+                            aria-label={comment.by.username}
+                            className={classes.avatar}
+                          >
+                            {comment.by.username.charAt(0).toUpperCase()}
+                          </Avatar>
+                          <TextField
+                            focused
+                            id="editable-comment"
+                            value={editingCommentText}
+                            multiline
+                            onFocus={() => setFocused(true)}
+                            placeholder="add a comment..."
+                            onChange={(e) =>
+                              setEditingCommentText(e.target.value)
                             }
-                            style={{ color: "black", textDecoration: "none" }}
-                          >
-                            <Typography>
-                              <b>{comment.by.name}</b>
-                            </Typography>
-                          </NavLink>
-                          <Typography
-                            color="textSecondary"
                             style={{
+                              margin: "1rem 0",
                               display: "flex",
-                              alignItems: "center",
-                              fontSize: ".9rem",
-                              marginLeft: ".3rem",
+                              flex: 1,
+                              marginLeft: "1rem",
                             }}
-                          >
-                            {new moment(comment.createdAt).fromNow()}
-                          </Typography>
+                          />
                         </Grid>
-                        <Typography>{comment.text}</Typography>
+                        <Grid container direction="row" justify="flex-end">
+                          <Button
+                            variant="contained"
+                            onClick={() => cancelCommentEditing()}
+                          >
+                            CANCEL
+                          </Button>
+                          <Button
+                            disabled={!!!editingCommentText || updatingComment}
+                            variant="contained"
+                            color="primary"
+                            style={{ marginLeft: ".7rem" }}
+                            onClick={() => updateComment()}
+                          >
+                            {updatingComment ? (
+                              <CircularProgress
+                                size={14}
+                                className={classes.buttonProgress}
+                              />
+                            ) : (
+                              "UPDATE"
+                            )}
+                          </Button>
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  );
+                    );
+                  } else {
+                    return (
+                      <Grid
+                        key={comment._id}
+                        container
+                        direction="row"
+                        className={classes.commentStyle}
+                      >
+                        <Avatar
+                          aria-label={comment.by.username}
+                          className={classes.avatar}
+                        >
+                          {comment.by.username.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Grid
+                          item
+                          xs={8}
+                          container
+                          direction="column"
+                          style={{
+                            marginLeft: "1rem",
+                          }}
+                        >
+                          <Grid
+                            container
+                            direction="row"
+                            justify="space-between"
+                            style={{ border: "1px solid black", width: "100%" }}
+                          >
+                            <Grid
+                              item
+                              xs={8}
+                              container
+                              direction="row"
+                              align="center"
+                              alignItems="center"
+                            >
+                              <NavLink
+                                to={
+                                  comment.onModel === "Developer"
+                                    ? `/dev/${comment.by._id}`
+                                    : `/company/${comment.by._id}`
+                                }
+                                style={{
+                                  color: "black",
+                                  textDecoration: "none",
+                                }}
+                              >
+                                <Typography>
+                                  <b>{comment.by.name}</b>
+                                </Typography>
+                              </NavLink>
+                              <Typography
+                                color="textSecondary"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  fontSize: ".9rem",
+                                  marginLeft: ".3rem",
+                                }}
+                              >
+                                {new moment(comment.createdAt).fromNow()}
+                              </Typography>
+                            </Grid>
+                            {comment.by._id.toString() ===
+                              props.authenticatedUser._id && (
+                              <IconButton
+                                aria-label="delete"
+                                onClick={() => setUpdatingStates(index)}
+                              >
+                                <Tooltip title="edit">
+                                  <EditIcon fontSize="small" />
+                                </Tooltip>
+                              </IconButton>
+                            )}
+                          </Grid>
+                          <Typography>{comment.text}</Typography>
+                        </Grid>
+                      </Grid>
+                    );
+                  }
                 })}
               </Grid>
             </Grid>
           </Grid>
-          <Grid
-            item
-            xs={3}
-            style={{
-              height: "100%",
-              width: "100%",
-              position: "fixed",
-              right: "1rem",
-              marginRight: "1rem",
-              padding: "2rem",
-            }}
-          >
-            <Typography
-              align="center"
-              component="h1"
-              variant="h5"
-              className={classes.blockHeading}
+          <Hidden xsDown>
+            <Grid
+              item
+              xs={3}
+              style={{
+                height: "100%",
+                width: "100%",
+                position: "fixed",
+                right: "1rem",
+                marginRight: "1rem",
+                padding: "2rem",
+              }}
             >
-              Developer
-            </Typography>
-            {project.developer && (
-              <SideProfile
-                as="developer"
-                user={project.developer}
-                projects={project.developer.projects}
-              />
-            )}
-          </Grid>
+              <Typography
+                align="center"
+                component="h1"
+                variant="h5"
+                className={classes.blockHeading}
+              >
+                Developer
+              </Typography>
+              {project.developer && (
+                <SideProfile
+                  as="developer"
+                  user={project.developer}
+                  projects={project.developer.projects}
+                />
+              )}
+            </Grid>
+          </Hidden>
         </Grid>
       )}
     </Grid>

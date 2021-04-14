@@ -72,7 +72,13 @@ const authReducer = (state = initialState, action) => {
     }
     case SETUP_PROFILE: {
       const { profile, as } = action.payload;
-      const { website, linkedIn, github, portfolio } = profile.websites;
+      let website = "",
+        linkedIn = "",
+        github = "",
+        portfolio = "";
+      if (profile.website) {
+        ({ website, linkedIn, github, portfolio } = profile.websites);
+      }
       const { _id, followers, following, email, name, username } = profile;
       return {
         authenticated: true,

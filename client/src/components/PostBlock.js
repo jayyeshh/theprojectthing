@@ -3,8 +3,8 @@ import {
   Button,
   Grid,
   TextareaAutosize,
-  makeStyles,
 } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import axios from "../utility/axios/apiInstance";
 import React, { useState } from "react";
 import { setModalStateAction } from "../actions/modalActions";
@@ -12,11 +12,40 @@ import { green } from "@material-ui/core/colors";
 import { connect } from "react-redux";
 import { ADD_NEW_POST } from "../actions/action-types";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   buttonProgress: {
     color: green[500],
   },
-});
+  postBlockContainer: {
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+      justifyContent: "center",
+      marginTop: "1rem",
+    },
+  },
+  textAreaStyles: {
+    margin: "0 2rem",
+    padding: ".8rem",
+    backgroundColor: "#eee",
+    transition: "all .4s ease-in-out",
+    outlineWidth: ".4px",
+    outlineColor: 'black',
+    border: "none",
+    "&::focus": {
+      backgroundColor: "#fff",
+    },
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
+  },
+  btnStyles: {
+    margin: ".6rem 2rem",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+      justifyContent: "center",
+    },
+  },
+}));
 
 const PostBlock = (props) => {
   const [text, setText] = useState("");
@@ -56,37 +85,20 @@ const PostBlock = (props) => {
   };
 
   return (
-    <Grid container item xs={12}>
+    <Grid container item xs={12} className={classes.postBlockContainer}>
       <Grid item container xs={12}>
         <TextareaAutosize
           rowsMin={4}
           rowsMax={4}
           cols={60}
           aria-label="post input box"
-          placeholder="write post..."
+          placeholder="write something here..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          style={{
-            margin: "0 2rem",
-            padding: ".8rem",
-            backgroundColor: "#eee",
-            transition: "all .6s ease-in-out",
-            outlineWidth: ".4px",
-            border: "none",
-            "&::focus": {
-              backgroundColor: "#fff",
-            },
-          }}
+          className={classes.textAreaStyles}
         />
       </Grid>
-      <Grid
-        item
-        container
-        xs={12}
-        style={{
-          margin: ".6rem 2rem",
-        }}
-      >
+      <Grid item container xs={12} className={classes.btnStyles}>
         <Button
           disabled={loading}
           variant="contained"

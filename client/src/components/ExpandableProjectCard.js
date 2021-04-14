@@ -1,4 +1,4 @@
-import { Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { CardHeader, CardContent, CardMedia, Card } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -11,7 +11,7 @@ const defaultImage =
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
-    height: 300
+    height: 300,
   },
   media: {
     height: 0,
@@ -46,11 +46,35 @@ const ExpandableProjectCard = ({ project }) => {
             )}`}
           />
         </NavLink>
-        <CardMedia
-          className={classes.media}
-          image={!!project.photo ? project.photo : defaultImage}
-          title={project.title}
-        />
+        {!!project.photo ? (
+          <CardMedia
+            className={classes.media}
+            image={project.photo}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultImage;
+            }}
+            title={project.title}
+          />
+        ) : (
+          <CardMedia>
+            <Grid
+              container
+              direction="row"
+              justify="center"
+              align="center"
+              alignItems="center"
+              style={{
+                minWidth: "100%",
+                minHeight: "10rem",
+                backgroundColor: "#efefef",
+                color: "#a1a1a1",
+              }}
+            >
+              <Typography>no image found</Typography>
+            </Grid>
+          </CardMedia>
+        )}
         {project.about && (
           <CardContent>
             <Typography variant="body2" color="textSecondary" component="p">

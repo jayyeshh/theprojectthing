@@ -3,7 +3,6 @@ import {
   Grid,
   TextField,
   CircularProgress,
-  TextareaAutosize,
   Button,
   Typography,
 } from "@material-ui/core";
@@ -16,6 +15,7 @@ import { useHistory } from "react-router-dom";
 import { setupAuthentication } from "../actions/authActions";
 import { getProjectById } from "../utility/utilityFunctions/ApiCalls";
 import { setModalStateAction } from "../actions/modalActions";
+import { useConfirm } from "material-ui-confirm";
 import { connect } from "react-redux";
 import Spinner from "./Spinner";
 
@@ -95,6 +95,14 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     position: "relative",
   },
+  deleteBtn: {
+    backgroundColor: "#d14a30",
+    color: "#fff",
+    margin: 0,
+    "&:hover": {
+      backgroundColor: "#ba2407",
+    },
+  },
   dropzoneStyles: {
     marginTop: "2rem",
     width: "100%",
@@ -120,6 +128,7 @@ const errorInitials = {
 const AddProject = (props) => {
   const history = useHistory();
   const classes = useStyles();
+  const confirmation = useConfirm();
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [fieldValues, setFieldValues] = useState(initials);
@@ -158,7 +167,7 @@ const AddProject = (props) => {
     setFieldValues({ ...fieldValues, photo: file[0] });
   };
 
-  const editProduct = (e) => {
+  const editProject = (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -193,8 +202,37 @@ const AddProject = (props) => {
       });
   };
 
+  const deleteProject = () => {
+    confirmation({
+      description: "This Project will be deleted permanently!",
+      confirmationText: "Delete",
+      confirmationButtonProps: { color: "secondary" },
+    })
+      .then(() => {
+        const configs = {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        axios
+          .delete(`/project/${props.computedMatch.params.pid}`, configs)
+          .then((resp) => {
+            props.setModalState(true, `Project Deleted Permanently!`);
+            history.replace("/");
+          })
+          .catch((error) => {
+            props.setModalState(true, `Something went wrong! Try again later.`);
+          });
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      })
+      .catch(() => {});
+  };
+
   const addThisProject = (e) => {
     e.preventDefault();
+
     setLoading(true);
     const data = new FormData();
     data.append("photo", fieldValues.photo);
@@ -269,7 +307,7 @@ const AddProject = (props) => {
         </Typography>
       )}
       <form
-        onSubmit={task === "toadd" ? addThisProject : editProduct}
+        onSubmit={task === "toadd" ? addThisProject : editProject}
         className={classes.formStyles}
       >
         <Grid container spacing={3}>
@@ -317,16 +355,17 @@ const AddProject = (props) => {
               label="Site"
             />
           </Grid>
-          <TextareaAutosize
-            style={{ marginLeft: ".6rem" }}
+          <TextField
+            multiline
+            variant="outlined"
             rows={5}
             cols={137}
-            value={fieldValues.links.description}
+            fullWidth
+            value={fieldValues.about}
             style={{
               padding: ".6rem",
-              marginLeft: ".6rem",
             }}
-            label="Project Description"
+            label="Description"
             placeholder="Project Description"
             onChange={onChangeHandler}
             name="about"
@@ -357,6 +396,18 @@ const AddProject = (props) => {
             <CircularProgress size={24} className={classes.buttonProgress} />
           )}
         </div>
+        {task === "toedit" && (
+          <Button
+            fullWidth
+            disabled={loading}
+            variant="contained"
+            color="#ab3018"
+            className={classes.deleteBtn}
+            onClick={() => deleteProject()}
+          >
+            Delete Project
+          </Button>
+        )}
       </form>
     </Paper>
   );

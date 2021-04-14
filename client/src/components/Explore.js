@@ -36,6 +36,12 @@ const useStyles = makeStyles((theme) => ({
     padding: "0 8rem",
     overflowY: "hidden",
   },
+  cardContainer: {
+    [theme.breakpoints.down("xs")]: {
+      minWidth: "16rem",
+    },
+    maxWidth: "18rem",
+  },
 }));
 
 const Explore = (props) => {
@@ -76,11 +82,11 @@ const Explore = (props) => {
       <Paper elevation={4} className={classes.headingStyles}>
         <Typography className={classes.pageHeading}>Explore</Typography>
         <ToggleButtonGroup exclusive value={type} onChange={toggleBtnHandler}>
-          <ToggleButton value="devs">
-            <Typography>Devs</Typography>
-          </ToggleButton>
           <ToggleButton value="projects">
             <Typography>Projects</Typography>
+          </ToggleButton>
+          <ToggleButton value="devs">
+            <Typography>Devs</Typography>
           </ToggleButton>
           <ToggleButton value="companies">
             <Typography>Companies</Typography>
@@ -89,16 +95,29 @@ const Explore = (props) => {
       </Paper>
       <Grid
         container
-        spacing={4}
         justify="center"
+        item
         xs={12}
         className={classes.mainContainer}
       >
         {loading && <Spinner />}
         {!loading && !!list.length && type === "devs" && (
-          <Grid item justify="center" direction="row" container xs={12}>
+          <Grid
+            item
+            container
+            spacing={4}
+            direction="row"
+            justify="center"
+            xs={12}
+          >
             {list.map((dev, index) => (
-              <Grid key={dev._id} item sm={6} md={3}>
+              <Grid
+                className={classes.cardContainer}
+                key={dev._id}
+                item
+                sm={6}
+                md={4}
+              >
                 <DevCard
                   refresh={(followStatus) => {
                     const updatedList = [...list];
@@ -135,9 +154,23 @@ const Explore = (props) => {
           </Grid>
         )}
         {!loading && !!list.length && type === "companies" && (
-          <Grid item justify="center" direction="row" container xs={12}>
+          <Grid
+            item
+            container
+            spacing={4}
+            direction="row"
+            justify="center"
+            xs={12}
+          >
             {list.map((company, index) => (
-              <Grid key={company._id} item sm={6} md={3}>
+              <Grid
+                style={{ minWidth: "18rem" }}
+                key={company._id}
+                item
+                className={classes.cardContainer}
+                sm={6}
+                md={4}
+              >
                 <CompanyCard setError={setError} profile={company} />
               </Grid>
             ))}
