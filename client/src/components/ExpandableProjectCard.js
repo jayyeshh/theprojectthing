@@ -42,7 +42,7 @@ const ExpandableProjectCard = ({ project }) => {
           <CardHeader
             title={project.title}
             subheader={`Posted on: ${moment(project.createdAt).format(
-              "MMM Do YY,hh:mm a"
+              "MMM Do, YYYY,(hh:mm a)"
             )}`}
           />
         </NavLink>

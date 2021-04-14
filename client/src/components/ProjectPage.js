@@ -5,6 +5,7 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
+import { setModalStateAction } from "../actions/modalActions";
 import Spinner from "./Spinner";
 import moment from "moment";
 import {
@@ -29,6 +30,7 @@ import {
   getProjectById,
 } from "../utility/utilityFunctions/ApiCalls";
 import { NavLink } from "react-router-dom";
+import { useConfirm } from "material-ui-confirm";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -74,6 +76,15 @@ const useStyles = makeStyles((theme) => ({
   buttonProgress: {
     padding: "0rem 1.5rem",
   },
+  timeTypeStyles: {
+    display: "flex",
+    alignItems: "center",
+    fontSize: ".9rem",
+    marginLeft: ".3rem",
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
+  },
 }));
 
 const ProjectPage = (props) => {
@@ -88,6 +99,7 @@ const ProjectPage = (props) => {
   const [editingComment, setEditingComment] = useState("");
   const [editingCommentText, setEditingCommentText] = useState("");
   const [updatingComment, setUpdatingComment] = useState(false);
+  const confirmation = useConfirm();
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
@@ -159,7 +171,6 @@ const ProjectPage = (props) => {
       })
       .catch((error) => {
         setPostingComment(false);
-        console.log("error: ", error, error.response);
       });
   };
 
@@ -178,13 +189,75 @@ const ProjectPage = (props) => {
     setEditingCommentText("");
   };
 
-  const updateComment = () => {
-    setUpdatingComment(true);
-    axios.patch(`/comment/${editingComment}`).then(resp=>{
-
-    }).catch(error=>{
-
+  const deleteComment = () => {
+    const configs = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
+    confirmation({
+      description: "Delete this comment permanently?",
+      confirmationText: "Delete",
+      confirmationButtonProps: { color: "secondary" },
     })
+      .then(() => {
+        axios
+          .delete(`/comment/${editingComment}`, configs)
+          .then(() => {
+            cancelCommentEditing();
+            const updatedProject = { ...project };
+            updatedProject.comments = updatedProject.comments.filter(
+              (comment) => comment._id.toString() !== editingComment.toString()
+            );
+            setProject(updatedProject);
+            props.setModalState(
+              true,
+              `Your comment has been deleted permanently!`
+            );
+          })
+          .catch((error) => {
+            props.setModalState(true, `Something went wrong! Try again later.`);
+          });
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      })
+      .catch((error) => {});
+  };
+
+  const updateComment = (index) => {
+    const configs = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
+    const payload = {
+      text: editingCommentText,
+    };
+    setUpdatingComment(true);
+    axios
+      .patch(`/comment/${editingComment}`, payload, configs)
+      .then((resp) => {
+        const updatedProject = { ...project };
+        updatedProject.comments[index] = resp.data.comment;
+        cancelCommentEditing();
+        setProject(updatedProject);
+        setUpdatingComment(false);
+        props.setModalState(
+          true,
+          `Your comment has been updated successfully!`
+        );
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      })
+      .catch((error) => {
+        setUpdatingComment(false);
+        props.setModalState(true, `Something went wrong! Try again later.`);
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
   };
 
   return (
@@ -407,13 +480,11 @@ const ProjectPage = (props) => {
                       <Grid
                         key={comment._id}
                         item
-                        xs={9}
+                        md={9}
+                        xs={12}
                         container
                         direction="column"
                         className={classes.commentStyle}
-                        style={{
-                          border: "1px solid black",
-                        }}
                       >
                         <Grid item xs={12} container direction="row">
                           <Avatar
@@ -427,7 +498,6 @@ const ProjectPage = (props) => {
                             id="editable-comment"
                             value={editingCommentText}
                             multiline
-                            onFocus={() => setFocused(true)}
                             placeholder="add a comment..."
                             onChange={(e) =>
                               setEditingCommentText(e.target.value)
@@ -443,6 +513,13 @@ const ProjectPage = (props) => {
                         <Grid container direction="row" justify="flex-end">
                           <Button
                             variant="contained"
+                            onClick={() => deleteComment()}
+                            style={{ marginRight: ".7rem", color: "red" }}
+                          >
+                            <DeleteIcon />
+                          </Button>
+                          <Button
+                            variant="contained"
                             onClick={() => cancelCommentEditing()}
                           >
                             CANCEL
@@ -452,7 +529,7 @@ const ProjectPage = (props) => {
                             variant="contained"
                             color="primary"
                             style={{ marginLeft: ".7rem" }}
-                            onClick={() => updateComment()}
+                            onClick={() => updateComment(index)}
                           >
                             {updatingComment ? (
                               <CircularProgress
@@ -470,8 +547,11 @@ const ProjectPage = (props) => {
                     return (
                       <Grid
                         key={comment._id}
+                        item
+                        xs={12}
                         container
                         direction="row"
+                        alignItems="center"
                         className={classes.commentStyle}
                       >
                         <Avatar
@@ -482,7 +562,8 @@ const ProjectPage = (props) => {
                         </Avatar>
                         <Grid
                           item
-                          xs={8}
+                          sm={8}
+                          xs={9}
                           container
                           direction="column"
                           style={{
@@ -493,7 +574,6 @@ const ProjectPage = (props) => {
                             container
                             direction="row"
                             justify="space-between"
-                            style={{ border: "1px solid black", width: "100%" }}
                           >
                             <Grid
                               item
@@ -520,12 +600,7 @@ const ProjectPage = (props) => {
                               </NavLink>
                               <Typography
                                 color="textSecondary"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  fontSize: ".9rem",
-                                  marginLeft: ".3rem",
-                                }}
+                                className={classes.timeTypeStyles}
                               >
                                 {new moment(comment.createdAt).fromNow()}
                               </Typography>
@@ -595,4 +670,11 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ProjectPage);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setModalState: (modalState, text) =>
+      dispatch(setModalStateAction({ showModal: modalState, text })),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProjectPage);
