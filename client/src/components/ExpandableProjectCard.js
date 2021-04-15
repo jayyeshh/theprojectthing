@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ExpandableProjectCard = ({ project }) => {
   const classes = useStyles();
-  const [expanded, setExpanded] = useState(false);
+  // const [expanded, setExpanded] = useState(false);
   return (
     <div>
       <Card className={classes.root}>

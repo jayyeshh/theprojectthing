@@ -42,14 +42,14 @@ export const getCompanyById = (id) => {
   return axios.get(`/company/${id}`, null, configs);
 };
 
-export const followUser = (uid) => {
-  setConfigs();
-  return axios.post(`/follow/${uid}`, null, configs);
-};
-
 export const getPostById = (id) => {
   setConfigs();
   return axios.get(`/post/${id}`, null, configs);
+};
+
+export const followUser = (uid) => {
+  setConfigs();
+  return axios.post(`/follow/${uid}`, null, configs);
 };
 
 export const unfollowUser = (uid) => {

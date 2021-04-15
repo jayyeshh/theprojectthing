@@ -1,6 +1,17 @@
-import { Avatar, Grid, Hidden, Tooltip, Typography } from "@material-ui/core";
+import {
+  Avatar,
+  CircularProgress,
+  Grid,
+  Hidden,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import React, { useState, useEffect } from "react";
-import { getDeveloperById } from "../utility/utilityFunctions/ApiCalls";
+import {
+  getDeveloperById,
+  unfollowUser,
+  followUser,
+} from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Button, IconButton } from "@material-ui/core";
 import { useHistory, NavLink } from "react-router-dom";
@@ -8,9 +19,11 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 import LinkedInIcon from "@material-ui/icons/LinkedIn";
 import HttpIcon from "@material-ui/icons/Http";
 import AssignmentIndIcon from "@material-ui/icons/AssignmentInd";
-import Spinner from "./Spinner";
 import ExpandableProjectCard from "./ExpandableProjectCard";
 import ListModal from "./ListModal";
+import Spinner from "./Spinner";
+import { setModalStateAction } from "../actions/modalActions";
+import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -78,6 +91,8 @@ const DevPage = (props) => {
   const [error, setError] = useState("");
   const [popupOf, setPopupOf] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [alreadyFollowing, setAlreadyFollowing] = useState(false);
+  const [btnInAction, setBtnInAction] = useState(false);
   const history = useHistory();
 
   if (props.history.location.pathname !== currLocation) {
@@ -97,6 +112,7 @@ const DevPage = (props) => {
     ) {
       history.replace(props.match.url);
     }
+
     getDeveloperById(props.match.params.id)
       .then((resp) => {
         const dummyLinks = {
@@ -122,11 +138,82 @@ const DevPage = (props) => {
           setPopupOf("following");
           setShowModal(true);
         }
+
+        //check if authed user is already following this developer or not
+        if (props.authedAs.toLowerCase() === "developer") {
+          if (
+            resp.data.followers.some(
+              (follower) =>
+                follower._id.toString() === props.authedUserId.toString()
+            )
+          ) {
+            setAlreadyFollowing(true);
+          }
+        }
       })
       .catch((error) => {
         setLoading(false);
       });
   }, [currLocation]);
+
+  const follow = () => {
+    setBtnInAction(true);
+    followUser(developer._id)
+      .then((res) => {
+        setBtnInAction(false);
+        const updatedDeveloper = { ...developer };
+        updatedDeveloper.followers = updatedDeveloper.followers.concat(
+          props.user
+        );
+        setDeveloper(updatedDeveloper);
+        setAlreadyFollowing(true);
+        props.setModalState(
+          true,
+          `You are now following ${developer.username}`
+        );
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      })
+      .catch((_error) => {
+        setBtnInAction(false);
+        props.setModalState(
+          true,
+          "Something went wrong! try again after some time"
+        );
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
+  };
+
+  const unfollow = () => {
+    setBtnInAction(true);
+    unfollowUser(developer._id)
+      .then((res) => {
+        setBtnInAction(false);
+        const updatedDeveloper = { ...developer };
+        updatedDeveloper.followers = updatedDeveloper.followers.filter(
+          (follower) => follower._id.toString() !== props.user._id.toString()
+        );
+        setDeveloper(updatedDeveloper);
+        setAlreadyFollowing(false);
+        props.setModalState(true, `unfollowed ${developer.username}`);
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      })
+      .catch((_error) => {
+        setBtnInAction(false);
+        props.setModalState(
+          true,
+          "Something went wrong! try again after some time"
+        );
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
+  };
 
   return (
     <Grid container style={{ overflowX: "hidden" }}>
@@ -187,6 +274,41 @@ const DevPage = (props) => {
                 <b style={{ marginRight: ".3rem" }}> Email:</b>
                 {developer.email}
               </Typography>
+              {props.authedAs.toLowerCase() === "developer" &&
+                developer._id !== props.authedUserId && (
+                  <>
+                    {alreadyFollowing && (
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={() => unfollow()}
+                      >
+                        {btnInAction ? (
+                          <Grid container justify="center" alignItems="center">
+                            <CircularProgress size={24} color="primary" />
+                          </Grid>
+                        ) : (
+                          "UnFollow"
+                        )}
+                      </Button>
+                    )}
+                    {!alreadyFollowing && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => follow()}
+                      >
+                        {btnInAction ? (
+                          <Grid container justify="center" alignItems="center">
+                            <CircularProgress size={24} color="secondary" />
+                          </Grid>
+                        ) : (
+                          "Follow"
+                        )}
+                      </Button>
+                    )}
+                  </>
+                )}
               <NavLink
                 to={`/dev/${developer._id}/followers`}
                 className={classes.linkStyles}
@@ -318,6 +440,52 @@ const DevPage = (props) => {
                     {developer.email}
                   </Typography>
                 </Grid>
+                {props.authedAs.toLowerCase() === "developer" &&
+                  developer._id !== props.authedUserId && (
+                    <>
+                      {alreadyFollowing && (
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => unfollow()}
+                          style={{ width: "9.5rem" }}
+                        >
+                          {btnInAction ? (
+                            <Grid
+                              container
+                              justify="center"
+                              alignItems="center"
+                            >
+                              <CircularProgress size={24} color="primary" />
+                            </Grid>
+                          ) : (
+                            "UnFollow"
+                          )}
+                        </Button>
+                      )}
+                      {!alreadyFollowing && (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => follow()}
+                          style={{ width: "9.5rem" }}
+                        >
+                          {btnInAction ? (
+                            <Grid
+                              container
+                              justify="center"
+                              alignItems="center"
+                            >
+                              <CircularProgress size={24} color="secondary" />
+                            </Grid>
+                          ) : (
+                            "Follow"
+                          )}
+                        </Button>
+                      )}
+                    </>
+                  )}
+
                 <NavLink
                   to={`/dev/${developer._id}/followers`}
                   className={classes.linkStyles}
@@ -364,7 +532,7 @@ const DevPage = (props) => {
                     target="_blank"
                   >
                     <Tooltip title="github">
-                      <GitHubIcon style={{fontSize: '1.2rem'}}/>
+                      <GitHubIcon style={{ fontSize: "1.2rem" }} />
                     </Tooltip>
                   </IconButton>
                   <IconButton
@@ -375,7 +543,7 @@ const DevPage = (props) => {
                     target="_blank"
                   >
                     <Tooltip title="linkedIn">
-                      <LinkedInIcon style={{fontSize: '1.2rem'}}/>
+                      <LinkedInIcon style={{ fontSize: "1.2rem" }} />
                     </Tooltip>
                   </IconButton>
                   <IconButton
@@ -386,7 +554,7 @@ const DevPage = (props) => {
                     target="_blank"
                   >
                     <Tooltip title="website">
-                      <HttpIcon style={{fontSize: '1.2rem'}}/>
+                      <HttpIcon style={{ fontSize: "1.2rem" }} />
                     </Tooltip>
                   </IconButton>
                   <IconButton
@@ -397,7 +565,7 @@ const DevPage = (props) => {
                     target="_blank"
                   >
                     <Tooltip title="portfolio">
-                      <AssignmentIndIcon style={{fontSize: '1.2rem'}}/>
+                      <AssignmentIndIcon style={{ fontSize: "1.2rem" }} />
                     </Tooltip>
                   </IconButton>
                 </Grid>
@@ -455,4 +623,19 @@ const DevPage = (props) => {
   );
 };
 
-export default DevPage;
+const mapStateToProps = (state) => {
+  return {
+    authedAs: state.authReducer.as,
+    authedUserId: state.authReducer.user._id,
+    user: state.authReducer.user,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setModalState: (modalState, text) =>
+      dispatch(setModalStateAction({ showModal: modalState, text })),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(DevPage);
