@@ -55,10 +55,18 @@ const AddReviewPopupModal = (props) => {
       .then((resp) => {
         setText("");
         setLoading(false);
+        props.setModalState(true, "Review Added!");
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
         props.updateReviews(resp.data.review);
       })
       .catch((error) => {
         setLoading(false);
+        props.setModalState(true, "Somthing went wrong! Try again later!");
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
         console.log("error: ", error);
       });
   };
@@ -103,7 +111,7 @@ const AddReviewPopupModal = (props) => {
           <Button
             color="primary"
             variant="contained"
-            disabled={loading}
+            disabled={loading || !!!text}
             style={{
               width: "100%",
             }}

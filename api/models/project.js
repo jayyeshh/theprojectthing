@@ -32,6 +32,12 @@ const projectSchema = new Schema(
         ref: "Developer",
       },
     ],
+    rewards: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "Company",
+      },
+    ],
     comments: [
       {
         type: mongoose.Types.ObjectId,

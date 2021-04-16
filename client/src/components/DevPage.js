@@ -30,6 +30,10 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "50%",
     left: "50%",
+    [theme.breakpoints.down("xs")]: {
+      left: "40%",
+      top: "45%",
+    },
   },
   mainContainer: {
     [theme.breakpoints.down("sm")]: {

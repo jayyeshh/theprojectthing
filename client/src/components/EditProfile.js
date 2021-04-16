@@ -10,7 +10,6 @@ import {
   Box,
   Avatar,
   Button,
-  FormControl,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
@@ -54,8 +53,39 @@ function a11yProps(index) {
 }
 
 const useStyles = makeStyles((theme) => ({
+  mainContainer: {
+    backgroundColor: "#eee",
+    minWidth: "90vw",
+    minHeight: "90vh",
+    overflow: "hidden",
+    [theme.breakpoints.down("xs")]: {
+      width: "100%",
+      height: "100%",
+    },
+  },
+  subContainer: {
+    margin: "2rem 4rem",
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
+  },
+  editProfileContainer: {
+    overflow: "hidden",
+    [theme.breakpoints.down("xs")]: {
+      minWidth: "90%",
+    },
+  },
   sideMenuBtnStyles: {
     borderBottom: "1px solid #e1e1e1",
+  },
+  formGrid: {
+    display: "flex",
+    alignSelf: "center",
+    width: "50%",
+    margin: "2rem 0",
+    [theme.breakpoints.down("xs")]: {
+      width: "90%",
+    },
   },
   root: {
     flexGrow: 1,
@@ -269,24 +299,18 @@ const EditProject = ({ profile, ...props }) => {
       direction="row"
       align="center"
       justify="center"
-      style={{
-        backgroundColor: "#eee",
-        minWidth: "90vw",
-        minHeight: "90vh",
-        overflow: "hidden",
-      }}
+      className={classes.mainContainer}
     >
       <Grid
         container
         direction="row"
         justify="center"
-        style={{
-          margin: "2rem 4rem",
-        }}
+        className={classes.subContainer}
       >
         <Grid
           item
-          xs={2}
+          sm={2}
+          xs={4}
           container
           direction="column"
           align="flex-start"
@@ -335,9 +359,7 @@ const EditProject = ({ profile, ...props }) => {
               xs={8}
               container
               direction="column"
-              style={{
-                overflow: "hidden",
-              }}
+              className={classes.editProfileContainer}
             >
               <form onSubmit={updateProfile}>
                 <InputField
@@ -448,13 +470,8 @@ const EditProject = ({ profile, ...props }) => {
                 container
                 direction="column"
                 alignItems="center"
-                style={{
-                  display: "flex",
-                  alignSelf: "center",
-                  width: "50%",
-                  margin: "2rem 0",
-                }}
                 component="form"
+                className={classes.formGrid}
                 noValidate
               >
                 <InputField

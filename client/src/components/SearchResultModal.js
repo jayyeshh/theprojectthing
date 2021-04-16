@@ -22,6 +22,10 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "2px",
     transition: "all .4s ease-in-out",
     zIndex: "99999999",
+    [theme.breakpoints.down('xs')]: {
+      width: '80%',
+      left: '10%'
+    }
   },
   searchResult: {
     padding: "1rem",

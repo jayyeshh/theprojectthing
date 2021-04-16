@@ -53,7 +53,7 @@ const HeaderMenus = (props) => {
           <Tooltip title="logout">
             <PowerSettingsNewOutlinedIcon
               className={classes.btnStyles}
-              onClick={() => props.logout()}
+              onClick={() => props.logoutUser()}
             />
           </Tooltip>
         </Grid>
@@ -68,13 +68,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    logout: () => {
-      dispatch(logoutAction());
-      window.location.href = "/";
-    },
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(HeaderMenus);
+export default connect(mapStateToProps, null)(HeaderMenus);

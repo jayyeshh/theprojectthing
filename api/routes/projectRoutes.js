@@ -1,11 +1,8 @@
 import express from "express";
 import { Developer, Project } from "../models";
-import {
-  isAuthedAsDeveloper,
-  isDev,
-  trimValues,
-} from "../utils/utilityFunctions";
+import { isCompany, isDev, trimValues } from "../utils/utilityFunctions";
 import authAsDev from "../middlewares/authAsDev";
+import authAsCompany from "../middlewares/authAsCompany";
 import sharp from "sharp";
 const fs = require("fs");
 import multer from "multer";
@@ -22,17 +19,17 @@ const storage = new multer.diskStorage({
   },
 });
 
-const upload = multer({
-  limits: {
-    fileSize: 1000000,
-  },
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png)$/gm)) {
-      return cb(new Error("Please upload file with proper extension only!"));
-    }
-    cb(undefined, true);
-  },
-});
+// const upload = multer({
+//   limits: {
+//     fileSize: 1000000,
+//   },
+//   fileFilter(req, file, cb) {
+//     if (!file.originalname.match(/\.(jpg|jpeg|png)$/gm)) {
+//       return cb(new Error("Please upload file with proper extension only!"));
+//     }
+//     cb(undefined, true);
+//   },
+// });
 
 const cloudinary = require("cloudinary").v2;
 cloudinary.config({
@@ -106,23 +103,26 @@ router.get("/:pid", async (req, res) => {
   const { pid } = req.params;
   let project;
   try {
-    project = await Project.findById(pid)
-      .populate([
-        {
-          path: "developer",
+    project = await Project.findById(pid).populate([
+      {
+        path: "developer",
+        select: "-tokens",
+        populate: {
+          path: "projects",
+        },
+      },
+      {
+        path: "comments",
+        populate: {
+          path: "by",
           select: "-tokens",
-          populate: {
-            path: "projects",
-          },
         },
-        {
-          path: "comments",
-          populate: {
-            path: "by",
-            select: "-tokens",
-          },
-        },
-      ])
+      },
+      {
+        path: "rewards",
+        select: "-tokens",
+      },
+    ]);
   } catch (error) {
     return res.status(500).send();
   }
@@ -142,6 +142,16 @@ router.get("/:pid", async (req, res) => {
     response.upvoted = upvoted;
     response.downvoted = downvoted;
   }
+
+  const authedAsCompany = await isCompany(req);
+  if (authedAsCompany) {
+    const rewarded = response.rewards.some(
+      (rewardingOrg) =>
+        rewardingOrg._id.toString() === req.company._id.toString()
+    );
+    response.rewarded = rewarded;
+  }
+
   response.developer.followers = project.developer.followers.length;
   response.developer.following = project.developer.following.length;
   response.upvotes = project.upvotes.length;
@@ -157,6 +167,27 @@ router.get("/:pid", async (req, res) => {
   } else {
     delete response.viewedBy;
     return res.send(response);
+  }
+});
+
+router.post("/reward", authAsCompany, async (req, res) => {
+  const { pid } = req.body;
+  try {
+    const project = await Project.findById(pid);
+    if (!project) return res.status(404).send({ error: "Invalid Project Id!" });
+    if (project.rewards.includes(req.company._id)) {
+      //remove reward
+      await project.update({ $pull: { rewards: req.company._id } });
+    } else {
+      //reward project
+      await project.updateOne({
+        $addToSet: { rewards: req.company._id },
+      });
+    }
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
   }
 });
 

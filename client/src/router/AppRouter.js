@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { connect } from "react-redux";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import FrontPage from "../components/FrontPage";
 import Authenticate from "../components/Authenticate";
 import NotFound from "../components/NotFound";
@@ -10,6 +10,7 @@ import DeveloperAuthenticationForm from "../components/DeveloperAuthenticationFo
 import PrivateRoute from "./PrivateRoute";
 import DeveloperOnlyRoute from "./DeveloperOnlyRoute";
 import CompanyOnlyRoute from "./CompanyOnlyRoute";
+import { Grid } from "@material-ui/core";
 import Header from "../components/Header";
 import AddProject from "../components/AddProject";
 import ProjectPage from "../components/ProjectPage";
@@ -19,8 +20,33 @@ import DevPage from "../components/DevPage";
 import GlobalModal from "../components/GlobalModal";
 import CompanyPage from "../components/CompanyPage";
 import PostPage from "../components/PostPage";
+import { setupAuthentication } from "../actions/authActions";
+import Spinner from "../components/Spinner";
 
 const AppRouter = (props) => {
+  const [loading, setLoading] = useState(true);
+  useEffect(async () => {
+    await setupAuthentication();
+    setLoading(false);
+  });
+
+  if (loading)
+    return (
+      <Grid
+        container
+        align="center"
+        alignItems="center"
+        alignContent="center"
+        justify="center"
+        style={{
+          width: "100vw",
+          height: "100vh",
+        }}
+      >
+        <Spinner />
+      </Grid>
+    );
+
   return (
     <Router>
       {props.showModal && <GlobalModal modalText={props.modalText} />}
@@ -41,7 +67,7 @@ const AppRouter = (props) => {
         <PrivateRoute path="/profile/edit" component={EditProfile} />
         <DeveloperOnlyRoute path="/projects/add" component={AddProject} exact />
         <Route path="/explore" component={Explore} exact />
-        <Route path="/projects/:id" component={ProjectPage} exact />
+        <Route path="/projects/:id" component={ProjectPage} />
         <Route path="/post/:id" component={PostPage} exact />
         <Route path="/dev/:id" component={DevPage} />
         <Route path="/company/:id" component={CompanyPage} exact />

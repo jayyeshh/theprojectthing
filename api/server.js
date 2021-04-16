@@ -199,16 +199,41 @@ app.get("/devs", async (req, res) => {
     }
     res.send(devs);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.sendStatus(500);
   }
 });
 
 app.get("/projects", async (req, res) => {
+  const { sortby } = req.query;
   try {
-    const projects = await Project.find({});
-    res.send(projects);
+    if (sortby === "mostVoted") {
+      const projects = await Project.aggregate([
+        {
+          $addFields: {
+            upvoteTotal: { $size: "$upvotes" },
+            // downvoteTotal: { $size: "$downvotes" },
+          },
+        },
+        {
+          $sort: {
+            upvoteTotal: -1,
+          },
+        },
+      ]);
+      res.send(projects);
+    } else {
+      const projects = await Project.aggregate([
+        {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+      ]);
+      res.send(projects);
+    }
   } catch (error) {
+    console.log(error);
     res.sendStatus(500);
   }
 });

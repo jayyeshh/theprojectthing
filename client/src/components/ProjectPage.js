@@ -7,6 +7,8 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
 import { setModalStateAction } from "../actions/modalActions";
 import Spinner from "./Spinner";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMedal } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import {
   Grid,
@@ -24,12 +26,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import SideProfile from "./SideProfile";
 import { connect } from "react-redux";
 import EditOutlinedIcon from "@material-ui/icons/EditOutlined";
+import ListModal from "./ListModal";
 import EditIcon from "@material-ui/icons/Edit";
 import {
   voteProject,
   getProjectById,
+  rewardProject,
 } from "../utility/utilityFunctions/ApiCalls";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { useConfirm } from "material-ui-confirm";
 
 const useStyles = makeStyles((theme) => ({
@@ -37,6 +41,14 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     top: "50%",
     left: "50%",
+  },
+  mainContainer: {
+    height: "100%",
+    overflow: "auto",
+    paddingLeft: "2rem",
+    [theme.breakpoints.down("xs")]: {
+      paddingLeft: ".8rem",
+    },
   },
   projectContainer: {
     margin: "2rem",
@@ -47,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
   },
   img: {
     height: "22rem",
-    padding: "2rem 0",
+    padding: "1rem 0",
   },
   blockHeading: {
     margin: "1rem",
@@ -58,6 +70,12 @@ const useStyles = makeStyles((theme) => ({
   },
   voted: {
     color: "red",
+  },
+  reward: {
+    marginRight: ".4rem",
+  },
+  rewarded: {
+    color: "blue",
   },
   expandTagStyles: {
     marginLeft: "1rem",
@@ -85,6 +103,23 @@ const useStyles = makeStyles((theme) => ({
       margin: 0,
     },
   },
+  rewardBtnStyles: {
+    fontSize: "1rem",
+    margin: 0,
+    padding: 0,
+    width: "2rem",
+    height: "2rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    margin: "0 .4rem",
+  },
+  presenterListBtnStyles: {
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
 }));
 
 const ProjectPage = (props) => {
@@ -99,7 +134,9 @@ const ProjectPage = (props) => {
   const [editingComment, setEditingComment] = useState("");
   const [editingCommentText, setEditingCommentText] = useState("");
   const [updatingComment, setUpdatingComment] = useState(false);
+  const [viewRewardModal, setViewRewardModal] = useState(false);
   const confirmation = useConfirm();
+  const history = useHistory();
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
@@ -110,7 +147,7 @@ const ProjectPage = (props) => {
 
   useEffect(() => {
     const config = {};
-    if (props.isAuthenticated && props.as.toLowerCase() === "developer") {
+    if (props.isAuthenticated) {
       config.headers = {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       };
@@ -122,11 +159,11 @@ const ProjectPage = (props) => {
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.message);
         setLoading(false);
+        props.setModalState(true, `Something went wrong! Check network.`);
         setTimeout(() => {
-          setError("");
-        }, 2000);
+          props.setModalState(false, "");
+        }, 3000);
       });
   }, [currLocation]);
   const classes = useStyles();
@@ -140,15 +177,61 @@ const ProjectPage = (props) => {
           setProject(updatedProject.data);
         })
         .catch((error) => {
-          setError("Something went wrong! cannot register vote for now!");
+          props.setModalState(true, `Something went wrong! Try again later.`);
           setTimeout(() => {
-            setError("");
-          }, 2000);
+            props.setModalState(false, "");
+          }, 3000);
         });
     }
   };
 
+  const reward = async () => {
+    //vote project
+    rewardProject({ pid: project._id })
+      .then(async (_resp) => {
+        //refresh data
+        const updatedProject = { ...project };
+        const alreadyRewarded = project.rewards.some(
+          (rewardingOrg) =>
+            rewardingOrg._id.toString() ===
+            props.authenticatedUser._id.toString()
+        );
+        if (alreadyRewarded) {
+          //remove reward
+          updatedProject.rewards = updatedProject.rewards.filter(
+            (reward) =>
+              reward._id.toString() !== props.authenticatedUser._id.toString()
+          );
+          updatedProject.rewarded = false;
+        } else {
+          //reward project
+
+          updatedProject.rewards = [
+            ...updatedProject.rewards,
+            props.authenticatedUser,
+          ];
+          updatedProject.rewarded = true;
+        }
+        // const updatedProject = await getProjectById(project._id);
+        setProject(updatedProject);
+      })
+      .catch((error) => {
+        console.log("e", error);
+        props.setModalState(true, `Something went wrong! Try again later.`);
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
+  };
+
   const postComment = () => {
+    if (!props.isAuthenticated) {
+      props.setModalState(true, "Login to continue");
+      setTimeout(() => {
+        props.setModalState(false, "");
+      }, 3000);
+      return history.push("/auth");
+    }
     setPostingComment(true);
     const configs = {
       headers: {
@@ -260,6 +343,10 @@ const ProjectPage = (props) => {
       });
   };
 
+  if (!loading && !project.title) {
+    return <h4>Something went wrong!</h4>;
+  }
+
   return (
     <Grid
       container
@@ -270,7 +357,6 @@ const ProjectPage = (props) => {
         width: "100%",
       }}
     >
-      {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading ? (
         <Container className={classes.containerStyles}>
           <Spinner />
@@ -279,15 +365,20 @@ const ProjectPage = (props) => {
         <Grid
           item
           direction="row"
-          style={{
-            height: "100%",
-            overflow: "auto",
-            paddingLeft: "2rem",
-          }}
           xs={12}
           spacing={2}
           container
+          className={classes.mainContainer}
         >
+          {viewRewardModal && (
+            <ListModal
+              linkto="company"
+              showModal={viewRewardModal}
+              title={"Rewarded By"}
+              list={project.rewards}
+              setShowModal={setViewRewardModal}
+            />
+          )}
           <Grid
             container
             item
@@ -352,7 +443,31 @@ const ProjectPage = (props) => {
               width="100%"
               className={classes.img}
             />
-            <Grid item xs={12}>
+            <Hidden smUp>
+              <Grid item xs={12} container direction="row">
+                <Typography component="h1" variant="h6">
+                  Developer:{" "}
+                </Typography>
+                <Typography
+                  component="h1"
+                  variant="h6"
+                  style={{
+                    marginLeft: ".3rem",
+                  }}
+                >
+                  <NavLink
+                    to={`/dev/${project.developer._id}`}
+                    style={{
+                      textDecoration: "none",
+                      color: "#212121",
+                    }}
+                  >
+                    {project.developer.name}
+                  </NavLink>
+                </Typography>
+              </Grid>
+            </Hidden>
+            <Grid item xs={12} container direction="row">
               <Button
                 disabled={
                   !(
@@ -389,6 +504,34 @@ const ProjectPage = (props) => {
                 />
                 <Typography>{project.downvotes}</Typography>
               </Button>
+              <Grid item xs={3} container direction="row" alignItems="center">
+                <IconButton
+                  disabled={
+                    !(
+                      props.isAuthenticated &&
+                      props.as.toLowerCase() === "company"
+                    )
+                  }
+                  className={classes.rewardBtnStyles}
+                  onClick={() => reward()}
+                >
+                  <FontAwesomeIcon
+                    icon={faMedal}
+                    className={
+                      project.rewarded
+                        ? `${classes.reward} ${classes.rewarded}`
+                        : classes.reward
+                    }
+                    size="lg"
+                  />
+                </IconButton>
+                <Typography
+                  onClick={() => setViewRewardModal(true)}
+                  className={classes.presenterListBtnStyles}
+                >
+                  {project.rewards && project.rewards.length}
+                </Typography>
+              </Grid>
             </Grid>
             <Divider style={{ marginBottom: ".7rem" }} />
             {!!project.about && (
@@ -551,7 +694,6 @@ const ProjectPage = (props) => {
                         xs={12}
                         container
                         direction="row"
-                        alignItems="center"
                         className={classes.commentStyle}
                       >
                         <Avatar

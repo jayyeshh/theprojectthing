@@ -32,6 +32,17 @@ export const voteProject = ({ pid, type }) => {
   );
 };
 
+export const rewardProject = ({ pid }) => {
+  setConfigs();
+  return axios.post(
+    "/project/reward",
+    {
+      pid,
+    },
+    configs
+  );
+};
+
 export const getDeveloperById = (id) => {
   setConfigs();
   return axios.get(`/developer/${id}`, null, configs);

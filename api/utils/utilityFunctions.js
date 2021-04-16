@@ -107,6 +107,27 @@ export const isDev = async (req) => {
   }
 };
 
+export const isCompany = async (req) => {
+  if (!req.header("Authorization")) return false;
+  try {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    const decode = await jwt.verify(token, process.env.JWT_SECRET);
+    const { _id, as } = decode;
+    if (as === "Developer") false;
+    const company = await Company.findOne({
+      _id,
+      "tokens.token": token,
+    });
+    if (!company) return false;
+    req.company = company;
+    req.as = as;
+    req.token = token;
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const isAuthedAsCompany = async (req, res) => {
   if (!req.header("Authorization")) return res.sendStatus(401);
   try {

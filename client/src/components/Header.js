@@ -26,6 +26,7 @@ import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
 import SearchResultModal from "./SearchResultModal";
 import MenuIcon from "@material-ui/icons/Menu";
 import { fade, makeStyles } from "@material-ui/core/styles";
+import { useConfirm } from "material-ui-confirm";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import { connect } from "react-redux";
@@ -165,6 +166,7 @@ const Header = (props) => {
   const [searchTimeout, setSearchTimeout] = useState(0);
   const [searchedItems, setSearchedItems] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const confirmation = useConfirm();
 
   const menusItems = {
     home: "/",
@@ -192,6 +194,17 @@ const Header = (props) => {
           });
       }, 100)
     );
+  };
+
+  const logoutUser = () => {
+    confirmation({
+      confirmationText: "Logout",
+      confirmationButtonProps: { color: "secondary" },
+    })
+      .then(() => {
+        props.logout();
+      })
+      .catch(() => {});
   };
 
   useEffect(() => {
@@ -240,7 +253,7 @@ const Header = (props) => {
                       <ListItemText primary="PROFILE" />
                     </ListItem>
                   </NavLink>
-                  <ListItem button key="logout" onClick={props.logout}>
+                  <ListItem button key="logout" onClick={() => logoutUser()}>
                     <ListItemIcon>{getIcon("LOGOUT")}</ListItemIcon>
                     <ListItemText primary="LOGOUT" />
                   </ListItem>
@@ -303,7 +316,11 @@ const Header = (props) => {
             </NavLink>
           )}
 
-          <Hidden xsDown>{props.auth.authenticated && <HeaderMenus />}</Hidden>
+          <Hidden xsDown>
+            {props.auth.authenticated && (
+              <HeaderMenus logoutUser={logoutUser} />
+            )}
+          </Hidden>
         </Grid>
       </Toolbar>
     </AppBar>

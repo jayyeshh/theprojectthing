@@ -90,7 +90,11 @@ const ListModal = (props) => {
                     className={classes.listItem}
                   >
                     <NavLink
-                      to={`/dev/${item._id}`}
+                      to={
+                        !!props.linkto
+                          ? `/${props.linkto}/${item._id}`
+                          : `/dev/${item._id}`
+                      }
                       style={{ textDecoration: "none", color: "black" }}
                     >
                       {item.username}

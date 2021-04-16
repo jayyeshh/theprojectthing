@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from "@material-ui/core";
+import { Grid, IconButton, Paper, Typography } from "@material-ui/core";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useEffect, useState } from "react";
@@ -7,6 +7,8 @@ import Spinner from "./Spinner";
 import DevCard from "./DevCard";
 import CompanyCard from "./CompanyCard";
 import ProjectCard from "./ProjectCard";
+import NewReleasesIcon from "@material-ui/icons/NewReleases";
+import WhatshotIcon from "@material-ui/icons/Whatshot";
 import { connect } from "react-redux";
 
 const useStyles = makeStyles((theme) => ({
@@ -42,14 +44,24 @@ const useStyles = makeStyles((theme) => ({
     },
     maxWidth: "18rem",
   },
+  sortingBar: {
+    width: "100%",
+  },
+  iconBtnText: {
+    marginLeft: ".3rem",
+  },
+  activeIconBtn: {
+    color: "blue",
+  },
 }));
 
 const Explore = (props) => {
   const classes = useStyles();
   const [type, setType] = useState("devs");
   const [list, setList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filteredBy, setFilteredBy] = useState("recentlyAdded");
   const configs = {};
   if (props.isAuthenticated) {
     configs.headers = {
@@ -58,16 +70,22 @@ const Explore = (props) => {
   }
   useEffect(() => {
     setLoading(true);
+    let url = `/${type}`;
+    if (type === "projects") {
+      const queryString = `/?sortby=${filteredBy}`;
+      url += queryString;
+    }
     axios
-      .get(`/${type}`, configs)
+      .get(url, configs)
       .then((resp) => {
         setList(resp.data);
         setLoading(false);
       })
       .catch((error) => {
+        setLoading(false);
         console.log("Something went wrong!", error);
       });
-  }, [type]);
+  }, [type, filteredBy]);
 
   const toggleBtnHandler = (event, newValue) => {
     if (newValue) {
@@ -100,7 +118,21 @@ const Explore = (props) => {
         xs={12}
         className={classes.mainContainer}
       >
-        {loading && <Spinner />}
+        {loading && (
+          <Grid
+            item
+            xs={12}
+            container
+            justify="center"
+            alignItems="center"
+            style={{
+              width: "100%",
+              height: "27rem",
+            }}
+          >
+            <Spinner />
+          </Grid>
+        )}
         {!loading && !!list.length && type === "devs" && (
           <Grid
             item
@@ -132,25 +164,59 @@ const Explore = (props) => {
           </Grid>
         )}
         {!loading && list.length && type === "projects" && (
-          <Grid
-            item
-            container
-            spacing={4}
-            direction="row"
-            justify="center"
-            xs={12}
-          >
-            {list.map((project) => (
-              <Grid
-                style={{ minWidth: "18rem" }}
-                key={project._id}
-                item
-                sm={6}
-                md={4}
+          <Grid item xs={12} container direction="column">
+            <Grid
+              item
+              xs={12}
+              container
+              direction="row"
+              alignItems="center"
+              justify="center"
+              className={classes.sortingBar}
+            >
+              <IconButton
+                className={
+                  filteredBy === "recentlyAdded" && `${classes.activeIconBtn}`
+                }
+                onClick={() => setFilteredBy("recentlyAdded")}
               >
-                <ProjectCard project={project} />
-              </Grid>
-            ))}
+                <NewReleasesIcon />
+                <Typography className={classes.iconBtnText}>
+                  recently added
+                </Typography>
+              </IconButton>
+              <IconButton
+                className={
+                  filteredBy === "mostVoted" && `${classes.activeIconBtn}`
+                }
+                onClick={() => setFilteredBy("mostVoted")}
+              >
+                <WhatshotIcon />
+                <Typography className={classes.iconBtnText}>
+                  Most voted
+                </Typography>
+              </IconButton>
+            </Grid>
+            <Grid
+              item
+              container
+              spacing={4}
+              direction="row"
+              justify="center"
+              xs={12}
+            >
+              {list.map((project) => (
+                <Grid
+                  style={{ minWidth: "18rem" }}
+                  key={project._id}
+                  item
+                  sm={6}
+                  md={4}
+                >
+                  <ProjectCard project={project} />
+                </Grid>
+              ))}
+            </Grid>
           </Grid>
         )}
         {!loading && !!list.length && type === "companies" && (

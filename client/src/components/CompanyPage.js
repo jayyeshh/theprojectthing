@@ -15,6 +15,7 @@ import Spinner from "./Spinner";
 import CompanyPost from "./CompanyPost";
 import moment from "moment";
 import { NavLink } from "react-router-dom";
+import { setModalStateAction } from "../actions/modalActions";
 import { connect } from "react-redux";
 import AddReviewPopupModal from "./AddReviewPopupModal";
 import ListModal from "./ListModal";
@@ -145,6 +146,7 @@ const CompanyPage = (props) => {
         addReviewPopup={addReviewPopup}
         setAddReviewPopup={setAddReviewPopup}
         updateReviews={updateReviews}
+        setModalState={props.setModalState}
       />
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading && (
@@ -321,4 +323,11 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(CompanyPage);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setModalState: (modalState, text) =>
+      dispatch(setModalStateAction({ showModal: modalState, text })),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(CompanyPage);

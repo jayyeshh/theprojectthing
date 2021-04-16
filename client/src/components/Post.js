@@ -38,6 +38,9 @@ const useStyles = makeStyles((theme) => ({
   },
   usernameStyles: {
     fontSize: "1.2rem",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: "1rem",
+    },
   },
   postHeaderIdentity: {
     display: "flex",
@@ -90,7 +93,7 @@ const Post = ({ post, ...props }) => {
         alignContent="center"
         justify="space-between"
       >
-        <div className={classes.postHeaderIdentity}>
+        <Grid className={classes.postHeaderIdentity}>
           <Avatar aria-label={post.developer.username}>
             {post.developer.username.charAt(0).toUpperCase()}
           </Avatar>
@@ -101,10 +104,12 @@ const Post = ({ post, ...props }) => {
             className={classes.linkStyles}
           >
             <Typography className={classes.usernameStyles}>
-              {post.developer.username}
+              {post.developer.username.length < 10
+                ? post.developer.username
+                : post.developer.username.substr(0, 7) + "..."}
             </Typography>
           </NavLink>
-        </div>
+        </Grid>
         <div>
           <Button
             onClick={() => window.open(post.links.github, "_blank")}

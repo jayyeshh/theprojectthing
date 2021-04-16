@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "#eee",
     transition: "all .4s ease-in-out",
     outlineWidth: ".4px",
-    outlineColor: 'black',
+    outlineColor: "black",
     border: "none",
     "&::focus": {
       backgroundColor: "#fff",
@@ -86,7 +86,7 @@ const PostBlock = (props) => {
 
   return (
     <Grid container item xs={12} className={classes.postBlockContainer}>
-      <Grid item container xs={12}>
+      <Grid item xs={12} container>
         <TextareaAutosize
           rowsMin={4}
           rowsMax={4}
