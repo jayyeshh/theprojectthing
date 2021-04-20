@@ -24,6 +24,7 @@ import { NavLink } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
+    minWidth: 260,
   },
   media: {
     height: 140,
@@ -41,10 +42,10 @@ const useStyles = makeStyles((theme) => ({
   },
   linkStyles: {
     textDecoration: "none",
-    color: '#535c68',
-    '&:hover': {
-      color: 'black'
-    }
+    color: "#535c68",
+    "&:hover": {
+      color: "black",
+    },
   },
 }));
 

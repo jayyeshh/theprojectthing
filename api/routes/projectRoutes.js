@@ -252,6 +252,7 @@ router.patch("/:pid", authAsDev, async (req, res) => {
   const upload = multer({ storage }).single("photo");
   await upload(req, res, async function (err) {
     if (err) return res.send(err);
+    console.log("data: ", req.body);
     let { title, about, github, site, photo } = req.body;
     if (!title)
       return res
@@ -259,6 +260,7 @@ router.patch("/:pid", authAsDev, async (req, res) => {
         .send({ error: "title is required for a project!" });
 
     const project = await Project.findById(pid);
+    photo = project.photo;
     if (!project)
       return res.status(404).send({
         error: "Invalid Project Id",
@@ -298,11 +300,14 @@ router.patch("/:pid", authAsDev, async (req, res) => {
       const updates = {
         title: !!title ? title : project.title,
         about: !!about ? about : project.about,
+        photo,
         links,
       };
-      if (!!photo) {
-        updates.photo = photo;
-      }
+      // console.log("The photo circus: ", photo, project.photo);
+      // console.log(photo, !!photo);
+      // if (photo) {
+      //   updates.photo = photo;
+      // }
       await project.updateOne({ ...updates });
       res.sendStatus(200);
     } catch (error) {

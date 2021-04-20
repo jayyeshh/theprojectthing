@@ -144,7 +144,7 @@ const DevPage = (props) => {
         }
 
         //check if authed user is already following this developer or not
-        if (props.authedAs.toLowerCase() === "developer") {
+        if (props.authedAs && props.authedAs.toLowerCase() === "developer") {
           if (
             resp.data.followers.some(
               (follower) =>
@@ -241,9 +241,20 @@ const DevPage = (props) => {
       )}
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading && (
-        <Container className={classes.containerStyles}>
+        <Grid
+          item
+          xs={12}
+          container
+          justify="center"
+          alignItems="center"
+          style={{
+            position: "absolute",
+            width: "100vw",
+            height: "80vh",
+          }}
+        >
           <Spinner />
-        </Container>
+        </Grid>
       )}
       {!!Object.keys(developer).length && (
         <Grid container item xs={12} className={classes.mainContainer}>
@@ -278,7 +289,8 @@ const DevPage = (props) => {
                 <b style={{ marginRight: ".3rem" }}> Email:</b>
                 {developer.email}
               </Typography>
-              {props.authedAs.toLowerCase() === "developer" &&
+              {props.authedAs &&
+                props.authedAs.toLowerCase() === "developer" &&
                 developer._id !== props.authedUserId && (
                   <>
                     {alreadyFollowing && (
@@ -444,7 +456,8 @@ const DevPage = (props) => {
                     {developer.email}
                   </Typography>
                 </Grid>
-                {props.authedAs.toLowerCase() === "developer" &&
+                {props.authedAs &&
+                  props.authedAs.toLowerCase() === "developer" &&
                   developer._id !== props.authedUserId && (
                     <>
                       {alreadyFollowing && (

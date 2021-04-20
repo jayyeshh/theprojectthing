@@ -4,8 +4,6 @@ import {
   Toolbar,
   Typography,
   Button,
-  Paper,
-  Avatar,
   Drawer,
   List,
   ListItem,
@@ -159,8 +157,9 @@ const getIcon = (text) => {
 
 const Header = (props) => {
   const classes = useStyles();
-  const [currPath, setCurrPath] = useState("");
   const location = useLocation();
+  const [currPath, setCurrPath] = useState("");
+  const [searching, setSearching] = useState(false);
   const [searchBarFocused, setSearchBarFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(0);
@@ -175,6 +174,7 @@ const Header = (props) => {
   };
 
   const searchHandler = (e) => {
+    setSearching(true);
     const searchQuery = e.target.value;
     setSearchQuery(searchQuery);
     if (!!!searchQuery) {
@@ -186,9 +186,11 @@ const Header = (props) => {
         axios
           .get(`/search/?query=${searchQuery}`)
           .then((resp) => {
+            setSearching(false);
             setSearchedItems(resp.data);
           })
           .catch((error) => {
+            setSearching(false);
             setSearchedItems([]);
             console.log("error: ", error);
           });
@@ -303,10 +305,12 @@ const Header = (props) => {
           </div>
         </Grid>
         <div className={classes.grow} />
-        {!!searchedItems.length && (
+        {searchBarFocused && (
           <SearchResultModal
             isFocused={searchBarFocused}
             searchedItems={searchedItems}
+            searching={searching}
+            searchQuery={searchQuery}
           />
         )}
         <Grid item container xs={5} justify="flex-end">

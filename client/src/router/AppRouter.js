@@ -25,10 +25,13 @@ import Spinner from "../components/Spinner";
 
 const AppRouter = (props) => {
   const [loading, setLoading] = useState(true);
-  useEffect(async () => {
-    await setupAuthentication();
-    setLoading(false);
-  });
+  useEffect(() => {
+    async function setup() {
+      await setupAuthentication();
+      setLoading(false);
+    }
+    setup();
+  }, []);
 
   if (loading)
     return (
@@ -67,16 +70,17 @@ const AppRouter = (props) => {
         <PrivateRoute path="/profile/edit" component={EditProfile} />
         <DeveloperOnlyRoute path="/projects/add" component={AddProject} exact />
         <Route path="/explore" component={Explore} exact />
-        <Route path="/projects/:id" component={ProjectPage} />
-        <Route path="/post/:id" component={PostPage} exact />
-        <Route path="/dev/:id" component={DevPage} />
-        <Route path="/company/:id" component={CompanyPage} exact />
-        <PrivateRoute path="/dashboard" component={Dashboard} exact />
         <DeveloperOnlyRoute
           path="/projects/edit/:pid"
           component={AddProject}
           exact
         />
+        <Route path="/projects/:id" component={ProjectPage} />
+        <Route path="/post/:id" component={PostPage} exact />
+        <Route path="/dev/:id" component={DevPage} />
+        <Route path="/company/:id" component={CompanyPage} exact />
+        <PrivateRoute path="/dashboard" component={Dashboard} exact />
+
         <Route component={NotFound} />
       </Switch>
     </Router>

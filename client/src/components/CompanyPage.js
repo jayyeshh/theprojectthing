@@ -4,6 +4,8 @@ import {
   Divider,
   Grid,
   Hidden,
+  IconButton,
+  Tooltip,
   Typography,
 } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
@@ -14,6 +16,8 @@ import { Container } from "@material-ui/core";
 import Spinner from "./Spinner";
 import CompanyPost from "./CompanyPost";
 import moment from "moment";
+import LinkedInIcon from "@material-ui/icons/LinkedIn";
+import HttpIcon from "@material-ui/icons/Http";
 import { NavLink } from "react-router-dom";
 import { setModalStateAction } from "../actions/modalActions";
 import { connect } from "react-redux";
@@ -29,6 +33,9 @@ const useStyles = makeStyles((theme) => ({
       top: "40%",
       left: "35%",
     },
+  },
+  mainContainer: {
+    maxWidth: "99.9%",
   },
   root: {
     maxWidth: 345,
@@ -60,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
       position: "relative",
       minWidth: "100%",
       backgroundColor: "#e1e1e1",
-      height: "12rem",
+      height: "18rem",
       margin: 0,
       padding: 0,
       justifyContent: "center",
@@ -69,6 +76,9 @@ const useStyles = makeStyles((theme) => ({
   },
   profileSubContainer: {
     position: "fixed",
+    width: "15rem",
+    alignItems: "center",
+    padding: "1rem",
     display: "flex",
     flexDirection: "column",
     [theme.breakpoints.down("xs")]: {
@@ -150,15 +160,39 @@ const CompanyPage = (props) => {
       />
       {error && <h4 style={{ color: "red" }}>{error}</h4>}
       {loading && (
-        <Container className={classes.containerStyles}>
+        <Grid
+          item
+          xs={12}
+          container
+          justify="center"
+          alignItems="center"
+          style={{
+            position: "absolute",
+            width: "100vw",
+            height: "80vh",
+          }}
+        >
           <Spinner />
-        </Container>
+        </Grid>
       )}
       {!!Object.keys(company).length && (
-        <Grid container item xs={12}>
+        <Grid
+          item
+          xs={12}
+          container
+          direction="column"
+          className={classes.mainContainer}
+        >
           <Grid item xs={12} md={4} className={classes.profile}>
             <div className={classes.profileSubContainer}>
-              <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+              <Avatar
+                style={{
+                  fontSize: "1.4rem",
+                  margin: ".3rem",
+                  border: "2px solid blue",
+                  padding: ".4rem",
+                }}
+              >
                 {company.name.charAt(0)}
               </Avatar>
               <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
@@ -173,8 +207,42 @@ const CompanyPage = (props) => {
                 <Typography>Email:</Typography>
                 <Typography> {company.email}</Typography>
               </div>
+              <Grid
+                container
+                direction="row"
+                style={{
+                  alignSelf: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <IconButton
+                  disabled={!company.websites.linkedIn}
+                  aria-label="linkedIn"
+                  size="medium"
+                  href={company.websites.linkedIn}
+                  target="_blank"
+                >
+                  <Tooltip title="linkedIn">
+                    <LinkedInIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+                <IconButton
+                  disabled={!company.websites.website}
+                  aria-label="website"
+                  size="medium"
+                  href={company.websites.website}
+                  target="_blank"
+                >
+                  <Tooltip title="website">
+                    <HttpIcon style={{ fontSize: "1.7rem" }} />
+                  </Tooltip>
+                </IconButton>
+              </Grid>
             </div>
           </Grid>
+          <Hidden xsDown>
+            <Divider orientation="vertical" />
+          </Hidden>
           <Grid
             container
             item
@@ -235,17 +303,18 @@ const CompanyPage = (props) => {
               )}
               {type === "reviews" && (
                 <>
-                  {props.authedAs.toLowerCase() === "developer" && (
-                    <Grid key="add_review">
-                      <Button
-                        color="primary"
-                        variant="outlined"
-                        onClick={() => setAddReviewPopup(true)}
-                      >
-                        Add Review
-                      </Button>
-                    </Grid>
-                  )}
+                  {props.authedAs &&
+                    props.authedAs.toLowerCase() === "developer" && (
+                      <Grid key="add_review">
+                        <Button
+                          color="primary"
+                          variant="outlined"
+                          onClick={() => setAddReviewPopup(true)}
+                        >
+                          Add Review
+                        </Button>
+                      </Grid>
+                    )}
                   <Grid>
                     {!!company.reviews.length ? (
                       company.reviews.map((review, index) => {

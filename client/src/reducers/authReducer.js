@@ -76,7 +76,7 @@ const authReducer = (state = initialState, action) => {
         linkedIn = "",
         github = "",
         portfolio = "";
-      if (profile.website) {
+      if (profile.websites) {
         ({ website, linkedIn, github, portfolio } = profile.websites);
       }
       const { _id, followers, following, email, name, username } = profile;

@@ -6,28 +6,47 @@ import { connect } from "react-redux";
 import axios from "../utility/axios/apiInstance";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   listviewerBtn: {
     fontSize: ".978rem",
     "&:hover": {
       cursor: "pointer",
-      color: '#616151'
+      color: "#616151",
     },
   },
-});
+  mainPostContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignSelf: "center",
+    alignItems: "flex-start",
+    width: "50%",
+    background: "#eee",
+    margin: ".4rem",
+    borderRadius: "2px",
+    flex: 1,
+    [theme.breakpoints.down("xs")]: {
+      width: "75%",
+    },
+  },
+}));
 
 const CompanyPost = ({ post, ...props }) => {
   const classes = useStyles();
   const [authedDevInteresed, setAuthedDevInterested] = useState(false);
   useEffect(() => {
-    const checkState = post.interested.some((item) => {
-      if (typeof item === "string") {
-        return item.toString() === props.uid.toString();
-      } else if (typeof item === "object" && item !== null) {
-        return item._id.toString() === props.uid.toString();
-      }
-    });
-    setAuthedDevInterested(checkState);
+    let checkState = false;
+    if (props.authedAs) {
+      checkState = post.interested.some((item) => {
+        if (typeof item === "string") {
+          return item.toString() === props.uid.toString();
+        } else if (typeof item === "object" && item !== null) {
+          return item._id.toString() === props.uid.toString();
+        }
+      });
+      setAuthedDevInterested(checkState);
+    } else {
+      setAuthedDevInterested(checkState);
+    }
   }, [post, post.interested.length]);
   const markInterested = () => {
     const configs = {
@@ -46,19 +65,7 @@ const CompanyPost = ({ post, ...props }) => {
   };
 
   return (
-    <Grid
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignSelf: "center",
-        alignItems: "flex-start",
-        width: "50%",
-        background: "#eee",
-        margin: ".4rem",
-        borderRadius: "2px",
-        flex: 1,
-      }}
-    >
+    <Grid className={classes.mainPostContainer}>
       <div style={{ textAlign: "left", padding: "1rem" }}>{post.text}</div>
       <Paper
         style={{
@@ -74,7 +81,9 @@ const CompanyPost = ({ post, ...props }) => {
         }}
       >
         <IconButton
-          disabled={props.authedAs.toLowerCase() !== "developer"}
+          disabled={
+            !props.authedAs || props.authedAs.toLowerCase() !== "developer"
+          }
           color={authedDevInteresed ? "secondary" : "primary"}
           aria-label="interested"
           onClick={() => markInterested()}

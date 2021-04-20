@@ -95,7 +95,7 @@ const Explore = (props) => {
   };
 
   return (
-    <Paper className={classes.paperStyles}>
+    <Paper elevation={0} className={classes.paperStyles}>
       {error && alert(error)}
       <Paper elevation={4} className={classes.headingStyles}>
         <Typography className={classes.pageHeading}>Explore</Typography>
@@ -197,14 +197,7 @@ const Explore = (props) => {
                 </Typography>
               </IconButton>
             </Grid>
-            <Grid
-              item
-              container
-              spacing={4}
-              direction="row"
-              justify="center"
-              xs={12}
-            >
+            <Grid item xs={12} container direction="row" justify="center">
               {list.map((project) => (
                 <Grid
                   style={{ minWidth: "18rem" }}
@@ -222,12 +215,12 @@ const Explore = (props) => {
         {!loading && !!list.length && type === "companies" && (
           <Grid
             item
+            xs={12}
             container
             spacing={4}
             direction="row"
             justify="center"
-            xs={12}
-          >
+         >
             {list.map((company, index) => (
               <Grid
                 style={{ minWidth: "18rem" }}

@@ -25,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     margin: ".3rem 0",
     padding: ".3rem",
-    transition: "all 0.09s ease-in-out",
     overflowX: "hidden",
     "&:hover": {
       fontSize: "1.1rem",

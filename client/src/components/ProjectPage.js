@@ -58,9 +58,9 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   img: {
-    height: "22rem",
+    maxHeight: "22rem",
     padding: "1rem 0",
-  },
+ },
   blockHeading: {
     margin: "1rem",
     textDecoration: "underline",
@@ -216,7 +216,6 @@ const ProjectPage = (props) => {
         setProject(updatedProject);
       })
       .catch((error) => {
-        console.log("e", error);
         props.setModalState(true, `Something went wrong! Try again later.`);
         setTimeout(() => {
           props.setModalState(false, "");
@@ -358,9 +357,20 @@ const ProjectPage = (props) => {
       }}
     >
       {loading ? (
-        <Container className={classes.containerStyles}>
+        <Grid
+          item
+          xs={12}
+          container
+          justify="center"
+          alignItems="center"
+          style={{
+            position: "absolute",
+            width: "100vw",
+            height: "80vh",
+          }}
+        >
           <Spinner />
-        </Container>
+        </Grid>
       ) : (
         <Grid
           item

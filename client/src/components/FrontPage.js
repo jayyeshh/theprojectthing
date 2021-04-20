@@ -38,6 +38,15 @@ const useStyles = makeStyles((theme) => ({
       margin: 0,
     },
   },
+  container: {
+    minWidth: "100%",
+    transition: "all .7s ease-in-out",
+    minHeight: "90vh",
+    paddingTop: "6rem",
+    [theme.breakpoints.down("xs")]: {
+      minHeight: "92.3vh",
+    },
+  },
 }));
 
 const FrontPage = (props) => {
@@ -66,39 +75,11 @@ const FrontPage = (props) => {
     <Grid
       container
       direction="column"
+      className={classes.container}
       style={{
-        minWidth: "100%",
-        minHeight: "90vh",
         backgroundColor: bgColor,
-        transition: "all .8s ease-in-out",
-        paddingTop: "6rem",
-        boxShadow: "4px 4px 4px",
       }}
     >
-      <Hidden xsDown>
-        <Grid item xs={12} container justify="space-evenly">
-          <Card
-            variant="outline"
-            style={{
-              padding: "1rem",
-            }}
-          >
-            <Typography>
-              Companies on platform: {stats.totalCompanies}
-            </Typography>
-          </Card>
-          <Card
-            variant="outline"
-            style={{
-              padding: "1rem",
-            }}
-          >
-            <Typography>
-              Developers on platform: {stats.totalDevelopers}
-            </Typography>
-          </Card>
-        </Grid>
-      </Hidden>
       <Grid
         item
         container
@@ -118,6 +99,9 @@ const FrontPage = (props) => {
         align="center"
         justify="center"
         alignContent="center"
+        style={{
+          padding: '.8rem'
+        }}
       >
         <Typography>
           Explore the Community of Developers, Web Designers, Coders,

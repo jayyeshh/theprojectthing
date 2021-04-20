@@ -19,7 +19,6 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: theme.shadows[5],
     outline: "none",
     borderRadius: "3px",
-    padding: theme.spacing(2, 4, 3),
     transition: "all .6s ease-in-out",
     padding: "1rem 2rem",
     [theme.breakpoints.down("xs")]: {

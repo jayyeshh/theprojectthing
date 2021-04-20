@@ -114,10 +114,7 @@ const initials = {
   about: "",
   github: "",
   site: "",
-  links: {
-    github: "",
-    site: "",
-  },
+  photo: ""
 };
 
 const errorInitials = {
@@ -146,7 +143,9 @@ const AddProject = (props) => {
       const { pid } = props.computedMatch.params;
       getProjectById(pid)
         .then((resp) => {
-          setFieldValues({ ...initials, ...resp.data });
+          const { title, about, photo } = resp.data;
+          const { github, site } = resp.data.links;
+          setFieldValues({ ...initials, title, about, github, photo, site });
           setLoading(false);
           setInitialLoad(false);
         })
@@ -331,7 +330,7 @@ const AddProject = (props) => {
               autoComplete="github"
               name="github"
               type="url"
-              value={fieldValues.links.github}
+              value={fieldValues.github}
               style={{
                 marginBottom: ".8rem",
               }}
@@ -344,9 +343,9 @@ const AddProject = (props) => {
             />
             <TextField
               autoComplete="site"
-              name="url"
-              type="site"
-              value={fieldValues.links.site}
+              name="site"
+              type="url"
+              value={fieldValues.site}
               error={!!errors.site}
               variant="outlined"
               onChange={onChangeHandler}
