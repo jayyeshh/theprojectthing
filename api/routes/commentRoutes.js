@@ -14,7 +14,7 @@ router.get("/:id", async (req, res) => {
     if (!comment) return res.status(404).send({ error: "Comment not found!" });
     res.send(comment);
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -43,8 +43,7 @@ router.post("/", auth, async (req, res) => {
     await comment.populate(["by", "project"]).execPopulate();
     res.send({ comment });
   } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -59,13 +58,12 @@ router.patch("/:id", auth, async (req, res) => {
     const comment = await Comment.findById(id);
     if (!comment) return res.status(404).send({ error: "Comment not found!" });
     await comment.updateOne({ text });
-    const updatedComment = await Comment.findById(id).populate([
-      "by",
-      "project",
-    ]).select('-by.tokens');
+    const updatedComment = await Comment.findById(id)
+      .populate(["by", "project"])
+      .select("-by.tokens");
     res.send({ comment: updatedComment });
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -81,7 +79,7 @@ router.delete("/:id", auth, async (req, res) => {
     await project.updateOne({ $pull: { comments: comment._id } });
     res.sendStatus(200);
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 

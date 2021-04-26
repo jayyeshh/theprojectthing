@@ -11,27 +11,27 @@ const router = new express.Router();
 
 //Authentication routes:
 router.post("/register", async (req, res) => {
-  req.body = trimValues(req.body);
-  let { username, name, email, password } = req.body;
-  if (!username || !email || !password || !name) {
-    return res.status(400).send({
-      error: "Required fields must be filled for registration!",
-    });
-  }
-  const usernameExpr = new RegExp(
-    /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-    "i"
-  );
-  if (!usernameExpr.test(username))
-    return res.status(400).send({ error: "Invalid Username String!" });
-
-  const developer = new Developer({
-    username,
-    email,
-    password,
-    name,
-  });
   try {
+    req.body = trimValues(req.body);
+    let { username, name, email, password } = req.body;
+    if (!username || !email || !password || !name) {
+      return res.status(400).send({
+        error: "Required fields must be filled for registration!",
+      });
+    }
+    const usernameExpr = new RegExp(
+      /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+      "i"
+    );
+    if (!usernameExpr.test(username))
+      return res.status(400).send({ error: "Invalid Username String!" });
+
+    const developer = new Developer({
+      username,
+      email,
+      password,
+      name,
+    });
     await developer.save();
     res.status(201).send();
   } catch (error) {
@@ -40,14 +40,14 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
-  const { identifier, password } = req.body;
-  if (!identifier || !password) {
-    return res.status(400).send({
-      error: "Identifier and password are needed for login!",
-    });
-  }
-  let developer;
   try {
+    const { identifier, password } = req.body;
+    if (!identifier || !password) {
+      return res.status(400).send({
+        error: "Identifier and password are needed for login!",
+      });
+    }
+    let developer;
     if (validator.isEmail(identifier)) {
       developer = await Developer.findByCredentials({
         email: identifier,
@@ -89,23 +89,23 @@ router.post("/login", async (req, res) => {
 });
 
 router.post("/logout", auth, async (req, res) => {
-  const { token, user } = req;
   try {
+    const { token, user } = req;
     const tokens = user.tokens.filter((_token) => _token.token !== token);
     await user.updateOne({ $set: { tokens } });
     res.send();
   } catch (err) {
-    res.status(500).send();
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
 router.post("/logoutall", auth, async (req, res) => {
-  const { user } = req;
   try {
+    const { user } = req;
     await user.updateOne({ $set: { tokens: [] } });
     res.send();
   } catch (err) {
-    res.status(500).send();
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -137,7 +137,6 @@ router.get("/:id", async (req, res) => {
     }
     res.send(developer);
   } catch (error) {
-    console.log(error);
     if (error.name === "CastError") {
       return res.status(400).send({
         error: "Invalid Id!",
@@ -150,17 +149,17 @@ router.get("/:id", async (req, res) => {
 });
 
 router.patch("/", auth, async (req, res) => {
-  req.body = trimValues(req.body);
-  let {
-    username = req.user.username,
-    name = req.user.name,
-    email = req.user.email,
-    github = req.user.websites.github,
-    website = req.user.websites.website,
-    portfolio = req.user.websites.portfolio,
-    linkedIn = req.user.websites.linkedIn,
-  } = req.body;
   try {
+    req.body = trimValues(req.body);
+    let {
+      username = req.user.username,
+      name = req.user.name,
+      email = req.user.email,
+      github = req.user.websites.github,
+      website = req.user.websites.website,
+      portfolio = req.user.websites.portfolio,
+      linkedIn = req.user.websites.linkedIn,
+    } = req.body;
     const websites = {
       github,
       website,

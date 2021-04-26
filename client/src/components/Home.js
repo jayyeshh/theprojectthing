@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "auto",
     paddingLeft: "2rem",
     [theme.breakpoints.down("xs")]: {
+      paddingLeft: 0,
       margin: 0,
     },
   },
@@ -84,7 +85,7 @@ const Home = (props) => {
           <Spinner />
         </Grid>
       ) : (
-        <Grid className={classes.homeContainer}>
+        <Grid className={classes.homeContainer} style={{ marginLeft: "1rem" }}>
           {props.authedAs.toLowerCase() === "company" && <PostBlock />}
           {props.authedAs.toLowerCase() === "developer" && posts.length === 0 && (
             <Grid

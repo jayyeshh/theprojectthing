@@ -9,7 +9,6 @@ import CompanyAuthenticationForm from "../components/CompanyAuthenticationForm";
 import DeveloperAuthenticationForm from "../components/DeveloperAuthenticationForm";
 import PrivateRoute from "./PrivateRoute";
 import DeveloperOnlyRoute from "./DeveloperOnlyRoute";
-import CompanyOnlyRoute from "./CompanyOnlyRoute";
 import { Grid } from "@material-ui/core";
 import Header from "../components/Header";
 import AddProject from "../components/AddProject";

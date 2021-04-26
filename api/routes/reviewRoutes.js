@@ -3,7 +3,6 @@ const router = new express.Router();
 import authAsDev from "../middlewares/authAsDev";
 import { Review, Company } from "../models";
 import mongoose from "mongoose";
-import { trimValues } from "../utils/utilityFunctions";
 
 //get review by id
 router.get("/:id", async (req, res) => {
@@ -15,7 +14,7 @@ router.get("/:id", async (req, res) => {
     if (!review) return res.status(404).send({ error: "Review not found!" });
     res.send(review);
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -42,8 +41,7 @@ router.post("/", authAsDev, async (req, res) => {
     await review.populate(["by", "company"]).execPopulate();
     res.send({ review });
   } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -62,7 +60,7 @@ router.patch("/:id", authAsDev, async (req, res) => {
     const updatedReview = await Review.findById(id).populate(["by", "company"]);
     res.send({ review: updatedReview });
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -78,7 +76,7 @@ router.delete("/:id", authAsDev, async (req, res) => {
     await company.updateOne({ $pull: { reviews: review._id } });
     res.sendStatus(200);
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 

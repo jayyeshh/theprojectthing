@@ -18,6 +18,12 @@ const useStyles = makeStyles((theme) => ({
     margin: "2rem 0",
     position: "fixed",
     right: "2%",
+    [theme.breakpoints.down("md")]: {
+      right: "4%",
+    },
+    [theme.breakpoints.down("sm")]: {
+      right: "10%",
+    },
   },
   homePageContainer: {
     overflowY: "auto",
@@ -37,7 +43,14 @@ const Dashboard = (props) => {
   const classes = useStyles();
   return (
     <Grid container className={classes.dashboardContainer}>
-      <Grid item sm={9} xs={12} className={classes.homePageContainer}>
+      <Grid
+        item
+        sm={9}
+        xs={12}
+        container
+        align="center"
+        className={classes.homePageContainer}
+      >
         <Home setModalState={props.setModalState} authedAs={props.authedAs} />
       </Grid>
       <Hidden xsDown>

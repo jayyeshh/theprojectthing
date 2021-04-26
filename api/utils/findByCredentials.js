@@ -1,4 +1,5 @@
 import { CompanyModel, DeveloperModel } from "../models";
+import bcrypt from "bcryptjs";
 
 export const findByCredentials = async (username, password, as) => {
   let user;

@@ -12,25 +12,29 @@ const router = new express.Router();
 //Authentication routes:
 //company registration(sign up)
 router.post("/register", async (req, res) => {
-  req.body = trimValues(req.body);
-  let { username, name, email, password } = req.body;
-  if (!username || !email || !password || !name) {
-    return res.status(400).send({
-      error: "Required fields must be filled for registration!",
+  try {
+    req.body = trimValues(req.body);
+    let { username, name, email, password } = req.body;
+    if (!username || !email || !password || !name) {
+      return res.status(400).send({
+        error: "Required fields must be filled for registration!",
+      });
+    }
+    const usernameExpr = new RegExp(
+      /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
+      "i"
+    );
+    if (!usernameExpr.test(username))
+      return res.status(400).send({ error: "Invalid Username String!" });
+    const company = new Company({
+      username,
+      email,
+      password,
+      name,
     });
+  } catch (error) {
+    res.status(500).send({ error: "Internal Server Error" });
   }
-  const usernameExpr = new RegExp(
-    /^(?=.{1,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$/,
-    "i"
-  );
-  if (!usernameExpr.test(username))
-    return res.status(400).send({ error: "Invalid Username String!" });
-  const company = new Company({
-    username,
-    email,
-    password,
-    name,
-  });
   try {
     await company.save();
     res.status(201).send();

@@ -15,17 +15,13 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   mainPostContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignSelf: "center",
-    alignItems: "flex-start",
-    width: "50%",
+    minWidth: "60%",
+    maxWidth: "60%",
     background: "#eee",
     margin: ".4rem",
     borderRadius: "2px",
-    flex: 1,
     [theme.breakpoints.down("xs")]: {
-      width: "75%",
+      minWidth: "75%",
     },
   },
 }));
@@ -65,7 +61,14 @@ const CompanyPost = ({ post, ...props }) => {
   };
 
   return (
-    <Grid className={classes.mainPostContainer}>
+    <Grid
+      item
+      xs={12}
+      container
+      justify="center"
+      alignItems="center"
+      className={classes.mainPostContainer}
+    >
       <div style={{ textAlign: "left", padding: "1rem" }}>{post.text}</div>
       <Paper
         style={{

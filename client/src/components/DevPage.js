@@ -157,6 +157,16 @@ const DevPage = (props) => {
       })
       .catch((error) => {
         setLoading(false);
+        if (error.response && error.response.data) {
+          props.setModalState(
+            true,
+            `Something went wrong! ${error.response.data.error}`
+          );
+        }
+        props.setModalState(true, `Something went wrong!`);
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
       });
   }, [currLocation]);
 
@@ -371,10 +381,10 @@ const DevPage = (props) => {
                 }}
               >
                 <IconButton
-                  disabled={!developer.websites.github}
+                  disabled={!developer.websites || !developer.websites.github}
                   aria-label="github"
                   size="small"
-                  href={developer.websites.github}
+                  href={developer.websites ? developer.websites.github: ""}
                   target="_blank"
                 >
                   <Tooltip title="github">
@@ -382,10 +392,10 @@ const DevPage = (props) => {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={!developer.websites.linkedIn}
+                  disabled={!developer.websites || !developer.websites.linkedIn}
                   aria-label="linkedIn"
                   size="medium"
-                  href={developer.websites.linkedIn}
+                  href={developer.websites ? developer.websites.linkedIn : ""}
                   target="_blank"
                 >
                   <Tooltip title="linkedIn">
@@ -393,10 +403,10 @@ const DevPage = (props) => {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={!developer.websites.website}
+                  disabled={!developer.websites || !developer.websites.website}
                   aria-label="website"
                   size="medium"
-                  href={developer.websites.website}
+                  href={developer.websites ? developer.websites.website : ""}
                   target="_blank"
                 >
                   <Tooltip title="website">
@@ -404,10 +414,12 @@ const DevPage = (props) => {
                   </Tooltip>
                 </IconButton>
                 <IconButton
-                  disabled={!developer.websites.portfolio}
+                  disabled={
+                    !developer.websites || !developer.websites.portfolio
+                  }
                   aria-label="portfolio"
                   size="medium"
-                  href={developer.websites.portfolio}
+                  href={developer.websites ? developer.websites.portfolio : ""}
                   target="_blank"
                 >
                   <Tooltip title="portfolio">

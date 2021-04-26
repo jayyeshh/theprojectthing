@@ -7,21 +7,21 @@ import { Post } from "../models";
 const router = new express.Router();
 
 router.get("/:id", async (req, res) => {
-  const { id: postId } = req.params;
   try {
+    const { id: postId } = req.params;
     const post = await Post.findById(postId).populate(["interested", "author"]);
     res.send(post);
   } catch (error) {
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
 router.post("/", authAsCompany, async (req, res) => {
-  let { text } = req.body;
-  if (text) text = text.trim();
-  if (!text || !text.length)
-    return res.status(400).send({ error: "Empty post not allowed!" });
   try {
+    let { text } = req.body;
+    if (text) text = text.trim();
+    if (!text || !text.length)
+      return res.status(400).send({ error: "Empty post not allowed!" });
     const post = new Post({
       text,
       author: req.company._id,
@@ -34,20 +34,18 @@ router.post("/", authAsCompany, async (req, res) => {
     ]);
     res.send(response);
   } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
-  res.send();
 });
 
 router.post("/interested", authAsDev, async (req, res) => {
-  let { postId } = req.body;
-  if (!mongoose.Types.ObjectId.isValid(postId)) {
-    return res.status(400).send({ error: "Invalid Post Id" });
-  }
-  const post = await Post.findById(postId);
-  if (!post) return res.status(404).send({ error: "Cannot find post!" });
   try {
+    let { postId } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).send({ error: "Invalid Post Id" });
+    }
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).send({ error: "Cannot find post!" });
     if (post.interested.includes(req.developer._id)) {
       await post.updateOne({ $pull: { interested: req.developer._id } });
     } else {
@@ -59,8 +57,7 @@ router.post("/interested", authAsDev, async (req, res) => {
     ]);
     res.send({ post: updatedPost });
   } catch (error) {
-    console.log(error);
-    return res.sendStatus(500);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 

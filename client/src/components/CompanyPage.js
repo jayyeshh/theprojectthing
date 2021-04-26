@@ -34,9 +34,6 @@ const useStyles = makeStyles((theme) => ({
       left: "35%",
     },
   },
-  mainContainer: {
-    maxWidth: "99.9%",
-  },
   root: {
     maxWidth: 345,
   },
@@ -57,12 +54,9 @@ const useStyles = makeStyles((theme) => ({
   profile: {
     display: "flex",
     flexDirection: "column",
-    width: "100%",
-    minHeigth: "100%",
     background: "white",
     padding: "4rem",
     overflow: "hidden",
-    position: "sticky",
     [theme.breakpoints.down("xs")]: {
       position: "relative",
       minWidth: "100%",
@@ -143,14 +137,23 @@ const CompanyPage = (props) => {
   };
 
   return (
-    <Grid container>
+    <Grid
+      item
+      xs={12}
+      container
+      style={{
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        flexWrap: "none",
+      }}
+    >
       <ListModal
         showModal={showInterestedDevs}
         title={"Interested Developers"}
         list={list}
         setShowModal={setShowInterestedDevs}
       />
-
       <AddReviewPopupModal
         companyId={props.match.params.id}
         addReviewPopup={addReviewPopup}
@@ -181,105 +184,209 @@ const CompanyPage = (props) => {
           xs={12}
           container
           direction="column"
-          className={classes.mainContainer}
+          style={{
+            minHeight: "90vh",
+          }}
         >
-          <Grid item xs={12} md={4} className={classes.profile}>
-            <div className={classes.profileSubContainer}>
-              <Avatar
-                style={{
-                  fontSize: "1.4rem",
-                  margin: ".3rem",
-                  border: "2px solid blue",
-                  padding: ".4rem",
-                }}
-              >
-                {company.name.charAt(0)}
-              </Avatar>
-              <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
-                @{company.username}
-              </Typography>
-              <Typography>{company.name}</Typography>
+          <Grid
+            item
+            xs={12}
+            sm={4}
+            container
+            alignItems="center"
+            justify="center"
+            className={classes.profile}
+          >
+            <Hidden xsDown>
               <div
                 style={{
-                  margin: ".7rem 0",
+                  position: "fixed",
+                  top: "4rem",
+                  left: 0,
+                  minHeight: "100vh",
+                  maxHeight: "100vh",
+                  width: "35%",
+                  paddingTop: "3rem",
                 }}
               >
-                <Typography>Email:</Typography>
-                <Typography> {company.email}</Typography>
+                <Grid
+                  item
+                  xs={12}
+                  container
+                  direction="column"
+                  justify="center"
+                  alignItems="center"
+                >
+                  <Avatar
+                    style={{
+                      fontSize: "1.4rem",
+                      margin: ".3rem",
+                      border: "2px solid blue",
+                      padding: ".4rem",
+                    }}
+                  >
+                    {company.name.charAt(0)}
+                  </Avatar>
+                  <Typography
+                    color="textSecondary"
+                    style={{ margin: ".1rem 0" }}
+                  >
+                    @{company.username}
+                  </Typography>
+                  <Typography>{company.name}</Typography>
+                  <div
+                    style={{
+                      margin: ".7rem 0",
+                      alignSelf: "center",
+                    }}
+                  >
+                    <Typography>Email:</Typography>
+                    <Typography> {company.email}</Typography>
+                  </div>
+                  <Grid
+                    container
+                    direction="row"
+                    style={{
+                      alignSelf: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <IconButton
+                      disabled={!company.websites || !company.websites.linkedIn}
+                      aria-label="linkedIn"
+                      size="medium"
+                      href={company.websites ? company.websites.linkedIn : ""}
+                      target="_blank"
+                    >
+                      <Tooltip title="linkedIn">
+                        <LinkedInIcon style={{ fontSize: "1.7rem" }} />
+                      </Tooltip>
+                    </IconButton>
+                    <IconButton
+                      disabled={!company.websites || !company.websites.website}
+                      aria-label="website"
+                      size="medium"
+                      href={company.websites ? company.websites.website : ""}
+                      target="_blank"
+                    >
+                      <Tooltip title="website">
+                        <HttpIcon style={{ fontSize: "1.7rem" }} />
+                      </Tooltip>
+                    </IconButton>
+                  </Grid>
+                </Grid>
               </div>
-              <Grid
-                container
-                direction="row"
-                style={{
-                  alignSelf: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <IconButton
-                  disabled={!company.websites.linkedIn}
-                  aria-label="linkedIn"
-                  size="medium"
-                  href={company.websites.linkedIn}
-                  target="_blank"
+            </Hidden>
+            <Hidden smUp>
+              <Grid className={classes.profileSubContainer}>
+                <Avatar
+                  style={{
+                    fontSize: "1.4rem",
+                    margin: ".3rem",
+                    border: "2px solid blue",
+                    padding: ".4rem",
+                  }}
                 >
-                  <Tooltip title="linkedIn">
-                    <LinkedInIcon style={{ fontSize: "1.7rem" }} />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
-                  disabled={!company.websites.website}
-                  aria-label="website"
-                  size="medium"
-                  href={company.websites.website}
-                  target="_blank"
+                  {company.name.charAt(0)}
+                </Avatar>
+                <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
+                  @{company.username}
+                </Typography>
+                <Typography>{company.name}</Typography>
+                <div
+                  style={{
+                    margin: ".7rem 0",
+                  }}
                 >
-                  <Tooltip title="website">
-                    <HttpIcon style={{ fontSize: "1.7rem" }} />
-                  </Tooltip>
-                </IconButton>
+                  <Typography>Email:</Typography>
+                  <Typography> {company.email}</Typography>
+                </div>
+                <Grid
+                  container
+                  direction="row"
+                  style={{
+                    alignSelf: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconButton
+                    disabled={!company.websites || !company.websites.linkedIn}
+                    aria-label="linkedIn"
+                    size="medium"
+                    href={company.websites ? company.websites.linkedIn : ""}
+                    target="_blank"
+                  >
+                    <Tooltip title="linkedIn">
+                      <LinkedInIcon style={{ fontSize: "1.7rem" }} />
+                    </Tooltip>
+                  </IconButton>
+                  <IconButton
+                    disabled={!company.websites || !company.websites.website}
+                    aria-label="website"
+                    size="medium"
+                    href={company.websites ? company.websites.website : ""}
+                    target="_blank"
+                  >
+                    <Tooltip title="website">
+                      <HttpIcon style={{ fontSize: "1.7rem" }} />
+                    </Tooltip>
+                  </IconButton>
+                </Grid>
               </Grid>
-            </div>
+            </Hidden>
           </Grid>
           <Hidden xsDown>
             <Divider orientation="vertical" />
           </Hidden>
           <Grid
-            container
             item
-            align="center"
-            direction="column"
-            md={8}
+            sm={7}
             xs={12}
+            container
+            direction="row"
+            align="center"
             style={{
               padding: "2rem 0",
             }}
           >
-            <ToggleButtonGroup
-              exclusive
-              value={type}
-              onChange={toggleBtnHandler}
+            <Grid
+              item
+              xs={12}
+              container
+              justify="center"
               style={{
-                alignSelf: "center",
+                maxHeight: "4rem",
+                minWidth: "100%",
               }}
             >
-              <ToggleButton value="posts">
-                <Typography>Posts</Typography>
-              </ToggleButton>
-              <ToggleButton value="reviews">
-                <Typography>Reviews</Typography>
-              </ToggleButton>
-            </ToggleButtonGroup>
+              <ToggleButtonGroup
+                exclusive
+                value={type}
+                onChange={toggleBtnHandler}
+                style={{
+                  alignSelf: "center",
+                }}
+              >
+                <ToggleButton value="posts">
+                  <Typography>Posts</Typography>
+                </ToggleButton>
+                <ToggleButton value="reviews">
+                  <Typography>Reviews</Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
             <Grid
-              container
               item
-              direction="column"
               xs={12}
+              container
+              direction="row"
+              justify="center"
               style={{
                 margin: "1rem 0",
               }}
             >
               {type === "posts" && (
-                <>
+                <Grid container justify="center">
                   {!!company.posts.length ? (
                     company.posts.map((post, index) => {
                       return (
@@ -295,17 +402,37 @@ const CompanyPage = (props) => {
                       );
                     })
                   ) : (
-                    <Typography style={{ fontWeight: 400, fontSize: "1.4rem" }}>
-                      No Posts Yet
-                    </Typography>
+                    <Grid
+                      container
+                      justify="center"
+                      alignItems="center"
+                      style={{
+                        width: "60%",
+                        backgroundColor: "#eee",
+                        padding: ".6rem",
+                        margin: "1rem",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Typography
+                        style={{ fontWeight: 400, fontSize: "1.4rem" }}
+                      >
+                        No post available
+                      </Typography>
+                    </Grid>
                   )}
-                </>
+                </Grid>
               )}
               {type === "reviews" && (
                 <>
                   {props.authedAs &&
                     props.authedAs.toLowerCase() === "developer" && (
-                      <Grid key="add_review">
+                      <Grid
+                        key="add_review"
+                        style={{
+                          minWidth: "100%",
+                        }}
+                      >
                         <Button
                           color="primary"
                           variant="outlined"
@@ -315,66 +442,77 @@ const CompanyPage = (props) => {
                         </Button>
                       </Grid>
                     )}
-                  <Grid>
-                    {!!company.reviews.length ? (
-                      company.reviews.map((review, index) => {
-                        return (
-                          <Grid
-                            container
-                            key={review._id}
-                            style={{
-                              width: "60%",
-                              backgroundColor: "#eee",
-                              padding: ".6rem",
-                              margin: "1rem",
-                              borderRadius: "8px",
-                            }}
-                          >
-                            <Grid container direction="column">
-                              <Grid
-                                container
-                                align="space-between"
-                                justify="space-between"
-                                alignContent="space-between"
-                                style={{
-                                  margin: ".5rem 0",
-                                }}
+                  {!!company.reviews.length ? (
+                    company.reviews.map((review, index) => {
+                      return (
+                        <Grid
+                          container
+                          key={review._id}
+                          style={{
+                            width: "60%",
+                            backgroundColor: "#eee",
+                            padding: ".6rem",
+                            margin: "1rem",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          <Grid container direction="column">
+                            <Grid
+                              container
+                              align="space-between"
+                              justify="space-between"
+                              alignContent="space-between"
+                              style={{
+                                margin: ".5rem 0",
+                              }}
+                            >
+                              <NavLink
+                                to={`/dev/${review.by._id}`}
+                                style={{ textDecoration: "none" }}
                               >
-                                <NavLink
-                                  to={`/dev/${review.by._id}`}
-                                  style={{ textDecoration: "none" }}
-                                >
-                                  @{review.by.username}
-                                </NavLink>
-                                <div style={{ color: "grey" }}>
-                                  {"reviewed on "}
-                                  {new moment(review.createdAt).format(
-                                    "ddd,DD MMM"
-                                  )}
-                                </div>
-                              </Grid>
-                              <Divider />
-                              <Grid
-                                container
-                                style={{
-                                  textAlign: "left",
-                                  padding: ".6rem 0",
-                                }}
-                              >
-                                {review.text}
-                              </Grid>
+                                @{review.by.username}
+                              </NavLink>
+                              <div style={{ color: "grey" }}>
+                                {"reviewed on "}
+                                {new moment(review.createdAt).format(
+                                  "ddd,DD MMM"
+                                )}
+                              </div>
+                            </Grid>
+                            <Divider />
+                            <Grid
+                              container
+                              style={{
+                                textAlign: "left",
+                                padding: ".6rem 0",
+                              }}
+                            >
+                              {review.text}
                             </Grid>
                           </Grid>
-                        );
-                      })
-                    ) : (
+                        </Grid>
+                      );
+                    })
+                  ) : (
+                    <Grid
+                      container
+                      justify="center"
+                      alignItems="center"
+                      style={{
+                        width: "60%",
+                        backgroundColor: "#eee",
+                        padding: ".6rem",
+                        margin: "1rem",
+                        borderRadius: "8px",
+                      }}
+                    >
                       <Typography
                         style={{ fontWeight: 400, fontSize: "1.4rem" }}
                       >
-                        No Reviews
+                        No Reviews Yet
                       </Typography>
-                    )}
-                  </Grid>
+                    </Grid>
+                  )}
                 </>
               )}
             </Grid>

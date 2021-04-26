@@ -60,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
   img: {
     maxHeight: "22rem",
     padding: "1rem 0",
- },
+  },
   blockHeading: {
     margin: "1rem",
     textDecoration: "underline",
@@ -343,7 +343,34 @@ const ProjectPage = (props) => {
   };
 
   if (!loading && !project.title) {
-    return <h4>Something went wrong!</h4>;
+    return (
+      <Grid
+        item
+        xs={12}
+        container
+        direction="column"
+        justify="center"
+        alignItems="center"
+      >
+        <Typography
+          style={{
+            marginTop: "8rem",
+            color: "#7e7e7e",
+          }}
+          variant="h5"
+        >
+          Something went wrong!
+        </Typography>
+        <Typography
+          style={{
+            marginTop: ".8rem",
+            color: "#aeaeae",
+          }}
+          variant="h5"
+        ></Typography>
+        Try again after some time
+      </Grid>
+    );
   }
 
   return (
@@ -595,6 +622,11 @@ const ProjectPage = (props) => {
                   id="standard-basic"
                   value={commentText}
                   onFocus={() => setFocused(true)}
+                  onClick={() => {
+                    if (!props.isAuthenticated) {
+                      history.push("/auth");
+                    }
+                  }}
                   placeholder="add a comment..."
                   style={{
                     margin: "1rem 0",
