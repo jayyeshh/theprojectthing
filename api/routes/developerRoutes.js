@@ -40,6 +40,7 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res) => {
+  let developer;
   try {
     const { identifier, password } = req.body;
     if (!identifier || !password) {
@@ -47,7 +48,6 @@ router.post("/login", async (req, res) => {
         error: "Identifier and password are needed for login!",
       });
     }
-    let developer;
     if (validator.isEmail(identifier)) {
       developer = await Developer.findByCredentials({
         email: identifier,

@@ -18,13 +18,22 @@ const authReducer = (state = initialState, action) => {
         following,
         website = "",
         github = "",
+        technologies = [],
         portfolio = "",
-        linkedIn = "";
+        linkedIn = "",
+        about = "";
       const { token } = action.payload;
       localStorage.setItem("authToken", token);
       if (action.payload.company) {
         newState.as = "Company";
-        ({ _id, email, username, name } = action.payload.company);
+        ({
+          _id,
+          email,
+          username,
+          technologies,
+          about,
+          name,
+        } = action.payload.company);
         if (action.payload.company.websites) {
           ({ website, linkedIn } = action.payload.company.websites);
         }
@@ -62,6 +71,10 @@ const authReducer = (state = initialState, action) => {
         user.github = github;
         user.portfolio = portfolio;
       }
+      if (newState.as === "Company") {
+        user.about = about;
+        user.technologies = technologies;
+      }
       newState.user = user;
       newState.authenticated = true;
       return newState;
@@ -79,7 +92,16 @@ const authReducer = (state = initialState, action) => {
       if (profile.websites) {
         ({ website, linkedIn, github, portfolio } = profile.websites);
       }
-      const { _id, followers, following, email, name, username } = profile;
+      const {
+        _id,
+        followers,
+        following,
+        about,
+        technologies = [],
+        email,
+        name,
+        username,
+      } = profile;
       return {
         authenticated: true,
         as,
@@ -88,6 +110,8 @@ const authReducer = (state = initialState, action) => {
           username,
           name,
           email,
+          about,
+          technologies,
           followers,
           following,
           website,

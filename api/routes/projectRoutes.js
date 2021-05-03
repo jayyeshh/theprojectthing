@@ -1,5 +1,5 @@
 import express from "express";
-import { Project } from "../models";
+import { Developer, Project } from "../models";
 import { isCompany, isDev } from "../utils/utilityFunctions";
 import authAsDev from "../middlewares/authAsDev";
 import authAsCompany from "../middlewares/authAsCompany";
@@ -31,6 +31,11 @@ router.post("/", authAsDev, async (req, res) => {
     const upload = multer({ storage }).single("photo");
     await upload(req, res, async function (err) {
       const { title, about, github, site } = req.body;
+      let { tags = "[]" } = req.body;
+      tags = JSON.parse(tags)
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length);
+
       if (!title)
         return res
           .status(400)
@@ -55,6 +60,7 @@ router.post("/", authAsDev, async (req, res) => {
           github,
           site,
         },
+        tags,
         developer: req.developer._id,
       });
       if (req.file) {
@@ -239,17 +245,44 @@ router.delete("/:pid", authAsDev, async (req, res) => {
   }
 });
 
+router.post("/delete", authAsDev, async (req, res) => {
+  try {
+    let { ids = [] } = req.body;
+    ids = ids.map((id) => mongoose.Types.ObjectId(id));
+    await Project.deleteMany({
+      _id: {
+        $in: ids,
+      },
+      developer: req.developer._id,
+    });
+    await req.developer.updateOne({
+      $pull: {
+        projects: {
+          $in: ids,
+        },
+      },
+    });
+    res.send();
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error!" });
+  }
+});
+
 router.patch("/:pid", authAsDev, async (req, res) => {
   try {
     const { pid } = req.params;
     const upload = multer({ storage }).single("photo");
     await upload(req, res, async function (err) {
       if (err) return res.send(err);
-      let { title, about, github, site, photo } = req.body;
+      let { title, about, github, site, photo, tags = "[]" } = req.body;
       if (!title)
         return res
           .status(400)
           .send({ error: "title is required for a project!" });
+      tags = JSON.parse(tags)
+        .map((tag) => tag.trim())
+        .filter((tag) => tag.length);
 
       const project = await Project.findById(pid);
       photo = project.photo;
@@ -294,6 +327,7 @@ router.patch("/:pid", authAsDev, async (req, res) => {
           about: !!about ? about : project.about,
           photo,
           links,
+          tags,
         };
         await project.updateOne({ ...updates });
         res.sendStatus(200);

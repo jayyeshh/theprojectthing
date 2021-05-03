@@ -23,6 +23,10 @@ const companySchema = new Schema(
       required: true,
     },
     logo: Buffer,
+    about: {
+      type: String,
+      maxLength: 150,
+    },
     email: {
       type: String,
       trim: true,
@@ -33,6 +37,10 @@ const companySchema = new Schema(
         if (!validator.isEmail(value))
           throw new Error("Invalid Email Address!");
       },
+    },
+    technologies: {
+      type: Array,
+      default: [],
     },
     password: {
       type: String,

@@ -9,10 +9,11 @@ import { setModalStateAction } from "../actions/modalActions";
 import Spinner from "./Spinner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMedal } from "@fortawesome/free-solid-svg-icons";
+import _ from "lodash";
 import moment from "moment";
 import {
   Grid,
-  Container,
+  Chip,
   Typography,
   TextField,
   Button,
@@ -23,7 +24,7 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import SideProfile from "./SideProfile";
+// import SideProfile from "./SideProfile";
 import { connect } from "react-redux";
 import EditOutlinedIcon from "@material-ui/icons/EditOutlined";
 import ListModal from "./ListModal";
@@ -32,11 +33,16 @@ import {
   voteProject,
   getProjectById,
   rewardProject,
+  getProjects,
 } from "../utility/utilityFunctions/ApiCalls";
 import { NavLink, useHistory } from "react-router-dom";
 import { useConfirm } from "material-ui-confirm";
+import SideSuggestionBlock from "./SideSuggestionBlock";
 
 const useStyles = makeStyles((theme) => ({
+  masterContainer: {
+    backgroundColor: "#DAE0E6",
+  },
   containerStyles: {
     position: "absolute",
     top: "50%",
@@ -47,14 +53,15 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     paddingLeft: "2rem",
     [theme.breakpoints.down("xs")]: {
-      paddingLeft: ".8rem",
+      padding: ".2rem",
     },
   },
   projectContainer: {
-    margin: "2rem",
+    margin: "1rem",
+    flexWrap: "nowrap",
     [theme.breakpoints.down("xs")]: {
       margin: "0",
-      marginTop: "2rem",
+      marginTop: "1rem",
     },
   },
   img: {
@@ -77,6 +84,12 @@ const useStyles = makeStyles((theme) => ({
   rewarded: {
     color: "blue",
   },
+  link: {
+    textDecoration: "none",
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
   expandTagStyles: {
     marginLeft: "1rem",
     transition: "all .1s ease-in-out",
@@ -84,12 +97,30 @@ const useStyles = makeStyles((theme) => ({
       color: "grey",
       cursor: "pointer",
     },
+    [theme.breakpoints.down("xs")]: {
+      margin: 0,
+    },
+  },
+  sideProjectBlock: {
+    minHeight: "7rem",
+    minWidth: "22rem",
+    margin: ".4rem 0",
+    padding: ".2rem",
+    paddingLeft: ".6rem",
+    boxShadow: "1px 1px 10px gray",
+    transition: "all ease-in-out .1s",
+    "&:hover": {
+      cursor: "pointer",
+      boxShadow: "1px 4px 14px gray",
+      transform: "scale(1.02)",
+    },
   },
   avatar: {
     fontSize: "1rem",
   },
   commentStyle: {
     margin: ".6rem 0",
+    overflow: "wrap",
   },
   buttonProgress: {
     padding: "0rem 1.5rem",
@@ -99,9 +130,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     fontSize: ".9rem",
     marginLeft: ".3rem",
-    [theme.breakpoints.down("xs")]: {
-      margin: 0,
-    },
+    [theme.breakpoints.down("xs")]: {},
   },
   rewardBtnStyles: {
     fontSize: "1rem",
@@ -120,6 +149,19 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer",
     },
   },
+  tagGrid: {
+    margin: ".4rem 0",
+  },
+  chip: {
+    marginRight: ".2rem",
+    marginTop: ".2rem",
+    padding: ".8rem .4rem",
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: "#ccc",
+      color: "black",
+    },
+  },
 }));
 
 const ProjectPage = (props) => {
@@ -135,6 +177,8 @@ const ProjectPage = (props) => {
   const [editingCommentText, setEditingCommentText] = useState("");
   const [updatingComment, setUpdatingComment] = useState(false);
   const [viewRewardModal, setViewRewardModal] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const confirmation = useConfirm();
   const history = useHistory();
   if (props.history.location.pathname !== currLocation) {
@@ -152,8 +196,7 @@ const ProjectPage = (props) => {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       };
     }
-    axios
-      .get(`/project/${props.match.params.id}`, config)
+    getProjectById(props.match.params.id)
       .then((resp) => {
         setProject(resp.data);
         setLoading(false);
@@ -164,6 +207,17 @@ const ProjectPage = (props) => {
         setTimeout(() => {
           props.setModalState(false, "");
         }, 3000);
+      });
+
+    getProjects()
+      .then((resp) => {
+        const randomSuggestions = _.shuffle(resp.data, 5);
+        setSuggestions(randomSuggestions.slice(0, 15));
+        setSuggestionsLoading(false);
+      })
+      .catch((error) => {
+        setSuggestionsLoading(false);
+        console.log("Something went wrong!", error);
       });
   }, [currLocation]);
   const classes = useStyles();
@@ -351,6 +405,7 @@ const ProjectPage = (props) => {
         direction="column"
         justify="center"
         alignItems="center"
+        className={classes.masterContainer}
       >
         <Typography
           style={{
@@ -374,15 +429,7 @@ const ProjectPage = (props) => {
   }
 
   return (
-    <Grid
-      container
-      item
-      xs={12}
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
-    >
+    <Grid item xs={12} container>
       {loading ? (
         <Grid
           item
@@ -401,10 +448,9 @@ const ProjectPage = (props) => {
       ) : (
         <Grid
           item
-          direction="row"
           xs={12}
-          spacing={2}
           container
+          direction="row"
           className={classes.mainContainer}
         >
           {viewRewardModal && (
@@ -417,20 +463,14 @@ const ProjectPage = (props) => {
             />
           )}
           <Grid
-            container
             item
             xs={12}
-            sm={8}
+            md={8}
+            container
             direction="column"
             className={classes.projectContainer}
           >
-            <Grid
-              container
-              item
-              xs={12}
-              direction="row"
-              justify="space-between"
-            >
+            <Grid container direction="row" justify="space-between">
               <Typography component="h1" variant="h4">
                 {project.title}
               </Typography>
@@ -475,36 +515,56 @@ const ProjectPage = (props) => {
                   )}
               </div>
             </Grid>
-            <img
-              src={!!project.photo ? project.photo : defaultImage}
-              width="100%"
-              className={classes.img}
-            />
-            <Hidden smUp>
-              <Grid item xs={12} container direction="row">
-                <Typography component="h1" variant="h6">
-                  Developer:{" "}
-                </Typography>
-                <Typography
-                  component="h1"
-                  variant="h6"
+
+            <Grid
+              container
+              direction="row"
+              justify="flex-start"
+              className={classes.tagGrid}
+            >
+              {project.tags.map((tag) => (
+                <NavLink
+                  to={`/search/?q=${tag}&type=tag`}
+                  className={classes.link}
+                >
+                  <Chip size="small" label={tag} className={classes.chip} />
+                </NavLink>
+              ))}
+            </Grid>
+
+            <Grid
+              container
+              style={{
+                minWidth: "100%",
+                maxHeight: "30rem",
+              }}
+            >
+              {project.photo ? (
+                <img
+                  src={!!project.photo ? project.photo : defaultImage}
+                  className={classes.img}
+                />
+              ) : (
+                <Grid
+                  container
+                  justify="center"
+                  alignItems="center"
                   style={{
-                    marginLeft: ".3rem",
+                    minWidth: "100%",
+                    minHeight: "15rem",
                   }}
                 >
-                  <NavLink
-                    to={`/dev/${project.developer._id}`}
+                  <Typography
                     style={{
-                      textDecoration: "none",
-                      color: "#212121",
+                      color: "#777",
                     }}
                   >
-                    {project.developer.name}
-                  </NavLink>
-                </Typography>
-              </Grid>
-            </Hidden>
-            <Grid item xs={12} container direction="row">
+                    No Image Available
+                  </Typography>
+                </Grid>
+              )}
+            </Grid>
+            <Grid container direction="row">
               <Button
                 disabled={
                   !(
@@ -571,11 +631,26 @@ const ProjectPage = (props) => {
               </Grid>
             </Grid>
             <Divider style={{ marginBottom: ".7rem" }} />
-            {!!project.about && (
-              <Grid>
-                <Typography component="h1" variant="h6" display="inline">
-                  Description:
-                </Typography>
+            <Grid container direction="row">
+              <Grid item xs={1} justify="center" style={{ maxWidth: "3rem" }}>
+                <Avatar />
+              </Grid>
+
+              <Grid
+                item
+                xs={10}
+                style={{
+                  marginLeft: ".4rem",
+                }}
+              >
+                <NavLink
+                  to={`/dev/${project.developer._id}`}
+                  className={classes.link}
+                >
+                  <Typography style={{ fontWeight: 600, color: "#000" }}>
+                    {project.developer.name}
+                  </Typography>
+                </NavLink>
                 <Typography
                   paragraph
                   style={{ transition: "all 1s ease-in-out" }}
@@ -607,11 +682,13 @@ const ProjectPage = (props) => {
                     </Grid>
                   )}
                 </Typography>
-                <Divider style={{ marginBottom: ".7rem" }} />
               </Grid>
-            )}
+              <Divider style={{ marginBottom: ".7rem" }} />
+            </Grid>
             <Grid container direction="column">
-              <Grid>
+              <Grid style={{
+                marginTop: '1rem'
+              }}>
                 <Typography style={{ fontWeight: 800 }}>
                   {project.comments.length}{" "}
                   {project.comments.length === 1 ? "Comment" : "Comments"}
@@ -736,22 +813,33 @@ const ProjectPage = (props) => {
                         xs={12}
                         container
                         direction="row"
+                        alignItems="flex-start"
                         className={classes.commentStyle}
                       >
-                        <Avatar
-                          aria-label={comment.by.username}
-                          className={classes.avatar}
-                        >
-                          {comment.by.username.charAt(0).toUpperCase()}
-                        </Avatar>
                         <Grid
                           item
-                          sm={8}
-                          xs={9}
+                          xs={1}
+                          style={{
+                            maxWidth: "2.5rem",
+                            paddingTop: ".8rem",
+                          }}
+                        >
+                          <Avatar
+                            aria-label={comment.by.username}
+                            className={classes.avatar}
+                          >
+                            {comment.by.username.charAt(0).toUpperCase()}
+                          </Avatar>
+                        </Grid>
+                        <Grid
+                          item
+                          xs={10}
                           container
                           direction="column"
                           style={{
                             marginLeft: "1rem",
+                            wordWrap: "break-word",
+                            flexWrap: "wrap",
                           }}
                         >
                           <Grid
@@ -801,7 +889,14 @@ const ProjectPage = (props) => {
                               </IconButton>
                             )}
                           </Grid>
-                          <Typography>{comment.text}</Typography>
+                          <Typography
+                            style={{
+                              maxWidth: "100%",
+                              wordWrap: "break-word",
+                            }}
+                          >
+                            {comment.text}
+                          </Typography>
                         </Grid>
                       </Grid>
                     );
@@ -810,33 +905,40 @@ const ProjectPage = (props) => {
               </Grid>
             </Grid>
           </Grid>
-          <Hidden xsDown>
+          <Hidden mdDown>
             <Grid
               item
               xs={3}
+              container
+              direction="column"
+              alignItems="center"
               style={{
-                height: "100%",
-                width: "100%",
-                position: "fixed",
-                right: "1rem",
-                marginRight: "1rem",
-                padding: "2rem",
+                padding: "2rem 1rem",
+                flexWrap: "nowrap",
               }}
             >
               <Typography
-                align="center"
-                component="h1"
-                variant="h5"
-                className={classes.blockHeading}
+                variant="h6"
+                style={{ fontWeight: 600, minWidth: "100%" }}
               >
-                Developer
+                Similar Projects
               </Typography>
-              {project.developer && (
-                <SideProfile
-                  as="developer"
-                  user={project.developer}
-                  projects={project.developer.projects}
-                />
+              {!suggestions.length ? (
+                <Grid
+                  item
+                  xs={12}
+                  container
+                  justify="center"
+                  style={{ marginTop: "4rem" }}
+                >
+                  <Spinner />
+                </Grid>
+              ) : (
+                <Grid container>
+                  {suggestions.map((project) => (
+                    <SideSuggestionBlock project={project} />
+                  ))}
+                </Grid>
               )}
             </Grid>
           </Hidden>

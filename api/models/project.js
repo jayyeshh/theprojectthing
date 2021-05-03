@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { CommentModel, DeveloperModel } from ".";
+import { CommentModel } from ".";
 const Schema = mongoose.Schema;
 
 const projectSchema = new Schema(
@@ -53,6 +53,10 @@ const projectSchema = new Schema(
         type: String,
         trim: true,
       },
+    },
+    tags: {
+      type: Array,
+      default: [],
     },
     viewedBy: [
       {

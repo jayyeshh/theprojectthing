@@ -1,29 +1,18 @@
 import React from "react";
 import { Grid, Hidden } from "@material-ui/core";
 import { connect } from "react-redux";
-import Profile from "./Profile";
+// import Profile from "./Profile";
 import { makeStyles } from "@material-ui/core/styles";
 import { setModalStateAction } from "../actions/modalActions";
+import SuggestionsBlock from "./SuggestionsBlock";
 import Home from "./Home";
 
 const useStyles = makeStyles((theme) => ({
   dashboardContainer: {
-    maxWidth: "90%",
+    flexWrap: "nowrap",
     overflow: "none",
-    [theme.breakpoints.down("xs")]: {
-      padding: 0,
-    },
-  },
-  profileContainer: {
-    margin: "2rem 0",
-    position: "fixed",
-    right: "2%",
-    [theme.breakpoints.down("md")]: {
-      right: "4%",
-    },
-    [theme.breakpoints.down("sm")]: {
-      right: "10%",
-    },
+    background: "#F3F3F3",
+    [theme.breakpoints.down("xs")]: {},
   },
   homePageContainer: {
     overflowY: "auto",
@@ -37,25 +26,42 @@ const useStyles = makeStyles((theme) => ({
       padding: 0,
     },
   },
+  suggestionsBlock: {
+    width: "100%",
+    padding: "1rem 2rem",
+  },
 }));
 
 const Dashboard = (props) => {
   const classes = useStyles();
   return (
-    <Grid container className={classes.dashboardContainer}>
+    <Grid
+      item
+      xs={12}
+      container
+      direction="row"
+      className={classes.dashboardContainer}
+    >
       <Grid
         item
-        sm={9}
+        md={8}
         xs={12}
         container
-        align="center"
+        direction="column"
         className={classes.homePageContainer}
+        align="center"
       >
         <Home setModalState={props.setModalState} authedAs={props.authedAs} />
       </Grid>
-      <Hidden xsDown>
-        <Grid className={classes.profileContainer} item xs={3}>
-          <Profile authedAs={props.authedAs} />
+      <Hidden smDown>
+        <Grid
+          item
+          xs={4}
+          container
+          direction="column"
+          className={classes.suggestionsBlock}
+        >
+          <SuggestionsBlock />
         </Grid>
       </Hidden>
     </Grid>

@@ -62,8 +62,8 @@ export const handlerRegistrationError = (error, res) => {
 };
 
 export const isAuthedAsDeveloper = async (req, res) => {
-  if (!req.header("Authorization")) return res.sendStatus(401);
   try {
+    if (!req.header("Authorization")) return res.sendStatus(401);
     const token = req.header("Authorization").replace("Bearer ", "");
     const decode = await jwt.verify(token, process.env.JWT_SECRET);
     const { _id, as } = decode;

@@ -4,10 +4,19 @@ const Schema = mongoose.Schema;
 
 const postSchema = new Schema(
   {
-    text: {
+    title: {
       type: String,
       required: true,
       trim: true,
+    },
+    body: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    tags: {
+      type: Array,
+      default: [],
     },
     interested: [
       {
@@ -18,7 +27,7 @@ const postSchema = new Schema(
     author: {
       type: mongoose.Types.ObjectId,
       ref: "Company",
-      required: true
+      required: true,
     },
   },
   {

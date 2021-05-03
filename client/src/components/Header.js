@@ -12,7 +12,7 @@ import {
   Divider,
   Hidden,
 } from "@material-ui/core";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useHistory, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
 import React, { useEffect, useRef, useState } from "react";
@@ -100,6 +100,11 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
     width: "100%",
+    transition: "all ease-in-out .2s",
+    "&:focus": {
+      border: "1px solid white",
+      borderRadius: "4px",
+    },
     [theme.breakpoints.up("md")]: {
       width: "20ch",
     },
@@ -166,6 +171,7 @@ const Header = (props) => {
   const [searchedItems, setSearchedItems] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const confirmation = useConfirm();
+  const history = useHistory();
 
   const menusItems = {
     home: "/",
@@ -177,14 +183,14 @@ const Header = (props) => {
     setSearching(true);
     const searchQuery = e.target.value;
     setSearchQuery(searchQuery);
-    if (!!!searchQuery) {
+    if (!!!searchQuery || !searchQuery.length) {
       return setSearchedItems([]);
     }
     if (searchTimeout) clearTimeout(searchTimeout);
     setSearchTimeout(
       setTimeout(() => {
         axios
-          .get(`/search/?query=${searchQuery}`)
+          .get(`/search/?query=${searchQuery}&type=all`)
           .then((resp) => {
             setSearching(false);
             setSearchedItems(resp.data);
@@ -216,7 +222,7 @@ const Header = (props) => {
   return (
     <AppBar position="sticky" className={classes.appBar}>
       <Toolbar>
-        <Hidden smUp>
+        <Hidden mdUp>
           <MenuIcon onClick={() => setDrawerOpen(true)} />
           <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
             <List style={{ backgroundColor: "#efefef", height: "100%" }}>
@@ -280,7 +286,14 @@ const Header = (props) => {
             <div className={classes.searchIcon}>
               <SearchIcon />
             </div>
-            <form noValidate>
+            <form
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSearchBarFocused(false);
+                history.push(`/search/?q=${searchQuery}&type=all`);
+              }}
+            >
               <InputBase
                 placeholder="Search…"
                 autoComplete="off"

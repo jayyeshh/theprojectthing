@@ -2,7 +2,8 @@ import {
   CircularProgress,
   Button,
   Grid,
-  TextareaAutosize,
+  TextField,
+  Typography,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "../utility/axios/apiInstance";
@@ -17,29 +18,23 @@ const useStyles = makeStyles((theme) => ({
     color: green[500],
   },
   postBlockContainer: {
+    marginTop: "2rem",
+    borderRadius: "2px",
+    padding: ".8rem",
+    backgroundColor: "#ddd",
+    width: "70%",
     [theme.breakpoints.down("xs")]: {
+      width: "100%",
       margin: 0,
       justifyContent: "center",
       marginTop: "1rem",
     },
   },
-  textAreaStyles: {
-    margin: "0 2rem",
-    padding: ".8rem",
-    backgroundColor: "#eee",
-    transition: "all .4s ease-in-out",
-    outlineWidth: ".4px",
-    outlineColor: "black",
-    border: "none",
-    "&::focus": {
-      backgroundColor: "#fff",
-    },
-    [theme.breakpoints.down("xs")]: {
-      margin: 0,
-    },
+  fieldStyles: {
+    marginBottom: ".4rem",
   },
   btnStyles: {
-    margin: ".6rem 2rem",
+    marginTop: ".4rem",
     [theme.breakpoints.down("xs")]: {
       width: "100%",
       justifyContent: "center",
@@ -48,7 +43,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PostBlock = (props) => {
-  const [text, setText] = useState("");
+  const [values, setValues] = useState({
+    title: "",
+    body: "",
+    tags: [],
+  });
   const [loading, setLoading] = useState(false);
 
   const classes = useStyles();
@@ -61,9 +60,9 @@ const PostBlock = (props) => {
       },
     };
     axios
-      .post("/post/", { text }, configs)
+      .post("/post/", values, configs)
       .then((resp) => {
-        setText("");
+        clearFields();
         setLoading(false);
         props.addNewPost(resp.data);
         props.setModalState(true, "post added");
@@ -84,23 +83,72 @@ const PostBlock = (props) => {
       });
   };
 
+  const onChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setValues((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const clearFields = () => {
+    setValues({
+      title: "",
+      body: "",
+      tags: [],
+    });
+  };
+
   return (
-    <Grid container item xs={12} className={classes.postBlockContainer}>
-      <Grid item xs={12} container>
-        <TextareaAutosize
-          rowsMin={4}
-          rowsMax={4}
-          cols={60}
-          aria-label="post input box"
-          placeholder="write something here..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className={classes.textAreaStyles}
-        />
-      </Grid>
-      <Grid item container xs={12} className={classes.btnStyles}>
+    <Grid
+      item
+      sm={9}
+      xs={12}
+      container
+      direction="column"
+      justify="flex-start"
+      alignItems="flex-start"
+      className={classes.postBlockContainer}
+    >
+      <Typography
+        style={{
+          marginBottom: ".4rem",
+          fontWeight: 500,
+          fontFamily: "Noto Sans JP",
+          fontSize: "1.2rem",
+        }}
+      >
+        Create Post
+      </Typography>
+      <TextField
+        autoComplete="title"
+        name="title"
+        value={values.title}
+        variant="standard"
+        onChange={onChangeHandler}
+        className={classes.fieldStyles}
+        required
+        fullWidth
+        placeholder="Title"
+        id="title"
+        label="Post Title"
+      />
+      <TextField
+        autoComplete="body"
+        multiline
+        rows={4}
+        name="body"
+        value={values.body}
+        className={classes.fieldStyles}
+        variant="standard"
+        onChange={onChangeHandler}
+        required
+        fullWidth
+        id="body"
+        label="text"
+        placeholder="text(required)"
+        required
+      />
+      <Grid className={classes.btnStyles}>
         <Button
-          disabled={loading}
+          disabled={loading || !values.title || !values.body}
           variant="contained"
           color="primary"
           onClick={addPost}
@@ -116,7 +164,7 @@ const PostBlock = (props) => {
           style={{
             margin: "0 .7rem",
           }}
-          onClick={() => setText("")}
+          onClick={clearFields}
         >
           clear
         </Button>

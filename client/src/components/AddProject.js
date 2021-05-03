@@ -114,7 +114,8 @@ const initials = {
   about: "",
   github: "",
   site: "",
-  photo: ""
+  tags: "",
+  photo: "",
 };
 
 const errorInitials = {
@@ -143,9 +144,17 @@ const AddProject = (props) => {
       const { pid } = props.computedMatch.params;
       getProjectById(pid)
         .then((resp) => {
-          const { title, about, photo } = resp.data;
+          const { title, about, photo, tags } = resp.data;
           const { github, site } = resp.data.links;
-          setFieldValues({ ...initials, title, about, github, photo, site });
+          setFieldValues({
+            ...initials,
+            title,
+            about,
+            github,
+            photo,
+            site,
+            tags: tags.join(", "),
+          });
           setLoading(false);
           setInitialLoad(false);
         })
@@ -169,6 +178,7 @@ const AddProject = (props) => {
   const editProject = (e) => {
     e.preventDefault();
     setLoading(true);
+    const tags = fieldValues.tags.split(",").map((tag) => tag.trim());
 
     const data = new FormData();
     data.append("photo", fieldValues.photo);
@@ -176,6 +186,7 @@ const AddProject = (props) => {
     data.append("about", fieldValues.about);
     data.append("github", fieldValues.github);
     data.append("site", fieldValues.site);
+    data.append("tags", JSON.stringify(tags));
     const configs = {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -231,14 +242,15 @@ const AddProject = (props) => {
 
   const addThisProject = (e) => {
     e.preventDefault();
-
     setLoading(true);
+    const tags = fieldValues.tags.split(",").map((tag) => tag.trim());
     const data = new FormData();
     data.append("photo", fieldValues.photo);
     data.append("title", fieldValues.title);
     data.append("about", fieldValues.about);
     data.append("github", fieldValues.github);
     data.append("site", fieldValues.site);
+    data.append("tags", JSON.stringify(tags));
     const configs = {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -369,6 +381,21 @@ const AddProject = (props) => {
             onChange={onChangeHandler}
             name="about"
             id="about"
+          />
+          <TextField
+            variant="outlined"
+            rows={5}
+            cols={137}
+            fullWidth
+            value={fieldValues.tags}
+            style={{
+              padding: ".6rem",
+            }}
+            placeholder="Ex: javascript, react"
+            label="Tags(comma separated)"
+            onChange={onChangeHandler}
+            name="tags"
+            id="tags"
           />
         </Grid>
         <Grid item xs={12} className={classes.dropzoneStyles}>

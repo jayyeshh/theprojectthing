@@ -7,6 +7,7 @@ import projectRoutes from "./routes/projectRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import baseRoutes from "./routes/baseRoutes";
+import tagRoutes from "./routes/tagRoutes";
 import cors from "cors";
 import postRoutes from "./routes/postRoutes";
 
@@ -14,6 +15,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(baseRoutes);
+app.use("/tag", tagRoutes);
 app.use("/developer", developerRoutes);
 app.use("/company", companyRoutes);
 app.use("/project", projectRoutes);

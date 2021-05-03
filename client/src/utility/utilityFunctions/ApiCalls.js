@@ -20,6 +20,11 @@ export const getProjectById = async (pid) => {
   return axios.get(`/project/${pid}`, configs);
 };
 
+export const getProjects = () => {
+  setConfigs();
+  return axios.get(`/projects`, configs);
+};
+
 export const voteProject = ({ pid, type }) => {
   setConfigs();
   return axios.post(
@@ -66,4 +71,21 @@ export const followUser = (uid) => {
 export const unfollowUser = (uid) => {
   setConfigs();
   return axios.post(`/unfollow/${uid}`, null, configs);
+};
+
+export const getCompanies = () => {
+  return axios.get("/companies");
+};
+
+export const getDevelopers = () => {
+  return axios.get("/developers");
+};
+
+export const getPosts = () => {
+  return axios.get("/posts");
+};
+
+export const deleteProjects = (ids) => {
+  setConfigs();
+  return axios.post("/project/delete", { ids }, configs);
 };

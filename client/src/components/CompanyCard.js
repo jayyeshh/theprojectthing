@@ -39,6 +39,7 @@ const CompanyCard = ({ profile, setError }) => {
           borderBottom: "1px solid #cbd6ce",
           display: "flex",
           flexDirection: "column",
+          minHeight: '3rem'
         }}
         avatar={
           <Avatar aria-label={profile.username} className={classes.avatar}>

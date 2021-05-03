@@ -1,10 +1,10 @@
 import express from "express";
 import auth from "../middlewares/auth";
-import { Company, Developer, Project } from "../models";
+import { Company, Developer, Post, Project } from "../models";
 import authAsDev from "../middlewares/authAsDev";
 import { isDev } from "../utils/utilityFunctions";
 import bcrypt from "bcryptjs";
-
+import mongoose from "mongoose";
 const router = new express.Router();
 
 router.get("/profile", auth, async (req, res) => {
@@ -46,22 +46,140 @@ router.patch("/password", auth, async (req, res) => {
 
 router.get("/search", async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, type } = req.query;
     const queryArray = query.split(/[_\s.]/);
     const expr = "(" + queryArray.join("|") + ")";
     let resp = [];
-    const devs = await Developer.find({
-      username: { $regex: expr },
-    });
-    const companies = await Company.find({
-      username: { $regex: expr },
-    });
-    const projects = await Project.find({
-      title: { $regex: expr },
-    });
-    resp = resp.concat(devs, companies, projects);
+    if (type === "tag" || type === "all") {
+      const projects = await Project.aggregate([
+        {
+          $match: {
+            tags: {
+              $in: [new RegExp(expr, "i")],
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "developers",
+            localField: "developer",
+            foreignField: "_id",
+            as: "developer",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+      ]);
+      resp = resp.concat(projects);
+    }
+    if (type === "developers" || type === "all") {
+      let developers = [];
+      const isDeveloper = await isDev(req);
+      if (isDeveloper) {
+        developers = await Developer.aggregate([
+          {
+            $match: {
+              username: { $regex: new RegExp(expr, "i") },
+            },
+          },
+          {
+            $addFields: {
+              isFollowing: {
+                $in: [
+                  mongoose.Types.ObjectId(req.developer._id.toString()),
+                  "$followers",
+                ],
+              },
+              isFollowed: {
+                $in: [
+                  mongoose.Types.ObjectId(req.developer._id.toString()),
+                  "$following",
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              password: 0,
+              tokens: 0,
+            },
+          },
+        ]);
+      } else {
+        developers = await Developer.aggregate([
+          {
+            $match: {
+              username: { $regex: new RegExp(expr, "i") },
+            },
+          },
+          {
+            $project: {
+              password: 0,
+              tokens: 0,
+            },
+          },
+        ]);
+      }
+      resp = resp.concat(developers);
+    }
+    if (type === "companies" || type === "all") {
+      const companies = await Company.find({
+        username: { $regex: new RegExp(expr, "i") },
+      });
+      resp = resp.concat(companies);
+    }
+    if (type === "projects" || type === "all") {
+      const projects = await Project.aggregate([
+        {
+          $match: {
+            title: {
+              $regex: new RegExp(expr, "i"),
+            },
+          },
+        },
+        {
+          $lookup: {
+            from: "developers",
+            localField: "developer",
+            foreignField: "_id",
+            as: "developer",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+      ]);
+      resp = resp.concat(projects);
+    }
+    if (type === "posts" || type === "all") {
+      const posts = await Post.aggregate([
+        {
+          $match: {
+            $or: [
+              {
+                title: { $regex: new RegExp(expr, "i") },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "companies",
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $unwind: "$author",
+        },
+      ]);
+      resp = resp.concat(posts);
+    }
     res.send(resp);
   } catch (error) {
+    console.log(error);
     return res.status(500).send({ error: "Internal Server Error" });
   }
 });
@@ -77,6 +195,34 @@ router.get("/stats", async (req, res) => {
   } catch (error) {
     return res.status(500).send({ error: "Internal Server Error" });
   }
+});
+
+router.get("/tags", async (req, res) => {
+  const fetchedTags = await Project.aggregate([
+    {
+      $project: {
+        tags: 1,
+      },
+    },
+    {
+      $unwind: "$tags",
+    },
+    {
+      $group: {
+        _id: null,
+        tags: {
+          $push: "$tags",
+        },
+      },
+    },
+    {
+      $project: {
+        tags: 1,
+        _id: 0,
+      },
+    },
+  ]);
+  res.send({ tags: fetchedTags[0].tags });
 });
 
 router.get("/home", auth, async (req, res) => {
@@ -172,6 +318,7 @@ router.get("/home", auth, async (req, res) => {
       res.send(fetchedProjects);
     }
   } catch (error) {
+    console.log(error);
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
@@ -201,6 +348,17 @@ router.get("/projects", async (req, res) => {
     if (sortby === "mostVoted") {
       const projects = await Project.aggregate([
         {
+          $lookup: {
+            from: "developers",
+            as: "developer",
+            localField: "developer",
+            foreignField: "_id",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+        {
           $addFields: {
             upvoteTotal: { $size: "$upvotes" },
             // downvoteTotal: { $size: "$downvotes" },
@@ -216,6 +374,17 @@ router.get("/projects", async (req, res) => {
     } else {
       const projects = await Project.aggregate([
         {
+          $lookup: {
+            from: "developers",
+            localField: "developer",
+            foreignField: "_id",
+            as: "developer",
+          },
+        },
+        {
+          $unwind: "$developer",
+        },
+        {
           $sort: {
             createdAt: -1,
           },
@@ -228,10 +397,37 @@ router.get("/projects", async (req, res) => {
   }
 });
 
+router.get("/projects/:tag", async (req, res) => {
+  try {
+    const { tag } = req.params;
+    const projects = await Project.aggregate([
+      {
+        $match: {
+          tags: {
+            $in: [tag],
+          },
+        },
+      },
+    ]);
+    res.send(projects);
+  } catch (error) {
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 router.get("/companies", async (req, res) => {
   try {
     const companies = await Company.find({});
     res.send(companies);
+  } catch (error) {
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/developers", async (req, res) => {
+  try {
+    const developers = await Developer.find({});
+    res.send(developers);
   } catch (error) {
     res.status(500).send({ error: "Internal Server Error" });
   }
@@ -312,6 +508,15 @@ router.post("/unfollow/:uid", authAsDev, async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/posts", async (req, res) => {
+  try {
+    const posts = await Post.find({}).populate(["interested", "author"]);
+    res.send(posts);
+  } catch (error) {
+    return res.status(500).send({ error: "Internal Server Error" });
   }
 });
 

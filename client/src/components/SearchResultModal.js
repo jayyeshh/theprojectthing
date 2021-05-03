@@ -92,7 +92,37 @@ const SearchResultModal = ({
         <Grid container>
           {isFocused &&
             searchedItems.map((item) => {
-              if (item.title) {
+              if (item.body) {
+                return (
+                  <NavLink
+                    key={item._id}
+                    to={`/post/${item._id}`}
+                    className={classes.linkStyles}
+                  >
+                    <Grid
+                      container
+                      alignContent="center"
+                      direction="row"
+                      alignItems="center"
+                      justify="flex-start"
+                      className={classes.searchResult}
+                    >
+                      <Typography
+                        className={classes.titleName}
+                        style={{
+                          width: "100%",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {item.title.length < 40
+                          ? item.title
+                          : item.title.substr(0, 37) + "..."}
+                      </Typography>
+                    </Grid>
+                  </NavLink>
+                );
+              } else if (item.title) {
                 return (
                   <NavLink
                     key={item._id}

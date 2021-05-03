@@ -22,13 +22,13 @@ const auth = async (req, res, next) => {
         "tokens.token": token,
       });
     }
-    if (!user) throw new Error();
+    if (!user) return res.status(401).send({ error: "Please authenticate!" });
     req.user = user;
     req.as = as;
     req.token = token;
     next();
   } catch (e) {
-    res.status(401).send({ error: "Please authenticate!" });
+    res.status(500).send({ error: "Internal Server Error!" });
   }
 };
 

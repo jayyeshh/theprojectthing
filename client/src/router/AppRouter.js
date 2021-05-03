@@ -15,6 +15,7 @@ import AddProject from "../components/AddProject";
 import ProjectPage from "../components/ProjectPage";
 import Explore from "../components/Explore";
 import EditProfile from "../components/EditProfile";
+import SearchResultsPage from "../components/SearchResultsPage";
 import DevPage from "../components/DevPage";
 import GlobalModal from "../components/GlobalModal";
 import CompanyPage from "../components/CompanyPage";
@@ -66,6 +67,8 @@ const AppRouter = (props) => {
           component={DeveloperAuthenticationForm}
           exact
         />
+        <Route path="/search" component={SearchResultsPage} exact />
+
         <PrivateRoute path="/profile/edit" component={EditProfile} />
         <DeveloperOnlyRoute path="/projects/add" component={AddProject} exact />
         <Route path="/explore" component={Explore} exact />

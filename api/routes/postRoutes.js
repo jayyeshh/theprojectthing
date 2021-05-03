@@ -18,12 +18,17 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", authAsCompany, async (req, res) => {
   try {
-    let { text } = req.body;
-    if (text) text = text.trim();
-    if (!text || !text.length)
-      return res.status(400).send({ error: "Empty post not allowed!" });
+    let { title, body, tags = [] } = req.body;
+    if (title) title = title.trim();
+    if (body) body = body.trim();
+    if (!title || !title.length)
+      return res.status(400).send({ error: "Title is required Field!" });
+    if (!body || !body.length)
+      return res.status(400).send({ error: "Post body is required Field!" });
     const post = new Post({
-      text,
+      title,
+      body,
+      tags,
       author: req.company._id,
     });
     await post.save();

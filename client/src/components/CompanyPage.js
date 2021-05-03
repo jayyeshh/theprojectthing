@@ -6,13 +6,13 @@ import {
   Hidden,
   IconButton,
   Tooltip,
+  Chip,
   Typography,
 } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import { getCompanyById } from "../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
-import { Container } from "@material-ui/core";
 import Spinner from "./Spinner";
 import CompanyPost from "./CompanyPost";
 import moment from "moment";
@@ -23,6 +23,7 @@ import { setModalStateAction } from "../actions/modalActions";
 import { connect } from "react-redux";
 import AddReviewPopupModal from "./AddReviewPopupModal";
 import ListModal from "./ListModal";
+import { Edit3 } from "react-feather";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -41,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     height: 0,
     paddingTop: "56.25%", // 16:9
   },
+  boldLabel: {
+    fontWeight: 600,
+  },
   expand: {
     transform: "rotate(0deg)",
     marginLeft: "auto",
@@ -54,18 +58,30 @@ const useStyles = makeStyles((theme) => ({
   profile: {
     display: "flex",
     flexDirection: "column",
-    background: "white",
     padding: "4rem",
     overflow: "hidden",
+    minHeight: "100%",
     [theme.breakpoints.down("xs")]: {
       position: "relative",
-      minWidth: "100%",
+      minHeight: "18rem",
+      maxHeight: "4rem",
       backgroundColor: "#e1e1e1",
-      height: "18rem",
       margin: 0,
       padding: 0,
       justifyContent: "center",
       alignItems: "center",
+    },
+  },
+  editIconStyles: {
+    alignSelf: "flex-end",
+    color: "black",
+    textAlign: "right",
+    zIndex: 1,
+    transition: "all ease-in-out .2s",
+    "&:hover": {
+      transform: "scale(1.03)",
+      cursor: "pointer",
+      color: "blue",
     },
   },
   profileSubContainer: {
@@ -82,6 +98,22 @@ const useStyles = makeStyles((theme) => ({
   labelStyle: {
     fontWeight: "400",
     marginRight: ".3rem",
+  },
+  link: {
+    textDecoration: "none",
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
+  chip: {
+    marginRight: ".2rem",
+    marginTop: ".2rem",
+    padding: ".8rem .4rem",
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: "#ccc",
+      color: "black",
+    },
   },
 }));
 
@@ -145,6 +177,7 @@ const CompanyPage = (props) => {
         width: "100%",
         height: "100%",
         overflow: "hidden",
+        background: "#F3F3F3",
         flexWrap: "none",
       }}
     >
@@ -191,7 +224,7 @@ const CompanyPage = (props) => {
           <Grid
             item
             xs={12}
-            sm={4}
+            sm={3}
             container
             alignItems="center"
             justify="center"
@@ -201,48 +234,115 @@ const CompanyPage = (props) => {
               <div
                 style={{
                   position: "fixed",
+                  display: "flex",
+                  justifyContent: "center",
                   top: "4rem",
                   left: 0,
-                  minHeight: "100vh",
-                  maxHeight: "100vh",
-                  width: "35%",
+                  width: "30%",
                   paddingTop: "3rem",
                 }}
               >
                 <Grid
-                  item
-                  xs={12}
                   container
                   direction="column"
                   justify="center"
                   alignItems="center"
+                  align="center"
+                  style={{
+                    padding: "1rem",
+                    maxWidth: "80%",
+                    alignSelf: "center",
+                    background: "white",
+                  }}
                 >
-                  <Avatar
+                  {props.authenticated &&
+                    company._id.toString() === props.uid.toString() && (
+                      <NavLink
+                        to={`/profile/edit`}
+                        className={classes.editIconStyles}
+                      >
+                        <Edit3 />
+                      </NavLink>
+                    )}
+                  <Grid
                     style={{
-                      fontSize: "1.4rem",
-                      margin: ".3rem",
-                      border: "2px solid blue",
-                      padding: ".4rem",
+                      position: "absolute",
+                      background: "#ffc996",
+                      width: "80%",
+                      height: "7rem",
+                      borderRadius: "5px 5px 0 0",
+                      top: "3rem",
+                      paddingTop: "1rem",
                     }}
                   >
-                    {company.name.charAt(0)}
-                  </Avatar>
-                  <Typography
-                    color="textSecondary"
-                    style={{ margin: ".1rem 0" }}
-                  >
-                    @{company.username}
-                  </Typography>
-                  <Typography>{company.name}</Typography>
-                  <div
+                    <Avatar
+                      style={{
+                        fontSize: "1.4rem",
+                        margin: ".3rem",
+                        border: "2px solid gray",
+                        padding: ".4rem",
+                      }}
+                    >
+                      {company.name.charAt(0)}
+                    </Avatar>
+                    <Typography
+                      color="textSecondary"
+                      style={{
+                        margin: ".1rem 0",
+                        zIndex: 1,
+                        fontWeight: 600,
+                      }}
+                    >
+                      @{company.username}
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    container
                     style={{
-                      margin: ".7rem 0",
-                      alignSelf: "center",
+                      marginTop: `${
+                        props.authenticated && company._id === props.uid
+                          ? ""
+                          : "2rem"
+                      }`,
                     }}
                   >
-                    <Typography>Email:</Typography>
-                    <Typography> {company.email}</Typography>
-                  </div>
+                    <Typography
+                      style={{
+                        marginTop: "5.8rem",
+                        fontSize: "1.2rem",
+                        fontWeight: 600,
+                        fontFamily: "Lato",
+                      }}
+                    >
+                      {company.name}
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    container
+                    direction="column"
+                    justify="flex-start"
+                    alignItems="flex-start"
+                    style={{
+                      textAlign: "left",
+                    }}
+                  >
+                    <Typography style={{ color: "#444" }}>
+                      {company.about}
+                    </Typography>
+
+                    <Typography className={classes.boldLabel}>
+                      Email:
+                    </Typography>
+                    <Typography style={{ color: "#444" }}>
+                      {company.email}
+                    </Typography>
+                    <Typography className={classes.boldLabel}>
+                      Joined:
+                    </Typography>
+                    <Typography style={{ color: "#444" }}>
+                      {new moment(company.createdAt).format("YYYY, MMM, DD")}
+                    </Typography>
+                  </Grid>
                   <Grid
                     container
                     direction="row"
@@ -274,6 +374,34 @@ const CompanyPage = (props) => {
                       </Tooltip>
                     </IconButton>
                   </Grid>
+                  {!!company.technologies.length && (
+                    <Grid container>
+                      <Typography
+                        style={{
+                          fontWeight: 600,
+                          color: "#333",
+                          fontFamily: "Lato",
+                        }}
+                      >
+                        Technologies
+                      </Typography>
+                      <Grid container>
+                        {company.technologies.map((tech) => (
+                          <NavLink
+                            to={`/search/?q=${tech}&type=tag`}
+                            className={classes.link}
+                            key={company.tech}
+                          >
+                            <Chip
+                              size="small"
+                              label={tech}
+                              className={classes.chip}
+                            />
+                          </NavLink>
+                        ))}
+                      </Grid>
+                    </Grid>
+                  )}
                 </Grid>
               </div>
             </Hidden>
@@ -298,7 +426,7 @@ const CompanyPage = (props) => {
                     margin: ".7rem 0",
                   }}
                 >
-                  <Typography>Email:</Typography>
+                  <Typography className={classes.boldLabel}>Email:</Typography>
                   <Typography> {company.email}</Typography>
                 </div>
                 <Grid
@@ -338,6 +466,7 @@ const CompanyPage = (props) => {
           <Hidden xsDown>
             <Divider orientation="vertical" />
           </Hidden>
+
           <Grid
             item
             sm={7}
@@ -525,6 +654,7 @@ const CompanyPage = (props) => {
 
 const mapStateToProps = (state) => {
   return {
+    authenticated: state.authReducer.authenticated,
     authedAs: state.authReducer.as,
     uid: state.authReducer.user._id,
   };

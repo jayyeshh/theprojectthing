@@ -10,12 +10,15 @@ import ProjectCard from "./ProjectCard";
 import NewReleasesIcon from "@material-ui/icons/NewReleases";
 import WhatshotIcon from "@material-ui/icons/Whatshot";
 import { connect } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   paperStyles: {
     display: "flex",
     flexDirection: "column",
     position: "relative",
+    background: "#F3F3F3",
+    minHeight: '100vh'
   },
   headingStyles: {
     display: "inherit",
@@ -57,18 +60,32 @@ const useStyles = makeStyles((theme) => ({
 
 const Explore = (props) => {
   const classes = useStyles();
-  const [type, setType] = useState("devs");
+  const [type, setType] = useState("");
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filteredBy, setFilteredBy] = useState("recentlyAdded");
   const configs = {};
+  const history = useHistory();
   if (props.isAuthenticated) {
     configs.headers = {
       Authorization: `Bearer ${localStorage.getItem("authToken")}`,
     };
   }
-  useEffect(() => {
+  useEffect(async () => {
+    const qs = props.location.search;
+    const query = new URLSearchParams(qs);
+    let tab = query.get("tab");
+    if (!!!tab) tab = "devs";
+    if (type !== tab) {
+      if (type && type.length) {
+        query.set("tab", type);
+      }
+      history.push({ search: query.toString() });
+    }
+    if (!!!type) {
+      setType(tab);
+    }
     setLoading(true);
     let url = `/${type}`;
     if (type === "projects") {
@@ -96,7 +113,6 @@ const Explore = (props) => {
 
   return (
     <Paper elevation={0} className={classes.paperStyles}>
-      {error && alert(error)}
       <Paper elevation={4} className={classes.headingStyles}>
         <Typography className={classes.pageHeading}>Explore</Typography>
         <ToggleButtonGroup exclusive value={type} onChange={toggleBtnHandler}>
@@ -118,7 +134,7 @@ const Explore = (props) => {
         xs={12}
         className={classes.mainContainer}
       >
-        {loading && (
+        {(loading || list.length === 0) && (
           <Grid
             item
             xs={12}
@@ -176,7 +192,9 @@ const Explore = (props) => {
             >
               <IconButton
                 className={
-                  filteredBy === "recentlyAdded" && `${classes.activeIconBtn}`
+                  filteredBy === "recentlyAdded"
+                    ? `${classes.activeIconBtn}`
+                    : ""
                 }
                 onClick={() => setFilteredBy("recentlyAdded")}
               >
@@ -187,7 +205,7 @@ const Explore = (props) => {
               </IconButton>
               <IconButton
                 className={
-                  filteredBy === "mostVoted" && `${classes.activeIconBtn}`
+                  filteredBy === "mostVoted" ? `${classes.activeIconBtn}` : ""
                 }
                 onClick={() => setFilteredBy("mostVoted")}
               >
@@ -220,7 +238,7 @@ const Explore = (props) => {
             spacing={4}
             direction="row"
             justify="center"
-         >
+          >
             {list.map((company, index) => (
               <Grid
                 style={{ minWidth: "18rem" }}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Grid, Avatar, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { NavLink } from "react-router-dom";
@@ -14,10 +14,11 @@ import {
 const useStyles = makeStyles((theme) => ({
   container: {
     width: "70%",
-    height: "30rem",
+    maxHeight: "30rem",
     border: ".1px solid #b1bdb4",
     borderRadius: "3px",
     margin: "2rem",
+    background: "#fff",
     [theme.breakpoints.down("xs")]: {
       width: "100%",
       margin: "2rem 0",
@@ -145,6 +146,10 @@ const Post = ({ post, ...props }) => {
             alignContent="center"
             alignItems="center"
             justify="center"
+            style={{
+              minHeight: "15rem",
+              color: "#777",
+            }}
           >
             <Typography>No Image Found</Typography>
           </Grid>

@@ -13,6 +13,8 @@ const router = new express.Router();
 //company registration(sign up)
 router.post("/register", async (req, res) => {
   try {
+    const { technologies = [] } = req.body;
+    delete req.body.technologies;
     req.body = trimValues(req.body);
     let { username, name, email, password } = req.body;
     if (!username || !email || !password || !name) {
@@ -30,6 +32,7 @@ router.post("/register", async (req, res) => {
       username,
       email,
       password,
+      technologies,
       name,
     });
   } catch (error) {
@@ -172,15 +175,18 @@ router.get("/:id", async (req, res) => {
 
 //update company profile
 router.patch("/", auth, async (req, res) => {
-  req.body = trimValues(req.body);
-  let {
-    username = req.user.username,
-    name = req.user.name,
-    email = req.user.email,
-    website = req.user.websites.website,
-    linkedIn = req.user.websites.linkedIn,
-  } = req.body;
   try {
+    let { technologies = [] } = req.body;
+    delete req.body.technologies;
+    req.body = trimValues(req.body);
+    let {
+      username = req.user.username,
+      name = req.user.name,
+      email = req.user.email,
+      about = req.user.about,
+      website = req.user.websites.website,
+      linkedIn = req.user.websites.linkedIn,
+    } = req.body;
     const websites = {
       website,
       linkedIn,
@@ -189,7 +195,9 @@ router.patch("/", auth, async (req, res) => {
       username,
       name,
       email,
+      about,
       websites,
+      technologies,
     };
     await req.user.updateOne({ ...updates });
     const updatedProfile = await Company.findOne({

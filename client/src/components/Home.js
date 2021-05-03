@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Paper, Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "../utility/axios/apiInstance";
 import Post from "../components/Post";
 import Spinner from "./Spinner";
 import PostBlock from "./PostBlock";
+import CreatePostDialog from "./CreatePostDialog";
 
 const useStyles = makeStyles((theme) => ({
   paperStyles: {
     maxWidth: "100%",
-    padding: "2rem 0",
     overflow: "hidden",
-    //   overflowY: "auto",
-    //   "&::-webkit-scrollbar": {
-    //     display: "none",
-    //   },
-    //   "&::scrollbar": {
-    //     display: 'none'
-    //   },
-    //   scrollbarWidth: 'none'
     [theme.breakpoints.down("xs")]: {
       padding: 0,
     },
@@ -26,10 +18,30 @@ const useStyles = makeStyles((theme) => ({
   homeContainer: {
     width: "100%",
     overflowY: "auto",
-    paddingLeft: "2rem",
+    marginLeft: "1rem",
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       margin: 0,
+      margin: "0 1rem",
+    },
+  },
+  createPostContainer: {
+    marginTop: "2rem",
+    minHeight: "3rem",
+    width: "70%",
+    background: "white",
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
+  createPostBtn: {
+    minWidth: "95%",
+    margin: ".1rem",
+    padding: ".4rem",
+    background: "#eee",
+    transition: "all ease-in-out .3s",
+    "&:hover": {
+      background: "#ccc",
     },
   },
 }));
@@ -38,11 +50,16 @@ const Home = (props) => {
   const classes = useStyles();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [createPost, setCreatePost] = useState(false);
 
   const updatePost = (index, updatedPost) => {
     const updatedPosts = [...posts];
     updatedPosts[index] = updatedPost;
     setPosts(updatedPosts);
+  };
+
+  const toggleCreatePost = () => {
+    setCreatePost((prevState) => !prevState);
   };
 
   useEffect(() => {
@@ -76,7 +93,7 @@ const Home = (props) => {
           item
           xs={12}
           container
-          style={{ minHeight: "70vh" }}
+          style={{ minHeight: "100vh" }}
           justify="center"
           alignItems="center"
           align="center"
@@ -85,8 +102,25 @@ const Home = (props) => {
           <Spinner />
         </Grid>
       ) : (
-        <Grid className={classes.homeContainer} style={{ marginLeft: "1rem" }}>
-          {props.authedAs.toLowerCase() === "company" && <PostBlock />}
+        <Grid className={classes.homeContainer}>
+          {props.authedAs.toLowerCase() === "company" && createPost && (
+            <CreatePostDialog open={createPost} close={toggleCreatePost} />
+          )}
+          {/* {props.authedAs.toLowerCase() === "company" && <PostBlock />} */}
+          {props.authedAs.toLowerCase() === "company" && (
+            <Grid
+              container
+              direction="row"
+              justify="center"
+              alignItems="center"
+              className={classes.createPostContainer}
+              onClick={toggleCreatePost}
+            >
+              <div className={classes.createPostBtn}>
+                <Typography>Create post</Typography>
+              </div>
+            </Grid>
+          )}
           {props.authedAs.toLowerCase() === "developer" && posts.length === 0 && (
             <Grid
               container

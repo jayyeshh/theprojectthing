@@ -105,9 +105,11 @@ const useStyles = makeStyles((theme) => ({
 const initialEditProfileFields = {
   username: "",
   name: "",
+  about: "",
   email: "",
   website: "",
   linkedIn: "",
+  technologies: "",
   github: "",
   portfolio: "",
 };
@@ -115,8 +117,10 @@ const initialEditProfileFields = {
 const initialEditProfileErrors = {
   username: false,
   name: false,
+  about: false,
   email: false,
   website: false,
+  technologies: false,
   linkedIn: false,
   github: false,
   portfolio: false,
@@ -132,7 +136,16 @@ const EditProject = ({ profile, ...props }) => {
     newPassword: "",
     confirmPassword: "",
   });
-  const [editProfileFields, setEditProfileFields] = useState(profile);
+  const [editProfileFields, setEditProfileFields] = useState(
+    initialEditProfileFields
+  );
+  useEffect(() => {
+    const values = { ...profile };
+    if (values.technologies) {
+      values.technologies = values.technologies.join(", ");
+    }
+    setEditProfileFields(values);
+  }, []);
 
   const [editProfileErrors, setEditProfileErrors] = useState(
     initialEditProfileErrors
@@ -177,7 +190,9 @@ const EditProject = ({ profile, ...props }) => {
       username,
       name,
       email,
+      about,
       website,
+      technologies,
       linkedIn,
       github,
       portfolio,
@@ -187,10 +202,17 @@ const EditProject = ({ profile, ...props }) => {
       name,
       email,
       website,
+      about,
       linkedIn,
       github,
       portfolio,
     };
+    if (props.authedAs.toLowerCase() === "company") {
+      const technologiesArray = technologies
+        .split(",")
+        .map((tech) => tech.trim());
+      payload.technologies = technologiesArray;
+    }
     axios
       .patch(url, payload, configs)
       .then((resp) => {
@@ -389,6 +411,19 @@ const EditProject = ({ profile, ...props }) => {
                   value={editProfileFields.email}
                   onChangeHandler={editProfileFieldsChangeHandler}
                 />
+                {props.authedAs &&
+                  props.authedAs.toLowerCase() === "company" && (
+                    <InputField
+                      labelText="Technologies(*comma separated)"
+                      id="technologies"
+                      type="text"
+                      placeholder="eg: javascript, python..."
+                      error={editProfileErrors.technologies}
+                      value={editProfileFields.technologies}
+                      onChangeHandler={editProfileFieldsChangeHandler}
+                    />
+                  )}
+
                 <InputField
                   labelText="website"
                   id="website"
@@ -405,6 +440,17 @@ const EditProject = ({ profile, ...props }) => {
                   value={editProfileFields.linkedIn}
                   onChangeHandler={editProfileFieldsChangeHandler}
                 />
+                {props.authedAs.toLowerCase() === "company" && (
+                  <InputField
+                    labelText="About"
+                    id="about"
+                    type="text"
+                    placeholder="about(*max 150 letters)"
+                    error={editProfileErrors.about}
+                    value={editProfileFields.about}
+                    onChangeHandler={editProfileFieldsChangeHandler}
+                  />
+                )}
                 {props.authedAs.toLowerCase() === "developer" && (
                   <>
                     <InputField
