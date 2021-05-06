@@ -115,7 +115,7 @@ const initials = {
   github: "",
   site: "",
   tags: "",
-  photo: "",
+  photos: [],
 };
 
 const errorInitials = {
@@ -144,14 +144,14 @@ const AddProject = (props) => {
       const { pid } = props.computedMatch.params;
       getProjectById(pid)
         .then((resp) => {
-          const { title, about, photo, tags } = resp.data;
+          const { title, about, photos, tags } = resp.data;
           const { github, site } = resp.data.links;
           setFieldValues({
             ...initials,
             title,
             about,
             github,
-            photo,
+            photos,
             site,
             tags: tags.join(", "),
           });
@@ -172,7 +172,7 @@ const AddProject = (props) => {
   };
 
   const handleDropzoneChange = (file) => {
-    setFieldValues({ ...fieldValues, photo: file[0] });
+    setFieldValues({ ...fieldValues, photos: file });
   };
 
   const editProject = (e) => {
@@ -181,7 +181,9 @@ const AddProject = (props) => {
     const tags = fieldValues.tags.split(",").map((tag) => tag.trim());
 
     const data = new FormData();
-    data.append("photo", fieldValues.photo);
+    fieldValues.photos.forEach((photo) => {
+      data.append("photo", photo);
+    });
     data.append("title", fieldValues.title);
     data.append("about", fieldValues.about);
     data.append("github", fieldValues.github);
@@ -245,7 +247,9 @@ const AddProject = (props) => {
     setLoading(true);
     const tags = fieldValues.tags.split(",").map((tag) => tag.trim());
     const data = new FormData();
-    data.append("photo", fieldValues.photo);
+    fieldValues.photos.forEach((photo) => {
+      data.append("photo", photo);
+    });
     data.append("title", fieldValues.title);
     data.append("about", fieldValues.about);
     data.append("github", fieldValues.github);
@@ -277,7 +281,10 @@ const AddProject = (props) => {
         } else {
           errormsg = {
             ...errormsg,
-            error: err.response.data.error,
+            error:
+              err.response && err.response.data.error
+                ? err.response.data.error
+                : "",
           };
           props.setModalState(true, errormsg.error);
         }
@@ -401,9 +408,10 @@ const AddProject = (props) => {
         <Grid item xs={12} className={classes.dropzoneStyles}>
           <DropzoneArea
             onChange={handleDropzoneChange}
+            initialFiles={fieldValues.photos}
             acceptedFiles={["image/*"]}
             dropzoneText={"Add a snapshot of project"}
-            filesLimit={1}
+            filesLimit={6}
             clearOnUnmount
           />
         </Grid>

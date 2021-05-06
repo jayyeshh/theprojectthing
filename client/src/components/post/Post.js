@@ -137,8 +137,12 @@ const Post = ({ post, ...props }) => {
           maxHeight: "22rem",
         }}
       >
-        {post.photo ? (
-          <img style={{ maxHeight: "100%" }} width="100%" src={post.photo} />
+        {!!post.photos && post.photos.length ? (
+          <img
+            style={{ maxHeight: "100%" }}
+            width="100%"
+            src={post.photos[0]}
+          />
         ) : (
           <Grid
             item

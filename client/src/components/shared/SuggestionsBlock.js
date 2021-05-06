@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
     padding: ".3rem 1rem",
     transition: ".1s ease-in-out all",
     "&:hover": {
-      backgroundColor: "#eeeeee",
+      backgroundColor: "#eee",
     },
   },
   link: {
@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "0 1rem",
     transition: "all ease-in-out .1s",
     "&:hover": {
-      backgroundColor: "#efefef",
+      boxShadow: "4px 4px 4px 4px gray",
       cursor: "pointer",
     },
   },
@@ -82,92 +82,22 @@ const useStyles = makeStyles((theme) => ({
   },
   jobBlock: {
     background: "white",
-    marginBottom: "1rem",
+    marginBottom: ".6rem",
     padding: ".4rem",
     border: "1px solid #eee",
+    transition: "all .2s ease-in-out",
+    "&:hover": {
+      paddingLeft: "1rem",
+    },
   },
 }));
 
-const CompanyBlock = ({ company }) => {
-  const classes = useStyles();
-  return (
-    <Grid className={classes.companyBlock}>
-      <Grid
-        container
-        style={{
-          flex: 1,
-          height: "2.5rem",
-        }}
-      >
-        <NavLink to={`/company/${company._id}`} className={classes.link}>
-          <Typography>{company.name}</Typography>
-        </NavLink>
-      </Grid>
-      <Grid
-        container
-        direction="row"
-        style={{
-          maxHeight: "1rem",
-          alignSelf: "flex-end",
-          color: "gray",
-        }}
-      >
-        <ListAlt />
-        <Typography style={{ marginLeft: ".3rem" }}>
-          {company.posts.length}
-        </Typography>
-      </Grid>
-    </Grid>
-  );
-};
-
-const DeveloperBlock = ({ developer }) => {
-  const classes = useStyles();
-  return (
-    <Grid className={classes.companyBlock}>
-      <Grid
-        container
-        style={{
-          flex: 1,
-          height: "2.5rem",
-        }}
-      >
-        <NavLink to={`/dev/${developer._id}`} className={classes.link}>
-          <Typography>{developer.name}</Typography>
-        </NavLink>
-      </Grid>
-      <Grid
-        container
-        direction="row"
-        style={{
-          maxHeight: "1rem",
-          alignSelf: "flex-end",
-          color: "gray",
-        }}
-      >
-        <ListAlt />
-        <Typography style={{ marginLeft: ".3rem" }}>
-          {developer.projects.length}
-        </Typography>
-      </Grid>
-    </Grid>
-  );
-};
 const SuggestionsBlock = ({ user, authedAs, ...props }) => {
   const classes = useStyles();
-  const [companies, setCompanies] = useState([]);
   const [developers, setDevelopers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [jobPosts, setJobPosts] = useState([]);
   useEffect(() => {
-    getCompanies()
-      .then((resp) => {
-        const fetchedCompanies = _.shuffle(resp.data).slice(0, 5);
-        setCompanies(fetchedCompanies);
-      })
-      .catch((error) => {
-        console.log("Couldn't fetch companies!");
-      });
     getDevelopers()
       .then((resp) => {
         const fetchedDevelopers = _.shuffle(resp.data).slice(0, 5);
@@ -239,53 +169,93 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
           </Grid>
         </NavLink>
       </Grid>
-      <Grid container>
-        <Typography className={classes.title}>Jobs</Typography>
-        {jobPosts.map((post) => (
-          <Grid container direction="column" className={classes.jobBlock}>
-            <NavLink
-              to={`/post/${post._id}`}
-              className={classes.link}
-              style={{ color: "black" }}
-            >
-              <Typography
-                style={{
-                  width: "100%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  fontSize: "1rem",
-                }}
-                className={classes.title}
+      {authedAs.toLowerCase() === "developer" && (
+        <Grid container>
+          <Typography className={classes.title}>Jobs</Typography>
+          {jobPosts.map((post) => (
+            <Grid container direction="column" className={classes.jobBlock}>
+              <NavLink
+                to={`/post/${post._id}`}
+                className={classes.link}
+                style={{ color: "black" }}
               >
-                {post.title}
-              </Typography>
-            </NavLink>
-            <NavLink
-              to={`/company/${post.author._id}`}
-              className={classes.link}
-            >
-              <Typography
-                style={{
-                  color: "#555",
-                }}
+                <Typography
+                  style={{
+                    width: "100%",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontSize: "1rem",
+                  }}
+                  className={classes.title}
+                >
+                  {post.title}
+                </Typography>
+              </NavLink>
+              <NavLink
+                to={`/company/${post.author._id}`}
+                className={classes.link}
               >
-                {post.author.name}
-              </Typography>
-            </NavLink>
-            <Grid container>
-              <Typography>Posted on: </Typography>
-              <Typography
-                style={{
-                  color: "#555",
-                  marginLeft: ".3rem",
-                }}
-              >
-                {new moment(post.createdAt).format("YYYY, MMM DD")}
-              </Typography>
+                <Typography
+                  style={{
+                    color: "#555",
+                  }}
+                >
+                  {post.author.name}
+                </Typography>
+              </NavLink>
+              <Grid container>
+                <Typography>Posted on: </Typography>
+                <Typography
+                  style={{
+                    color: "#555",
+                    marginLeft: ".3rem",
+                  }}
+                >
+                  {new moment(post.createdAt).format("YYYY, MMM DD")}
+                </Typography>
+              </Grid>
             </Grid>
-          </Grid>
-        ))}
-      </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {authedAs.toLowerCase() === "company" && (
+        <Grid container>
+          <Typography className={classes.title}>Developers</Typography>
+          {developers.map((developer) => (
+            <Grid container direction="column" className={classes.jobBlock}>
+              <NavLink
+                to={`/dev/${developer._id}`}
+                className={classes.link}
+                style={{ color: "black" }}
+              >
+                <Typography
+                  style={{
+                    width: "100%",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    fontSize: "1rem",
+                  }}
+                  className={classes.title}
+                >
+                  {developer.name}
+                </Typography>
+              </NavLink>
+              <Grid container>
+                <Typography>Projects: </Typography>
+                <Typography
+                  style={{
+                    color: "#555",
+                    marginLeft: ".3rem",
+                  }}
+                >
+                  {developer.projects.length}
+                </Typography>
+              </Grid>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
       <Grid className={classes.blockWrapper}>
         <Typography className={classes.title}>Projects</Typography>

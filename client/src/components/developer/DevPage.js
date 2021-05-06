@@ -446,7 +446,7 @@ const DevPage = (props) => {
                 direction="column"
                 style={{
                   position: "fixed",
-                  width: "15rem",
+                  width: "16rem",
                   border: "1px solid #ddd",
                   marginTop: "8%",
                   borderRadius: "4px",
@@ -459,7 +459,7 @@ const DevPage = (props) => {
                     alignItems="center"
                     justify="center"
                     style={{
-                      padding: ".6rem",
+                      padding: "1rem",
                       background: "#02475e",
                       borderRadius: "4px 4px 0 0",
                     }}
@@ -479,7 +479,7 @@ const DevPage = (props) => {
                           <Edit3 />
                         </NavLink>
                       )}
-                    <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                    <Avatar style={{ fontSize: "1.5rem", margin: ".3rem" }}>
                       {developer.name.charAt(0)}
                     </Avatar>
                     <Typography
@@ -488,6 +488,7 @@ const DevPage = (props) => {
                         margin: ".1rem 0",
                         fontFamily: "Loto Sans JP",
                         color: "white",
+                        fontWeight: 600,
                       }}
                     >
                       @{developer.username}
@@ -500,8 +501,15 @@ const DevPage = (props) => {
                       padding: ".4rem",
                     }}
                   >
-                    <Typography className={classes.userField}>
-                      <b>Name: </b>
+                    <Typography
+                      className={classes.userField}
+                      style={{
+                        fontFamily: "Lato",
+                        fontWeight: 580,
+                        fontSize: "1.3rem",
+                        textTransform: "capitalize",
+                      }}
+                    >
                       {developer.name}
                     </Typography>
                     <Typography className={classes.userField}>

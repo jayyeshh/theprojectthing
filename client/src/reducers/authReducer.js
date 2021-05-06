@@ -18,6 +18,8 @@ const authReducer = (state = initialState, action) => {
         following,
         website = "",
         github = "",
+        avatar = "",
+        logo = "",
         technologies = [],
         portfolio = "",
         linkedIn = "",
@@ -33,6 +35,7 @@ const authReducer = (state = initialState, action) => {
           technologies,
           about,
           name,
+          logo,
         } = action.payload.company);
         if (action.payload.company.websites) {
           ({ website, linkedIn } = action.payload.company.websites);
@@ -47,6 +50,7 @@ const authReducer = (state = initialState, action) => {
           name,
           followers,
           following,
+          avatar,
         } = action.payload.developer);
         if (action.payload.developer.websites) {
           ({
@@ -70,10 +74,12 @@ const authReducer = (state = initialState, action) => {
         user.following = following;
         user.github = github;
         user.portfolio = portfolio;
+        user.avatar = avatar;
       }
       if (newState.as === "Company") {
         user.about = about;
         user.technologies = technologies;
+        user.logo = logo;
       }
       newState.user = user;
       newState.authenticated = true;
@@ -88,7 +94,9 @@ const authReducer = (state = initialState, action) => {
       let website = "",
         linkedIn = "",
         github = "",
-        portfolio = "";
+        portfolio = "",
+        avatar = "",
+        logo = "";
       if (profile.websites) {
         ({ website, linkedIn, github, portfolio } = profile.websites);
       }
@@ -102,6 +110,7 @@ const authReducer = (state = initialState, action) => {
         name,
         username,
       } = profile;
+      ({ avatar, logo } = profile);
       return {
         authenticated: true,
         as,
@@ -114,6 +123,8 @@ const authReducer = (state = initialState, action) => {
           technologies,
           followers,
           following,
+          avatar,
+          logo,
           website,
           linkedIn,
           github,

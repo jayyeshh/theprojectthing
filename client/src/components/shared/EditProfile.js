@@ -10,14 +10,21 @@ import {
   Box,
   Avatar,
   Button,
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { setModalStateAction } from "../../actions/modalActions";
 import { green } from "@material-ui/core/colors";
 import InputField from "../forms/InputField";
 import axios from "../../utility/axios/apiInstance";
 import { logoutAction } from "../../actions/authActions";
+import UploadAvatar from "react-avatar-edit";
+import { setIcon } from "../../utility/utilityFunctions/ApiCalls";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -100,7 +107,28 @@ const useStyles = makeStyles((theme) => ({
   buttonProgress: {
     color: green[500],
   },
+  large: {
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+  },
+  badgeGrid: {
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
 }));
+
+const SmallAvatar = withStyles((theme) => ({
+  root: {
+    width: 15,
+    height: 15,
+    border: `2px solid ${theme.palette.background.paper}`,
+    "&:hover": {
+      color: "black",
+      cursor: "pointer",
+    },
+  },
+}))(Avatar);
 
 const initialEditProfileFields = {
   username: "",
@@ -131,6 +159,12 @@ const EditProject = ({ profile, ...props }) => {
   const [value, setValue] = useState(0);
   const [changingPassword, setChangingPassword] = useState(false);
   const [updatingProfile, setUpdatingProfile] = useState(false);
+  const [showEditIconDialog, setShowEditIconDialog] = useState(false);
+  const [updatingIcon, setUpdatingIcon] = useState(false);
+  const [avatarState, setAvatarState] = useState({
+    preview: null,
+    src: "",
+  });
   const [passwordChangeFields, setPasswordChangeFields] = useState({
     oldPassword: "",
     newPassword: "",
@@ -150,6 +184,53 @@ const EditProject = ({ profile, ...props }) => {
   const [editProfileErrors, setEditProfileErrors] = useState(
     initialEditProfileErrors
   );
+
+  const onClose = () => {
+    setAvatarState((prevState) => ({
+      ...prevState,
+      preview: null,
+    }));
+  };
+
+  const onCrop = (preview) => {
+    setAvatarState((prevState) => ({
+      ...prevState,
+      preview,
+    }));
+  };
+
+  const toggleEditIconState = () => {
+    setAvatarState({ src: null, preview: profile.icon || profile.avatar });
+    setShowEditIconDialog((prevState) => !prevState);
+  };
+
+  const setIconSubmission = () => {
+    setUpdatingIcon(true);
+    setIcon(avatarState.src)
+      .then((res) => {
+        console.log("res: ", res);
+        const updatedProfile = { ...profile };
+        if (props.authedAs.toLowerCase() === "developer") {
+          updatedProfile.avatar = res.data.icon;
+        }
+        if (props.authedAs.toLowerCase() === "company") {
+          updatedProfile.logo = res.data.icon;
+        }
+        props.updateLocalProfile({
+          profile: updatedProfile,
+          as: props.authedAs,
+        });
+        toggleEditIconState();
+        setUpdatingIcon(false);
+      })
+      .catch((error) => {
+        setUpdatingIcon(false);
+        props.setModalState(true, "Something went wrong! Try again later!");
+        setTimeout(() => {
+          props.setModalState(false, "");
+        }, 3000);
+      });
+  };
 
   const [passwordFieldsErrors, setPaswordFieldsErrors] = useState({
     oldPassword: false,
@@ -323,6 +404,57 @@ const EditProject = ({ profile, ...props }) => {
       justify="center"
       className={classes.mainContainer}
     >
+      {showEditIconDialog && (
+        <Dialog open={showEditIconDialog} onClose={toggleEditIconState}>
+          <DialogTitle id="edit-icon-title">Edit Profile Picture</DialogTitle>
+          <DialogContent dividers>
+            <Grid
+              container
+              direction="row"
+              style={{
+                flexWrap: "nowrap",
+                width: "100%",
+              }}
+              spacing={14}
+            >
+              <UploadAvatar
+                width={290}
+                height={195}
+                onCrop={onCrop}
+                onClose={onClose}
+                src={avatarState.src}
+                onFileLoad={(file) => {
+                  setAvatarState({ src: file });
+                }}
+              />
+              {avatarState.preview && (
+                <img
+                  src={avatarState.preview}
+                  width="180rem"
+                  alt="Preview"
+                  style={{
+                    marginLeft: "4rem",
+                  }}
+                />
+              )}
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={toggleEditIconState}>Cancel</Button>
+            <Button onClick={setIconSubmission}>
+              {updatingIcon ? (
+                <CircularProgress
+                  size={24}
+                  className={classes.buttonProgress}
+                />
+              ) : (
+                "Upload"
+              )}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
       <Grid
         container
         direction="row"
@@ -370,8 +502,32 @@ const EditProject = ({ profile, ...props }) => {
           }}
         >
           <TabPanel value={value} index={0}>
-            <Grid>
-              <Avatar>{profile.username.charAt(0)}</Avatar>
+            <Grid onClick={toggleEditIconState} className={classes.badgeGrid}>
+              <Badge
+                overlap="circle"
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "right",
+                }}
+                badgeContent={
+                  <SmallAvatar
+                    alt="Remy Sharp"
+                    src="/static/images/avatar/1.jpg"
+                  >
+                    +
+                  </SmallAvatar>
+                }
+              >
+                <Avatar
+                  alt="profile-icon"
+                  className={classes.large}
+                  src={
+                    props.authedAs.toLowerCase() === "company"
+                      ? profile.logo
+                      : profile.avatar
+                  }
+                />
+              </Badge>
               <Typography style={{ marginTop: ".3rem" }}>
                 {profile.username}
               </Typography>
@@ -500,17 +656,39 @@ const EditProject = ({ profile, ...props }) => {
               alignContent="center"
             >
               <Grid item xs={12} container direction="row" justify="center">
-                <Avatar>{profile.username.charAt(0)}</Avatar>
-                <Typography
-                  style={{
-                    textAlign: "center",
-                    display: "flex",
-                    alignItems: "center",
-                    marginLeft: ".7rem",
-                  }}
+                <Grid
+                  onClick={toggleEditIconState}
+                  className={classes.badgeGrid}
                 >
-                  {profile.username}
-                </Typography>
+                  <Badge
+                    overlap="circle"
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                    badgeContent={
+                      <SmallAvatar
+                        alt="Remy Sharp"
+                        src="/static/images/avatar/1.jpg"
+                      >
+                        +
+                      </SmallAvatar>
+                    }
+                  >
+                    <Avatar
+                      alt="profile-icon"
+                      className={classes.large}
+                      src={
+                        props.authedAs.toLowerCase() === "company"
+                          ? profile.logo
+                          : profile.avatar
+                      }
+                    />
+                  </Badge>
+                  <Typography style={{ marginTop: ".3rem" }}>
+                    {profile.username}
+                  </Typography>
+                </Grid>
               </Grid>
               <Grid
                 container

@@ -1,34 +1,44 @@
 import express from "express";
-import { Developer, Project } from "../models";
+import { Project } from "../models";
 import { isCompany, isDev } from "../utils/utilityFunctions";
 import authAsDev from "../middlewares/authAsDev";
 import authAsCompany from "../middlewares/authAsCompany";
 import mongoose from "mongoose";
 import fs from "fs";
 import multer from "multer";
-import path from "path";
+import { cloudinary, storage } from "../utils/uploadFunctions";
 
 const router = new express.Router();
 
-const storage = new multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../assets/"));
-  },
-  filname: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-const cloudinary = require("cloudinary").v2;
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const uploadPhotos = async (images, public_id, res) => {
+  const photos = [];
+  for (const [index, img] of images.entries()) {
+    await cloudinary.uploader.upload(
+      img.path,
+      {
+        public_id: `${public_id}.${index}`,
+        tags: "projectphoto",
+        eager: [
+          {
+            width: 1280,
+            height: 720,
+            crop: "mpad",
+          },
+        ],
+      },
+      async function (err, image) {
+        if (err) return res.status(400).send(err);
+        fs.unlinkSync(img.path);
+        photos.push(image.eager[0].url);
+      }
+    );
+  }
+  return photos;
+};
 
 router.post("/", authAsDev, async (req, res) => {
   try {
-    const upload = multer({ storage }).single("photo");
+    const upload = multer({ storage }).any("photo");
     await upload(req, res, async function (err) {
       const { title, about, github, site } = req.body;
       let { tags = "[]" } = req.body;
@@ -63,19 +73,13 @@ router.post("/", authAsDev, async (req, res) => {
         tags,
         developer: req.developer._id,
       });
-      if (req.file) {
-        await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            public_id: `project-images/${req.developer.username}:${project._id}`,
-            tags: "projectphoto",
-          },
-          async function (err, image) {
-            if (err) return res.status(400).send(err);
-            fs.unlinkSync(req.file.path);
-            project.photo = image.url;
-          }
+      if (req.files.length) {
+        const photos = await uploadPhotos(
+          req.files,
+          `project-images/${req.developer.username}:${project._id}`,
+          res
         );
+        project.photos = photos;
       }
       try {
         await project.save();
@@ -272,7 +276,7 @@ router.post("/delete", authAsDev, async (req, res) => {
 router.patch("/:pid", authAsDev, async (req, res) => {
   try {
     const { pid } = req.params;
-    const upload = multer({ storage }).single("photo");
+    const upload = multer({ storage }).any("photo");
     await upload(req, res, async function (err) {
       if (err) return res.send(err);
       let { title, about, github, site, photo, tags = "[]" } = req.body;
@@ -307,18 +311,12 @@ router.patch("/:pid", authAsDev, async (req, res) => {
         return res
           .status(400)
           .send({ error: "You already have a project with same title!" });
-      if (req.file) {
-        await cloudinary.uploader.upload(
-          req.file.path,
-          {
-            public_id: `project-images/${req.developer.username}:${project._id}`,
-            tags: "projectphoto",
-          },
-          async function (err, image) {
-            if (err) return res.status(400).send(err);
-            fs.unlinkSync(req.file.path);
-            photo = image.url;
-          }
+      let photos = project.photos;
+      if (req.files.length) {
+        photos = await uploadPhotos(
+          req.files,
+          `project-images/${req.developer.username}:${project._id}`,
+          res
         );
       }
       try {
@@ -328,6 +326,7 @@ router.patch("/:pid", authAsDev, async (req, res) => {
           photo,
           links,
           tags,
+          photos,
         };
         await project.updateOne({ ...updates });
         res.sendStatus(200);

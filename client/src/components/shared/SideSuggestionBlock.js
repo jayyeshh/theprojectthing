@@ -5,16 +5,15 @@ import { Slash } from "react-feather";
 
 const useStyles = makeStyles((theme) => ({
   sideProjectBlock: {
-    minHeight: "7rem",
+    minHeight: "6rem",
     minWidth: "22rem",
-    margin: ".4rem 0",
+    margin: ".6rem 0",
     padding: ".2rem",
-    paddingLeft: ".6rem",
     boxShadow: "1px 1px 10px gray",
     transition: "all ease-in-out .1s",
     "&:hover": {
       cursor: "pointer",
-      boxShadow: "1px 4px 14px gray",
+      boxShadow: "1px 4px 14px 4px gray",
       transform: "scale(1.02)",
     },
   },
@@ -31,13 +30,14 @@ const SideSuggestionBlock = ({ project }) => {
   return (
     <NavLink to={`/projects/${project._id}`} className={classes.link}>
       <Grid container direction="row" className={classes.sideProjectBlock}>
-        <Grid item xs={5} style={{}}>
-          {project.photo ? (
+        <Grid item xs={5}>
+          {!!project.photos && !!project.photos.length ? (
             <img
               style={{
                 width: "8.4rem",
+                minHeight: "100%",
               }}
-              src={project.photo}
+              src={project.photos[0]}
             />
           ) : (
             <Grid
@@ -48,7 +48,7 @@ const SideSuggestionBlock = ({ project }) => {
                 background: "#ccc",
                 maxWidth: "8rem",
                 minHeight: "98%",
-                color: "black",
+                color: "gray",
               }}
             >
               <Slash />

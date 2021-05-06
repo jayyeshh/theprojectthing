@@ -13,8 +13,9 @@ const projectSchema = new Schema(
       type: String,
       trim: true,
     },
-    photo: {
-      type: String,
+    photos: {
+      type: Array,
+      default: [],
     },
     developer: {
       type: mongoose.Types.ObjectId,

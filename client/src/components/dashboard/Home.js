@@ -5,6 +5,7 @@ import axios from "../../utility/axios/apiInstance";
 import Post from "../post/Post";
 import Spinner from "../spinners/Spinner";
 import CreatePostDialog from "../post/CreatePostDialog";
+import { PlusSquare } from "react-feather";
 
 const useStyles = makeStyles((theme) => ({
   paperStyles: {
@@ -41,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     transition: "all ease-in-out .3s",
     "&:hover": {
       background: "#ccc",
+      color: "blue",
     },
   },
 }));
@@ -105,7 +107,6 @@ const Home = (props) => {
           {props.authedAs.toLowerCase() === "company" && createPost && (
             <CreatePostDialog open={createPost} close={toggleCreatePost} />
           )}
-          {/* {props.authedAs.toLowerCase() === "company" && <PostBlock />} */}
           {props.authedAs.toLowerCase() === "company" && (
             <Grid
               container
@@ -115,9 +116,20 @@ const Home = (props) => {
               className={classes.createPostContainer}
               onClick={toggleCreatePost}
             >
-              <div className={classes.createPostBtn}>
-                <Typography>Create post</Typography>
-              </div>
+              <Grid
+                container
+                justify="center"
+                className={classes.createPostBtn}
+              >
+                <PlusSquare />
+                <Typography
+                  style={{
+                    marginLeft: ".4rem",
+                  }}
+                >
+                  Create post
+                </Typography>
+              </Grid>
             </Grid>
           )}
           {props.authedAs.toLowerCase() === "developer" && posts.length === 0 && (

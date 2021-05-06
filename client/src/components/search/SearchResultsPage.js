@@ -181,13 +181,15 @@ const SearchResultsPage = (props) => {
     }
   };
 
-  const switchType = (type) => {
-    setLoading(true);
-    setResults([]);
-    setType(type);
-    qs.set("type", type);
-    history.replace({ search: qs.toString() });
-    setLoading(false);
+  const switchType = (newType) => {
+    if (newType !== type) {
+      setLoading(true);
+      setResults([]);
+      setType(newType);
+      qs.set("type", newType);
+      history.replace({ search: qs.toString() });
+      setLoading(false);
+    }
   };
 
   return (

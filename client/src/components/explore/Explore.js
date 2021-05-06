@@ -179,7 +179,7 @@ const Explore = (props) => {
             ))}
           </Grid>
         )}
-        {!loading && list.length && type === "projects" && (
+        {!loading && !!list.length && type === "projects" && (
           <Grid item xs={12} container direction="column">
             <Grid
               item

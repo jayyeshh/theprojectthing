@@ -89,3 +89,11 @@ export const deleteProjects = (ids) => {
   setConfigs();
   return axios.post("/project/delete", { ids }, configs);
 };
+
+export const setIcon = (icon) => {
+  console.log("fu****g icon: ", icon)
+  setConfigs();
+  const data = new FormData();
+  data.append("icon", icon);
+  return axios.post("/icon", data, configs);
+};

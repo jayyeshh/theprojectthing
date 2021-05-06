@@ -5,6 +5,9 @@ import authAsDev from "../middlewares/authAsDev";
 import { isDev } from "../utils/utilityFunctions";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import fs from "fs";
+import multer from "multer";
+import { cloudinary, storage } from "../utils/uploadFunctions";
 const router = new express.Router();
 
 router.get("/profile", auth, async (req, res) => {
@@ -428,6 +431,36 @@ router.get("/developers", async (req, res) => {
   try {
     const developers = await Developer.find({});
     res.send(developers);
+  } catch (error) {
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+router.post("/icon", auth, async (req, res) => {
+  try {
+    const upload = multer({ storage }).single("icon");
+    await upload(req, res, async function (err) {
+      if (err) console.log("multer err: ", err);
+      if (req.file) {
+        await cloudinary.uploader.upload(
+          req.file.path,
+          {
+            public_id: `${`avatars/${req.user.username}:${req.user._id}`}`,
+            tags: "avatar",
+          },
+          async function (err, image) {
+            if (err) return res.status(400).send(err);
+            fs.unlinkSync(req.file.path);
+            if (req.as.toLowerCase() === "developer") {
+              await req.user.updateOne({ avatar: image.url });
+            } else if (req.as.toLowerCase() === "company") {
+              await req.user.updateOne({ logo: image.url });
+            }
+            return res.send({ icon: image.url });
+          }
+        );
+      }
+    });
   } catch (error) {
     res.status(500).send({ error: "Internal Server Error" });
   }

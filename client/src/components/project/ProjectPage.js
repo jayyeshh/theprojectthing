@@ -9,6 +9,8 @@ import { setModalStateAction } from "../../actions/modalActions";
 import Spinner from "../spinners/Spinner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMedal } from "@fortawesome/free-solid-svg-icons";
+import "react-image-gallery/styles/css/image-gallery.css";
+import ImageGallery from "react-image-gallery";
 import _ from "lodash";
 import moment from "moment";
 import {
@@ -65,6 +67,13 @@ const useStyles = makeStyles((theme) => ({
   },
   img: {
     maxHeight: "22rem",
+    padding: "1rem 0",
+  },
+  cover: {
+    objectFit: "cover",
+    width: "100%",
+    height: "100%",
+    maxHeight: "24rem",
     padding: "1rem 0",
   },
   blockHeading: {
@@ -161,6 +170,10 @@ const useStyles = makeStyles((theme) => ({
       color: "black",
     },
   },
+  corosolStyles: {
+    minWidth: "100%",
+    minHeight: "100%",
+  },
 }));
 
 const ProjectPage = (props) => {
@@ -180,13 +193,20 @@ const ProjectPage = (props) => {
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const confirmation = useConfirm();
   const history = useHistory();
+  const classes = useStyles();
   if (props.history.location.pathname !== currLocation) {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
   }
 
-  const defaultImage =
-    "https://safetyaustraliagroup.com.au/wp-content/uploads/2019/05/image-not-found.png";
+  const createPhotos = (photos) => {
+    return photos.map((photo) => {
+      return {
+        original: photo,
+        originalClass: classes.corosolStyles,
+      };
+    });
+  };
 
   useEffect(() => {
     const config = {};
@@ -197,6 +217,7 @@ const ProjectPage = (props) => {
     }
     getProjectById(props.match.params.id)
       .then((resp) => {
+        resp.data.photos = createPhotos(resp.data.photos);
         setProject(resp.data);
         setLoading(false);
       })
@@ -219,7 +240,6 @@ const ProjectPage = (props) => {
         console.log("Something went wrong!", error);
       });
   }, [currLocation]);
-  const classes = useStyles();
   const vote = async (type) => {
     if (type) {
       //vote project
@@ -239,7 +259,7 @@ const ProjectPage = (props) => {
   };
 
   const reward = async () => {
-    //vote project
+    //reward project
     rewardProject({ pid: project._id })
       .then(async (_resp) => {
         //refresh data
@@ -531,18 +551,30 @@ const ProjectPage = (props) => {
               ))}
             </Grid>
 
-            <Grid
-              container
-              style={{
-                minWidth: "100%",
-                maxHeight: "30rem",
-              }}
-            >
-              {project.photo ? (
-                <img
-                  src={!!project.photo ? project.photo : defaultImage}
-                  className={classes.img}
-                />
+            <Grid container>
+              {!!project.photos && project.photos.length ? (
+                <Grid
+                  container
+                  justify="center"
+                  alignItems="center"
+                  style={{
+                    minWidth: "100%",
+                    minHeight: "25rem",
+                    background: "#eee",
+                    backgroundSize: "contain",
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                >
+                  <ImageGallery
+                    items={project.photos}
+                    showBullets={true}
+                    showThumbnails={false}
+                    showFullscreenButton={false}
+                    showPlayButton={false}
+                    infinite={false}
+                    slideDuration={200}
+                  />
+                </Grid>
               ) : (
                 <Grid
                   container
@@ -563,7 +595,13 @@ const ProjectPage = (props) => {
                 </Grid>
               )}
             </Grid>
-            <Grid container direction="row">
+            <Grid
+              container
+              direction="row"
+              style={{
+                marginTop: ".4rem",
+              }}
+            >
               <Button
                 disabled={
                   !(

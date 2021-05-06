@@ -22,7 +22,9 @@ const developerSchema = new Schema(
       type: String,
       required: true,
     },
-    avatar: Buffer,
+    avatar: {
+      type: String,
+    },
     email: {
       type: String,
       trim: true,
