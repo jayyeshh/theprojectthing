@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@material-ui/core";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CardHeader, CardContent, CardMedia, Card } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { NavLink } from "react-router-dom";
@@ -31,7 +31,18 @@ const useStyles = makeStyles((theme) => ({
 
 const ExpandableProjectCard = ({ project }) => {
   const classes = useStyles();
-  // const [expanded, setExpanded] = useState(false);
+  const [frontShow, setFrontShow] = useState(null);
+
+  useEffect(() => {
+    if (project.photos && project.photos.length) {
+      const gifFile = project.photos.find((photo) => photo.endsWith(".gif"));
+      if (gifFile) {
+        setFrontShow(gifFile);
+      } else {
+        setFrontShow(project.photos[0]);
+      }
+    }
+  }, []);
   return (
     <div>
       <Card className={classes.root}>
@@ -46,10 +57,10 @@ const ExpandableProjectCard = ({ project }) => {
             )}`}
           />
         </NavLink>
-        {!!project.photo ? (
+        {frontShow ? (
           <CardMedia
             className={classes.media}
-            image={project.photo}
+            image={frontShow}
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = defaultImage;

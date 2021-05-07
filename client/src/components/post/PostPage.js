@@ -247,7 +247,11 @@ const PostPage = (props) => {
             className={classes.profileContainer}
           >
             <Grid container direction="row" className={classes.rowGrid}>
-              <Avatar />
+              {post.author.logo ? (
+                <Avatar src={post.author.logo} />
+              ) : (
+                <Avatar>{post.author.name[0]}</Avatar>
+              )}
               <NavLink
                 to={`/company/${post.author._id}`}
                 className={classes.link}
@@ -294,7 +298,11 @@ const PostPage = (props) => {
                 className={classes.developerBlock}
               >
                 <Grid item xs={2} className={classes.avatar}>
-                  <Avatar>{developer.username[0].toUpperCase()}</Avatar>
+                  {developer.avatar ? (
+                    <Avatar src={developer.avatar} />
+                  ) : (
+                    <Avatar>{developer.username[0].toUpperCase()}</Avatar>
+                  )}
                 </Grid>
                 <Grid item xs={10} container direction="column">
                   <NavLink

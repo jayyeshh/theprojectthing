@@ -353,7 +353,14 @@ const SearchResultsPage = (props) => {
                                 maxWidth: "3.2rem",
                               }}
                             >
-                              <Avatar />
+                              {!!result.logo || result.avatar ? (
+                                <Avatar
+                                  src={result.logo || result.avatar}
+                                  alt="avatar"
+                                />
+                              ) : (
+                                <Avatar />
+                              )}
                             </Grid>
                             <Grid>
                               {/* <NavLink
@@ -467,9 +474,25 @@ const SearchResultsPage = (props) => {
                             maxWidth: "3.2rem",
                           }}
                         >
-                          <Avatar />
+                          {!!result.avatar ? (
+                            <Avatar src={result.avatar} alt="avatar" />
+                          ) : (
+                            <Avatar />
+                          )}
                         </Grid>
-                        <Grid item xs={10} container direction="column">
+                        <Grid
+                          item
+                          xs={10}
+                          container
+                          direction="column"
+                          justify="center"
+                          alignItems="flex-start"
+                          style={{
+                            alignSelf: "flex-start",
+                            minWidth: "92%",
+                            maxWidth: "92%",
+                          }}
+                        >
                           <NavLink
                             to={`/dev/${result._id}`}
                             className={classes.link}
@@ -485,7 +508,7 @@ const SearchResultsPage = (props) => {
                         {props.isAuthenticated &&
                           props.authedAs === "developer" && (
                             <Grid item xs={1} container>
-                              <Button color="primary">Follow</Button>
+                              {/* <Button color="primary">Follow</Button> */}
                             </Grid>
                           )}
                       </Grid>
@@ -513,7 +536,11 @@ const SearchResultsPage = (props) => {
                             maxWidth: "3.2rem",
                           }}
                         >
-                          <Avatar />
+                          {!!result.logo ? (
+                            <Avatar src={result.logo} alt="avatar" />
+                          ) : (
+                            <Avatar />
+                          )}
                         </Grid>
                         <Grid>
                           <NavLink

@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
   suggestionsBlock: {
     width: "100%",
-    padding: "1rem 2rem",
+    padding: "1rem 2rem 1rem 0",
   },
 }));
 
@@ -58,6 +58,7 @@ const Dashboard = (props) => {
           xs={4}
           container
           direction="column"
+          alignItems="flex-start"
           className={classes.suggestionsBlock}
         >
           <SuggestionsBlock />

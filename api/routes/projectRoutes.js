@@ -29,7 +29,8 @@ const uploadPhotos = async (images, public_id, res) => {
       async function (err, image) {
         if (err) return res.status(400).send(err);
         fs.unlinkSync(img.path);
-        photos.push(image.eager[0].url);
+        // photos.push(image.eager[0].url);
+        photos.push(image.url);
       }
     );
   }

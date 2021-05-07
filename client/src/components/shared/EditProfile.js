@@ -208,7 +208,6 @@ const EditProject = ({ profile, ...props }) => {
     setUpdatingIcon(true);
     setIcon(avatarState.src)
       .then((res) => {
-        console.log("res: ", res);
         const updatedProfile = { ...profile };
         if (props.authedAs.toLowerCase() === "developer") {
           updatedProfile.avatar = res.data.icon;
@@ -509,14 +508,7 @@ const EditProject = ({ profile, ...props }) => {
                   vertical: "bottom",
                   horizontal: "right",
                 }}
-                badgeContent={
-                  <SmallAvatar
-                    alt="Remy Sharp"
-                    src="/static/images/avatar/1.jpg"
-                  >
-                    +
-                  </SmallAvatar>
-                }
+                badgeContent={<SmallAvatar alt="plus">+</SmallAvatar>}
               >
                 <Avatar
                   alt="profile-icon"
@@ -666,14 +658,7 @@ const EditProject = ({ profile, ...props }) => {
                       vertical: "bottom",
                       horizontal: "right",
                     }}
-                    badgeContent={
-                      <SmallAvatar
-                        alt="Remy Sharp"
-                        src="/static/images/avatar/1.jpg"
-                      >
-                        +
-                      </SmallAvatar>
-                    }
+                    badgeContent={<SmallAvatar alt="plus">+</SmallAvatar>}
                   >
                     <Avatar
                       alt="profile-icon"

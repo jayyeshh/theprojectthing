@@ -91,7 +91,6 @@ export const deleteProjects = (ids) => {
 };
 
 export const setIcon = (icon) => {
-  console.log("fu****g icon: ", icon)
   setConfigs();
   const data = new FormData();
   data.append("icon", icon);

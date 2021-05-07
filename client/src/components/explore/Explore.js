@@ -235,11 +235,11 @@ const Explore = (props) => {
             item
             xs={12}
             container
-            spacing={4}
             direction="row"
             justify="center"
+            spacing={4}
           >
-            {list.map((company, index) => (
+            {list.map((company) => (
               <Grid
                 style={{ minWidth: "18rem" }}
                 key={company._id}

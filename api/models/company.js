@@ -22,7 +22,10 @@ const companySchema = new Schema(
       type: String,
       required: true,
     },
-    logo: Buffer,
+    logo: {
+      type: String,
+      default: "",
+    },
     about: {
       type: String,
       maxLength: 150,

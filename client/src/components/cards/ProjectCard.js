@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Card from "@material-ui/core/Card";
 import CardActionArea from "@material-ui/core/CardActionArea";
@@ -31,6 +31,15 @@ const onMediaFallback = (event) => {
 const ProjectCard = ({ project }) => {
   const classes = useStyles();
   const history = useHistory();
+  const [frontFace, setFrontFace] = useState(null);
+
+  useEffect(() => {
+    if (project.photos && project.photos.length) {
+      const gif = project.photos.find((photo) => photo.endsWith(".gif"));
+      if (gif) setFrontFace(gif);
+      else setFrontFace(project.photos[0]);
+    }
+  }, []);
   if (!!!project.title) return <></>;
   return (
     <Card className={classes.root}>
@@ -39,7 +48,7 @@ const ProjectCard = ({ project }) => {
           component="img"
           alt="project snapshot"
           height="140"
-          image={!!project.photo ? project.photo : defaultImage}
+          image={!!frontFace ? frontFace : defaultImage}
           onError={onMediaFallback}
           title={project.title}
         />

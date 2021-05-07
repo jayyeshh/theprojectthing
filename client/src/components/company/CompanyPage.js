@@ -115,6 +115,12 @@ const useStyles = makeStyles((theme) => ({
       color: "black",
     },
   },
+  avatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+  },
 }));
 
 const CompanyPage = (props) => {
@@ -275,16 +281,19 @@ const CompanyPage = (props) => {
                       paddingTop: "1rem",
                     }}
                   >
-                    <Avatar
-                      style={{
-                        fontSize: "1.4rem",
-                        margin: ".3rem",
-                        border: "2px solid gray",
-                        padding: ".4rem",
-                      }}
-                    >
-                      {company.name.charAt(0)}
-                    </Avatar>
+                    {company.logo ? (
+                      <Avatar
+                        className={classes.avatarStyles}
+                        src={company.logo}
+                      >
+                        {company.name.charAt(0)}
+                      </Avatar>
+                    ) : (
+                      <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                        {company.name.charAt(0)}
+                      </Avatar>
+                    )}
+
                     <Typography
                       color="textSecondary"
                       style={{
@@ -406,29 +415,40 @@ const CompanyPage = (props) => {
               </div>
             </Hidden>
             <Hidden smUp>
-              <Grid className={classes.profileSubContainer}>
-                <Avatar
-                  style={{
-                    fontSize: "1.4rem",
-                    margin: ".3rem",
-                    border: "2px solid blue",
-                    padding: ".4rem",
-                  }}
-                >
-                  {company.name.charAt(0)}
-                </Avatar>
+              <Grid
+                container
+                justify="center"
+                className={classes.profileSubContainer}
+              >
+                <Grid>
+                  {company.logo ? (
+                    <Avatar className={classes.avatarStyles} src={company.logo}>
+                      {company.name.charAt(0)}
+                    </Avatar>
+                  ) : (
+                    <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                      {company.name.charAt(0)}
+                    </Avatar>
+                  )}
+                </Grid>
                 <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
                   @{company.username}
                 </Typography>
-                <Typography>{company.name}</Typography>
-                <div
+                <Typography
                   style={{
-                    margin: ".7rem 0",
+                    fontFamily: "Loto Sans JP",
+                    fontWeight: 600,
+                    fontSize: "1.5rem",
                   }}
                 >
+                  {company.name}
+                </Typography>
+                <Grid container>
                   <Typography className={classes.boldLabel}>Email:</Typography>
-                  <Typography> {company.email}</Typography>
-                </div>
+                  <Typography style={{ marginLeft: ".4rem" }}>
+                    {company.email}
+                  </Typography>
+                </Grid>
                 <Grid
                   container
                   direction="row"

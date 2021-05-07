@@ -10,7 +10,8 @@ import Spinner from "../spinners/Spinner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMedal } from "@fortawesome/free-solid-svg-icons";
 import "react-image-gallery/styles/css/image-gallery.css";
-import ImageGallery from "react-image-gallery";
+import NavigateBeforeSharpIcon from "@material-ui/icons/NavigateBeforeSharp";
+import NavigateNextSharpIcon from "@material-ui/icons/NavigateNextSharp";
 import _ from "lodash";
 import moment from "moment";
 import {
@@ -174,6 +175,37 @@ const useStyles = makeStyles((theme) => ({
     minWidth: "100%",
     minHeight: "100%",
   },
+  avatarStyles: {
+    fontSize: "1.4rem",
+    width: theme.spacing(5),
+    height: theme.spacing(5),
+  },
+  arrowBtn: {
+    position: "absolute",
+    top: 210,
+    display: "flex",
+    justifyContent: "center",
+    alignContent: "center",
+    borderRadius: "50%",
+    backgroundColor: "transparent",
+    border: "1px solid black",
+    transition: "all ease-in-out .2s",
+    "&:hover": {
+      cursor: "pointer",
+      border: "1px solid white",
+      transform: "scale(1.1)",
+      background: "white",
+    },
+  },
+  arrowIcon: {
+    transition: "all ease-in-out .2s",
+    color: "black",
+    "&:hover": {
+      color: "black",
+      cursor: "pointer",
+      transform: "scale(1.1)",
+    },
+  },
 }));
 
 const ProjectPage = (props) => {
@@ -191,6 +223,7 @@ const ProjectPage = (props) => {
   const [viewRewardModal, setViewRewardModal] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
+  const [gallery, setGallery] = useState(0);
   const confirmation = useConfirm();
   const history = useHistory();
   const classes = useStyles();
@@ -198,15 +231,6 @@ const ProjectPage = (props) => {
     setLoading(true);
     setCurrLocation(props.history.location.pathname);
   }
-
-  const createPhotos = (photos) => {
-    return photos.map((photo) => {
-      return {
-        original: photo,
-        originalClass: classes.corosolStyles,
-      };
-    });
-  };
 
   useEffect(() => {
     const config = {};
@@ -217,8 +241,8 @@ const ProjectPage = (props) => {
     }
     getProjectById(props.match.params.id)
       .then((resp) => {
-        resp.data.photos = createPhotos(resp.data.photos);
         setProject(resp.data);
+        console.log(resp.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -247,9 +271,11 @@ const ProjectPage = (props) => {
         .then(async (_resp) => {
           //refresh data
           const updatedProject = await getProjectById(project._id);
+          // updatedProject.data.photos = createPhotos(updatedProject.data.photos);
           setProject(updatedProject.data);
         })
         .catch((error) => {
+          console.log("er: ", error);
           props.setModalState(true, `Something went wrong! Try again later.`);
           setTimeout(() => {
             props.setModalState(false, "");
@@ -264,6 +290,7 @@ const ProjectPage = (props) => {
       .then(async (_resp) => {
         //refresh data
         const updatedProject = { ...project };
+        // updatedProject.data.photos = createPhotos(updatedProject.data.photos);
         const alreadyRewarded = project.rewards.some(
           (rewardingOrg) =>
             rewardingOrg._id.toString() ===
@@ -294,6 +321,22 @@ const ProjectPage = (props) => {
           props.setModalState(false, "");
         }, 3000);
       });
+  };
+
+  const nextPhoto = () => {
+    setGallery((prev) => {
+      if (prev >= project.photos.length - 1) {
+        return prev;
+      }
+      return prev + 1;
+    });
+  };
+
+  const prevPhoto = () => {
+    setGallery((prev) => {
+      if (prev <= 0) return prev;
+      return prev - 1;
+    });
   };
 
   const postComment = () => {
@@ -558,14 +601,34 @@ const ProjectPage = (props) => {
                   justify="center"
                   alignItems="center"
                   style={{
-                    minWidth: "100%",
+                    position: "relative",
+                    overflow: "hidden",
                     minHeight: "25rem",
                     background: "#eee",
                     backgroundSize: "contain",
-                    backgroundRepeat: 'no-repeat',
+                    backgroundRepeat: "no-repeat",
+                    flexWrap: "nowrap",
                   }}
                 >
-                  <ImageGallery
+                  {gallery > 0 && (
+                    <span
+                      onClick={prevPhoto}
+                      className={classes.arrowBtn}
+                      style={{
+                        left: 15,
+                      }}
+                    >
+                      <NavigateBeforeSharpIcon
+                        className={classes.arrowIcon}
+                        style={{
+                          fontSize: "2rem",
+                          alignSelf: "center",
+                        }}
+                      />
+                    </span>
+                  )}
+                  <img src={project.photos[gallery]} width="100%" />
+                  {/* <ImageGallery
                     items={project.photos}
                     showBullets={true}
                     showThumbnails={false}
@@ -573,7 +636,24 @@ const ProjectPage = (props) => {
                     showPlayButton={false}
                     infinite={false}
                     slideDuration={200}
-                  />
+                  /> */}
+                  {gallery < project.photos.length - 1 && (
+                    <span
+                      onClick={nextPhoto}
+                      className={classes.arrowBtn}
+                      style={{
+                        right: 15,
+                      }}
+                    >
+                      <NavigateNextSharpIcon
+                        className={classes.arrowIcon}
+                        style={{
+                          fontSize: "2rem",
+                          alignSelf: "center",
+                        }}
+                      />
+                    </span>
+                  )}
                 </Grid>
               ) : (
                 <Grid
@@ -670,7 +750,18 @@ const ProjectPage = (props) => {
             <Divider style={{ marginBottom: ".7rem" }} />
             <Grid container direction="row">
               <Grid item xs={1} justify="center" style={{ maxWidth: "3rem" }}>
-                <Avatar />
+                {project.developer.avatar ? (
+                  <Avatar
+                    className={classes.avatarStyles}
+                    src={project.developer.avatar}
+                  >
+                    {project.developer.name.charAt(0)}
+                  </Avatar>
+                ) : (
+                  <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                    {project.developer.name.charAt(0)}
+                  </Avatar>
+                )}
               </Grid>
 
               <Grid
@@ -693,7 +784,13 @@ const ProjectPage = (props) => {
                   style={{ transition: "all 1s ease-in-out" }}
                 >
                   {project.about.length < 80 || expanded ? (
-                    <Grid container direction="row">
+                    <Grid
+                      container
+                      direction="row"
+                      style={{
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
                       <Typography>{project.about}</Typography>
                       {expanded && (
                         <Typography
@@ -780,20 +877,24 @@ const ProjectPage = (props) => {
                     return (
                       <Grid
                         key={comment._id}
-                        item
-                        md={9}
-                        xs={12}
                         container
-                        direction="column"
+                        direction="row"
                         className={classes.commentStyle}
+                        style={{ flexWrap: "nowrap" }}
                       >
-                        <Grid item xs={12} container direction="row">
-                          <Avatar
-                            aria-label={comment.by.username}
-                            className={classes.avatar}
-                          >
-                            {comment.by.username.charAt(0).toUpperCase()}
-                          </Avatar>
+                        <Grid item xs={1}>
+                          {comment.by.avatar || comment.by.logo ? (
+                            <Avatar
+                              className={classes.avatarStyles}
+                              src={comment.by.avatar || comment.by.logo}
+                            />
+                          ) : (
+                            <Avatar className={classes.blankAvatarStyles}>
+                              {comment.by.username.charAt(0)}
+                            </Avatar>
+                          )}
+                        </Grid>
+                        <Grid item={10} container direction="column">
                           <TextField
                             focused
                             id="editable-comment"
@@ -810,37 +911,39 @@ const ProjectPage = (props) => {
                               marginLeft: "1rem",
                             }}
                           />
-                        </Grid>
-                        <Grid container direction="row" justify="flex-end">
-                          <Button
-                            variant="contained"
-                            onClick={() => deleteComment()}
-                            style={{ marginRight: ".7rem", color: "red" }}
-                          >
-                            <DeleteIcon />
-                          </Button>
-                          <Button
-                            variant="contained"
-                            onClick={() => cancelCommentEditing()}
-                          >
-                            CANCEL
-                          </Button>
-                          <Button
-                            disabled={!!!editingCommentText || updatingComment}
-                            variant="contained"
-                            color="primary"
-                            style={{ marginLeft: ".7rem" }}
-                            onClick={() => updateComment(index)}
-                          >
-                            {updatingComment ? (
-                              <CircularProgress
-                                size={14}
-                                className={classes.buttonProgress}
-                              />
-                            ) : (
-                              "UPDATE"
-                            )}
-                          </Button>
+                          <Grid container direction="row" justify="flex-end">
+                            <Button
+                              variant="contained"
+                              onClick={() => deleteComment()}
+                              style={{ marginRight: ".7rem", color: "red" }}
+                            >
+                              <DeleteIcon />
+                            </Button>
+                            <Button
+                              variant="contained"
+                              onClick={() => cancelCommentEditing()}
+                            >
+                              CANCEL
+                            </Button>
+                            <Button
+                              disabled={
+                                !!!editingCommentText || updatingComment
+                              }
+                              variant="contained"
+                              color="primary"
+                              style={{ marginLeft: ".7rem" }}
+                              onClick={() => updateComment(index)}
+                            >
+                              {updatingComment ? (
+                                <CircularProgress
+                                  size={14}
+                                  className={classes.buttonProgress}
+                                />
+                              ) : (
+                                "UPDATE"
+                              )}
+                            </Button>
+                          </Grid>
                         </Grid>
                       </Grid>
                     );
@@ -854,21 +957,28 @@ const ProjectPage = (props) => {
                         direction="row"
                         alignItems="flex-start"
                         className={classes.commentStyle}
+                        style={{
+                          flexWrap: "nowrap",
+                        }}
                       >
                         <Grid
                           item
                           xs={1}
                           style={{
                             maxWidth: "2.5rem",
-                            paddingTop: ".8rem",
+                            paddingTop: ".4rem",
                           }}
                         >
-                          <Avatar
-                            aria-label={comment.by.username}
-                            className={classes.avatar}
-                          >
-                            {comment.by.username.charAt(0).toUpperCase()}
-                          </Avatar>
+                          {comment.by.avatar || comment.by.logo ? (
+                            <Avatar
+                              className={classes.avatarStyles}
+                              src={comment.by.avatar || comment.by.logo}
+                            />
+                          ) : (
+                            <Avatar className={classes.blankAvatarStyles}>
+                              {comment.by.username.charAt(0)}
+                            </Avatar>
+                          )}
                         </Grid>
                         <Grid
                           item
@@ -885,6 +995,9 @@ const ProjectPage = (props) => {
                             container
                             direction="row"
                             justify="space-between"
+                            style={{
+                              maxHeight: "2.3rem",
+                            }}
                           >
                             <Grid
                               item

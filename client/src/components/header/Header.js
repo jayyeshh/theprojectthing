@@ -11,6 +11,7 @@ import {
   ListItemText,
   Divider,
   Hidden,
+  Avatar,
 } from "@material-ui/core";
 import { NavLink, useHistory, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";

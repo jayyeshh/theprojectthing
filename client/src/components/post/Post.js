@@ -10,6 +10,9 @@ import {
   voteProject,
   getProjectById,
 } from "../../utility/utilityFunctions/ApiCalls";
+import { MessageCircle } from "react-feather";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComment } from "@fortawesome/free-solid-svg-icons";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -18,10 +21,12 @@ const useStyles = makeStyles((theme) => ({
     border: ".1px solid #b1bdb4",
     borderRadius: "3px",
     margin: "2rem",
+    marginBottom: 0,
     background: "#fff",
     [theme.breakpoints.down("xs")]: {
       width: "100%",
       margin: "2rem 0",
+      marginBottom: 0,
       alignSelf: "center",
       justifyContent: "center",
     },
@@ -63,6 +68,12 @@ const useStyles = makeStyles((theme) => ({
   voted: {
     color: "red",
   },
+  avatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(4),
+    height: theme.spacing(4),
+  },
 }));
 
 const Post = ({ post, ...props }) => {
@@ -95,9 +106,19 @@ const Post = ({ post, ...props }) => {
         justify="space-between"
       >
         <Grid className={classes.postHeaderIdentity}>
-          <Avatar aria-label={post.developer.username}>
-            {post.developer.username.charAt(0).toUpperCase()}
-          </Avatar>
+          {post.developer.avatar ? (
+            <Avatar
+              className={classes.avatarStyles}
+              src={post.developer.avatar}
+            >
+              {post.developer.name.charAt(0)}
+            </Avatar>
+          ) : (
+            <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+              {post.developer.name.charAt(0)}
+            </Avatar>
+          )}
+
           <NavLink
             to={{
               pathname: `/dev/${post.developer._id}`,
@@ -164,9 +185,13 @@ const Post = ({ post, ...props }) => {
         xs={12}
         container
         direction="row"
+        alignItems="center"
         className={classes.footerStyles}
+        style={{
+          flexWrap: "nowrap",
+        }}
       >
-        <div>
+        <Grid item xs={9} container alignItems="center">
           <Button
             disabled={
               !(props.isAuthenticated && props.as.toLowerCase() === "developer")
@@ -195,18 +220,20 @@ const Post = ({ post, ...props }) => {
             />
             <Typography>{post.downvotes}</Typography>
           </Button>
-        </div>
-        <NavLink
-          to={{
-            pathname: `/projects/${post._id}`,
-          }}
-          className={classes.linkStyles}
-          style={{
-            alignSelf: "center",
-          }}
-        >
-          <Typography>view project</Typography>
-        </NavLink>
+        </Grid>
+        <Grid item xs={3} container justify="flex-end">
+          <NavLink
+            to={{
+              pathname: `/projects/${post._id}`,
+            }}
+            className={classes.linkStyles}
+            style={{
+              alignSelf: "center",
+            }}
+          >
+            <Typography>view project</Typography>
+          </NavLink>
+        </Grid>
       </Grid>
     </Grid>
   );

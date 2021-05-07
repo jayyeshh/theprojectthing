@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Avatar, Grid, makeStyles, Typography } from "@material-ui/core";
 import {
-  getCompanies,
   getDevelopers,
   getPosts,
   getProjects,
 } from "../../utility/utilityFunctions/ApiCalls";
-import ListAlt from "@material-ui/icons/ListAlt";
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import _ from "lodash";
@@ -151,9 +149,21 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
             className={`${classes.wrapperGrid} ${classes.profileBlock}`}
           >
             <Grid item xs={2} container alignItems="center">
-              <NavLink to={`/dev/${user._id}`}>
-                <Avatar variant="rounded" />
-              </NavLink>
+              {authedAs.toLowerCase() === "developer" ? (
+                user.avatar ? (
+                  <Avatar className={classes.avatarStyles} src={user.avatar} />
+                ) : (
+                  <Avatar className={classes.blankAvatarStyles}>
+                    {user.name.charAt(0)}
+                  </Avatar>
+                )
+              ) : user.logo ? (
+                <Avatar className={classes.avatarStyles} src={user.logo} />
+              ) : (
+                <Avatar className={classes.blankAvatarStyles}>
+                  {user.name.charAt(0)}
+                </Avatar>
+              )}
             </Grid>
             <Grid item xs={9} container direction="column" justify="center">
               <Typography>{user.name.toUpperCase()}</Typography>

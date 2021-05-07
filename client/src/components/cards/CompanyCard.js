@@ -2,16 +2,15 @@ import React from "react";
 import {
   Grid,
   Card,
-  CardHeader,
   Avatar,
   Typography,
   CardContent,
   CardActionArea,
+  makeStyles,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { useHistory } from "react-router";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     margin: "1rem",
     height: "15rem",
@@ -21,7 +20,21 @@ const useStyles = makeStyles({
     },
   },
   actionBtn: {},
-});
+  avatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+    margin: "1rem",
+  },
+  blankAvatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+    margin: "1rem",
+  },
+}));
 
 const CompanyCard = ({ profile, setError }) => {
   const classes = useStyles();
@@ -34,19 +47,26 @@ const CompanyCard = ({ profile, setError }) => {
         history.push(`/company/${profile._id}`);
       }}
     >
-      <CardHeader
+      <Grid
+        container
+        justify="center"
+        alignItems="center"
         style={{
           borderBottom: "1px solid #cbd6ce",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: '3rem'
+          minHeight: "5rem",
         }}
-        avatar={
-          <Avatar aria-label={profile.username} className={classes.avatar}>
-            {profile.username.charAt(0).toUpperCase()}
+      >
+        {profile.logo ? (
+          <Avatar className={classes.avatarStyles} src={profile.logo}>
+            {profile.name.charAt(0)}
           </Avatar>
-        }
-      />
+        ) : (
+          <Avatar className={classes.blankAvatarStyles}>
+            {profile.name.charAt(0)}
+          </Avatar>
+        )}
+      </Grid>
+
       <CardActionArea>
         <CardContent>
           <Typography color="textSecondary">@{profile.username}</Typography>

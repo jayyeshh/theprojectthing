@@ -10,15 +10,16 @@ import { PlusSquare } from "react-feather";
 const useStyles = makeStyles((theme) => ({
   paperStyles: {
     maxWidth: "100%",
-    overflow: "hidden",
+    paddingBottom: "4rem",
     [theme.breakpoints.down("xs")]: {
       padding: 0,
+      paddingBottom: "3rem",
     },
   },
   homeContainer: {
     width: "100%",
     overflowY: "auto",
-    marginLeft: "1rem",
+    marginRight: "3rem",
     [theme.breakpoints.down("xs")]: {
       paddingLeft: 0,
       margin: 0,
@@ -103,7 +104,12 @@ const Home = (props) => {
           <Spinner />
         </Grid>
       ) : (
-        <Grid className={classes.homeContainer}>
+        <Grid
+          container
+          direction="column"
+          alignItems="flex-end"
+          className={classes.homeContainer}
+        >
           {props.authedAs.toLowerCase() === "company" && createPost && (
             <CreatePostDialog open={createPost} close={toggleCreatePost} />
           )}

@@ -81,6 +81,12 @@ const useStyles = makeStyles((theme) => ({
   linkStyles: {
     textDecoration: "none",
   },
+  avatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(6),
+    height: theme.spacing(6),
+  },
   userField: {
     marginBottom: "8px",
   },
@@ -283,13 +289,23 @@ const DevPage = (props) => {
               <Grid
                 item
                 container
+                direction="column"
                 align="center"
                 justify="center"
                 alignItems="center"
               >
-                <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
-                  {developer.name.charAt(0)}
-                </Avatar>
+                {developer.avatar ? (
+                  <Avatar
+                    className={classes.avatarStyles}
+                    src={developer.avatar}
+                  >
+                    {developer.name.charAt(0)}
+                  </Avatar>
+                ) : (
+                  <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                    {developer.name.charAt(0)}
+                  </Avatar>
+                )}
                 <Typography color="textSecondary" style={{ margin: ".1rem 0" }}>
                   @{developer.username}
                 </Typography>
@@ -479,9 +495,18 @@ const DevPage = (props) => {
                           <Edit3 />
                         </NavLink>
                       )}
-                    <Avatar style={{ fontSize: "1.5rem", margin: ".3rem" }}>
-                      {developer.name.charAt(0)}
-                    </Avatar>
+                    {developer.avatar ? (
+                      <Avatar
+                        className={classes.avatarStyles}
+                        src={developer.avatar}
+                      >
+                        {developer.name.charAt(0)}
+                      </Avatar>
+                    ) : (
+                      <Avatar style={{ fontSize: "1.4rem", margin: ".3rem" }}>
+                        {developer.name.charAt(0)}
+                      </Avatar>
+                    )}
                     <Typography
                       color="textSecondary"
                       style={{

@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import React from "react";
 import {
   Card,
   CardActionArea,
@@ -8,8 +7,8 @@ import {
   Grid,
   Button,
   CardActions,
-  CardHeader,
   Avatar,
+  makeStyles,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { connect } from "react-redux";
@@ -20,17 +19,34 @@ import {
 import { setupAuthentication } from "../../actions/authActions";
 import { setModalStateAction } from "../../actions/modalActions";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
-    margin: "1rem",
+    margin: ".8rem",
     minHeight: "15rem",
     "&:hover": {
       cursor: "pointer",
       boxShadow: "5px 20px 12px",
     },
+    [theme.breakpoints.down('sm')]:{
+      margin: '.4rem'
+    }
   },
   actionBtn: {},
-});
+  avatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(8),
+    height: theme.spacing(8),
+    margin: "1rem",
+  },
+  blankAvatarStyles: {
+    fontSize: "1.4rem",
+    margin: ".3rem",
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+    margin: "1rem",
+  },
+}));
 
 const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
   const classes = useStyles();
@@ -89,18 +105,26 @@ const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
         }
       }}
     >
-      <CardHeader
+      <Grid
+        container
+        justify="center"
+        alignItems="center"
         style={{
           borderBottom: "1px solid #cbd6ce",
-          display: "flex",
-          flexDirection: "column",
+          minHeight: "5rem",
         }}
-        avatar={
-          <Avatar aria-label={profile.username} className={classes.avatar}>
-            {profile.username.charAt(0).toUpperCase()}
+      >
+        {profile.avatar ? (
+          <Avatar className={classes.avatarStyles} src={profile.avatar}>
+            {profile.name.charAt(0)}
           </Avatar>
-        }
-      />
+        ) : (
+          <Avatar className={classes.blankAvatarStyles}>
+            {profile.name.charAt(0)}
+          </Avatar>
+        )}
+      </Grid>
+
       <CardActionArea>
         <CardContent>
           <Typography color="textSecondary">@{profile.username}</Typography>
