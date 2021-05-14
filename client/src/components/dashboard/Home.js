@@ -30,9 +30,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "2rem",
     minHeight: "3rem",
     width: "70%",
+    marginRight: "2rem",
     background: "white",
     "&:hover": {
       cursor: "pointer",
+    },
+    [theme.breakpoints.down("xs")]: {
+      minWidth: "100%",
+      marginRight: 0,
     },
   },
   createPostBtn: {

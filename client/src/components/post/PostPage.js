@@ -6,6 +6,7 @@ import {
   Button,
   Grid,
   Typography,
+  Hidden,
 } from "@material-ui/core";
 import ExposureNeg1Icon from "@material-ui/icons/ExposureNeg1";
 import ExposurePlus1OutlinedIcon from "@material-ui/icons/ExposurePlus1Outlined";
@@ -23,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
     background: "#1F4980",
     minHeight: "100vh",
     width: "100%",
-    border: "1px solid black",
     padding: "2rem",
     [theme.breakpoints.down("xs")]: {
       padding: "2rem 0",
@@ -37,6 +37,8 @@ const useStyles = makeStyles((theme) => ({
     padding: "1rem",
     background: "white",
     height: "100%",
+    wordWrap: "break-word",
+    margin: ".3rem",
   },
   postTitle: {
     fontFamily: "Nono Sans JP",
@@ -51,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
   },
   postBody: {
     color: "#333",
+    whiteSpace: "pre-wrap",
   },
   profile: {
     marginLeft: "1rem",
@@ -108,7 +111,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const PostPage = (props) => {
-  console.log(props);
   const classes = useStyles();
   const [post, setPost] = useState({});
   const [loading, setLoading] = useState(true);
@@ -185,7 +187,7 @@ const PostPage = (props) => {
       justify="center"
       className={classes.mainContainer}
     >
-      <Grid item xs={8} className={classes.postBlock}>
+      <Grid item xs={11} md={8} className={classes.postBlock}>
         <Typography className={classes.postTitle}>{post.title}</Typography>
         <Typography className={classes.date}>
           {new moment(post.createdAt).format("YYYY, MMM DD")}
@@ -232,98 +234,101 @@ const PostPage = (props) => {
           )}
         </Grid>
       </Grid>
-      <Grid
-        item
-        xs={3}
-        container
-        direction="column"
-        className={classes.profile}
-      >
-        <Grid container direction="column" className={classes.profileSection}>
-          <Grid container className={classes.profileTop}></Grid>
-          <Grid
-            container
-            direction="column"
-            className={classes.profileContainer}
-          >
-            <Grid container direction="row" className={classes.rowGrid}>
-              {post.author.logo ? (
-                <Avatar src={post.author.logo} />
-              ) : (
-                <Avatar>{post.author.name[0]}</Avatar>
-              )}
-              <NavLink
-                to={`/company/${post.author._id}`}
-                className={classes.link}
-              >
-                <Typography className={classes.boldTitle}>
-                  {post.author.name}
-                </Typography>
-              </NavLink>
-            </Grid>
+
+      <Hidden mdDown>
+        <Grid
+          item
+          xs={3}
+          container
+          direction="column"
+          className={classes.profile}
+        >
+          <Grid container direction="column" className={classes.profileSection}>
+            <Grid container className={classes.profileTop}></Grid>
             <Grid
               container
               direction="column"
-              className={classes.profileDetails}
+              className={classes.profileContainer}
             >
-              <Typography>{post.author.about}</Typography>
-              <Typography className={classes.label}>Email: </Typography>
-              <Typography>{post.author.email}</Typography>
-              <Typography className={classes.label}>Joined:</Typography>
-              <Typography>
-                {new moment(post.author.createdAt).format("YYYY, MMM DD")}
-              </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                className={classes.btnStyles}
-                onClick={() => {
-                  history.push(`/company/${post.author._id}`);
-                }}
-              >
-                View Profile
-              </Button>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid container direction="column" className={classes.listBlock}>
-          <Typography className={classes.blockTitle}>
-            Interested Developers
-          </Typography>
-          {post.interested.map((developer) => {
-            return (
+              <Grid container direction="row" className={classes.rowGrid}>
+                {post.author.logo ? (
+                  <Avatar src={post.author.logo} />
+                ) : (
+                  <Avatar>{post.author.name[0]}</Avatar>
+                )}
+                <NavLink
+                  to={`/company/${post.author._id}`}
+                  className={classes.link}
+                >
+                  <Typography className={classes.boldTitle}>
+                    {post.author.name}
+                  </Typography>
+                </NavLink>
+              </Grid>
               <Grid
                 container
-                direction="row"
-                className={classes.developerBlock}
+                direction="column"
+                className={classes.profileDetails}
               >
-                <Grid item xs={2} className={classes.avatar}>
-                  {developer.avatar ? (
-                    <Avatar src={developer.avatar} />
-                  ) : (
-                    <Avatar>{developer.username[0].toUpperCase()}</Avatar>
-                  )}
-                </Grid>
-                <Grid item xs={10} container direction="column">
-                  <NavLink
-                    to={`/dev/${developer._id}`}
-                    className={classes.link}
-                  >
-                    <Typography
-                      className={classes.label}
-                      style={{
-                        color: "black",
-                      }}
-                    >
-                      {developer.name}
-                    </Typography>
-                  </NavLink>
-                </Grid>
+                <Typography>{post.author.about}</Typography>
+                <Typography className={classes.label}>Email: </Typography>
+                <Typography>{post.author.email}</Typography>
+                <Typography className={classes.label}>Joined:</Typography>
+                <Typography>
+                  {new moment(post.author.createdAt).format("YYYY, MMM DD")}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  className={classes.btnStyles}
+                  onClick={() => {
+                    history.push(`/company/${post.author._id}`);
+                  }}
+                >
+                  View Profile
+                </Button>
               </Grid>
-            );
-          })}
+            </Grid>
+          </Grid>
+          <Grid container direction="column" className={classes.listBlock}>
+            <Typography className={classes.blockTitle}>
+              Interested Developers
+            </Typography>
+            {post.interested.map((developer) => {
+              return (
+                <Grid
+                  container
+                  direction="row"
+                  className={classes.developerBlock}
+                >
+                  <Grid item xs={2} className={classes.avatar}>
+                    {developer.avatar ? (
+                      <Avatar src={developer.avatar} />
+                    ) : (
+                      <Avatar>{developer.username[0].toUpperCase()}</Avatar>
+                    )}
+                  </Grid>
+                  <Grid item xs={10} container direction="column">
+                    <NavLink
+                      to={`/dev/${developer._id}`}
+                      className={classes.link}
+                    >
+                      <Typography
+                        className={classes.label}
+                        style={{
+                          color: "black",
+                        }}
+                      >
+                        {developer.name}
+                      </Typography>
+                    </NavLink>
+                  </Grid>
+                </Grid>
+              );
+            })}
+          </Grid>
         </Grid>
-      </Grid>
+      </Hidden>
     </Grid>
   );
 };

@@ -66,4 +66,24 @@ router.post("/interested", authAsDev, async (req, res) => {
   }
 });
 
+router.delete("/:pid", authAsCompany, async (req, res) => {
+  try {
+    const { pid } = req.params;
+    const post = await Post.findById(pid);
+    if (!post)
+      return res.status(404).send({
+        error: "Invalid Post Id",
+      });
+    if (post.author.toString() !== req.company._id.toString())
+      return res.send(400).send({
+        error: "You don't have permission to perform this action!",
+      });
+    await Post.deleteOne({ _id: post._id });
+    await req.company.updateOne({ $pull: { posts: post._id } });
+    res.sendStatus(200);
+  } catch (error) {
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 export default router;

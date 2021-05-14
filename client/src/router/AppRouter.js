@@ -22,6 +22,7 @@ import CompanyPage from "../components/company/CompanyPage";
 import PostPage from "../components/post/PostPage";
 import { setupAuthentication } from "../actions/authActions";
 import Spinner from "../components/spinners/Spinner";
+import Test from "../components/test";
 
 const AppRouter = (props) => {
   const [loading, setLoading] = useState(true);
@@ -55,6 +56,7 @@ const AppRouter = (props) => {
       {props.showModal && <GlobalModal modalText={props.modalText} />}
       <Header />
       <Switch>
+        <Route path="/test" component={Test} exact />
         <Route path="/" component={FrontPage} exact />
         <Route path="/auth" component={Authenticate} exact />
         <Route

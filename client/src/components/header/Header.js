@@ -82,6 +82,9 @@ const useStyles = makeStyles((theme) => ({
       marginLeft: theme.spacing(3),
       width: "auto",
     },
+    [theme.breakpoints.down("xs")]: {
+      marginLeft: "4rem",
+    },
   },
   searchIcon: {
     padding: theme.spacing(0, 2),
@@ -100,11 +103,18 @@ const useStyles = makeStyles((theme) => ({
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
     transition: theme.transitions.create("width"),
-    width: "100%",
+    width: "8rem",
     transition: "all ease-in-out .2s",
     "&:focus": {
-      border: "1px solid white",
       borderRadius: "4px",
+      width: "13rem",
+    },
+    [theme.breakpoints.down("sm")]: {
+      "&:focus": {
+        borderRadius: "4px",
+        width: "8rem",
+        border: "1px solid white",
+      },
     },
     [theme.breakpoints.up("md")]: {
       width: "20ch",

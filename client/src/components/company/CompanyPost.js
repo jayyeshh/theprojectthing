@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { IconButton, Grid, Typography } from "@material-ui/core";
+import {
+  IconButton,
+  Grid,
+  Typography,
+  Menu,
+  MenuItem,
+  makeStyles,
+} from "@material-ui/core";
 import ExposureNeg1Icon from "@material-ui/icons/ExposureNeg1";
 import ExposurePlus1OutlinedIcon from "@material-ui/icons/ExposurePlus1Outlined";
 import { connect } from "react-redux";
 import axios from "../../utility/axios/apiInstance";
-import { makeStyles } from "@material-ui/core/styles";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { useConfirm } from "material-ui-confirm";
+import { deleteCompanyPost } from "../../utility/utilityFunctions/ApiCalls";
 
 const useStyles = makeStyles((theme) => ({
   listviewerBtn: {
@@ -34,9 +43,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const CompanyPost = ({ post, ...props }) => {
+const options = ["delete"];
+
+const ITEM_HEIGHT = 48;
+
+const CompanyPost = ({ post, removePost, ...props }) => {
   const classes = useStyles();
   const [authedDevInteresed, setAuthedDevInterested] = useState(false);
+  const confirmation = useConfirm();
   useEffect(() => {
     let checkState = false;
     if (props.authedAs) {
@@ -68,6 +82,51 @@ const CompanyPost = ({ post, ...props }) => {
       });
   };
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOptionClick = (option) => {
+    if (option === "delete") {
+      confirmation({
+        description: "This Post will be deleted permanently!",
+        confirmationText: "Delete",
+        confirmationButtonProps: { color: "secondary" },
+      })
+        .then(() => {
+          deleteCompanyPost(post._id)
+            .then((res) => {
+              removePost();
+              props.setModalState(true, "Post Deleted!");
+              setTimeout(() => {
+                props.setModalState(false, "");
+              }, 3000);
+            })
+            .catch((error) => {
+              props.setModalState(
+                true,
+                "Something went wrong! Try again later!"
+              );
+              setTimeout(() => {
+                props.setModalState(false, "");
+              }, 3000);
+              console.log("[error]: ", error);
+            });
+          handleClose();
+        })
+        .catch((error) => {
+          handleClose();
+        });
+    }
+  };
+
   return (
     <Grid
       item
@@ -83,7 +142,45 @@ const CompanyPost = ({ post, ...props }) => {
         alignItems="flex-start"
         style={{ textAlign: "left", padding: "1rem", whiteSpace: "pre-wrap" }}
       >
-        <Typography className={classes.title}>{post.title}</Typography>
+        <Grid container>
+          <Grid item xs={11}>
+            <Typography className={classes.title}>{post.title}</Typography>
+          </Grid>
+          <Grid item xs={1} container justify="flex-end">
+            {!!props.uid && props.uid === post.author._id && (
+              <IconButton
+                aria-label="more"
+                aria-controls="long-menu"
+                aria-haspopup="true"
+                onClick={handleClick}
+              >
+                <MoreVertIcon />
+              </IconButton>
+            )}
+            <Menu
+              id="long-menu"
+              anchorEl={anchorEl}
+              keepMounted
+              open={open}
+              onClose={handleClose}
+              PaperProps={{
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              }}
+            >
+              {options.map((option) => (
+                <MenuItem
+                  key={option}
+                  onClick={() => handleOptionClick(option)}
+                >
+                  {option}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Grid>
+        </Grid>
         <Typography className={classes.body}>{post.body}</Typography>
       </Grid>
       <Grid

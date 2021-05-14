@@ -4,7 +4,6 @@ import {
   Typography,
   makeStyles,
   Avatar,
-  Button,
   Hidden,
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
@@ -93,7 +92,14 @@ const FilterBlock = ({ label, active, typeText, clickHandler }) => {
         color: `${active ? "black" : "gray"}`,
       }}
     >
-      <Typography>{label}</Typography>
+      <Typography
+        style={{
+          fontWeight: `${active ? 600 : 400}`,
+          // borderBottom: `${active ? `2px solid red` : ``}`,
+        }}
+      >
+        {label}
+      </Typography>
     </Grid>
   );
 };
@@ -173,7 +179,6 @@ const SearchResultsPage = (props) => {
         configs
       );
       setResults(results.data);
-      console.log("type: ", type, results.data);
       setLoading(false);
     } catch (error) {
       console.log("[log]: Error while fetching search results: ", error);
@@ -381,6 +386,9 @@ const SearchResultsPage = (props) => {
                     );
                   }
                   case "posts": {
+                    if (!!!result.author) {
+                      return;
+                    }
                     return (
                       <Grid
                         container

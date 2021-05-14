@@ -23,6 +23,7 @@ import { connect } from "react-redux";
 import { setModalStateAction } from "../../actions/modalActions";
 import { useConfirm } from "material-ui-confirm";
 import { NavLink } from "react-router-dom";
+import { InputBase } from "@material-ui/core";
 
 function createData(
   id,
@@ -133,6 +134,9 @@ function EnhancedTableHead(props) {
               active={orderBy === headCell.id}
               direction={orderBy === headCell.id ? order : "asc"}
               onClick={createSortHandler(headCell.id)}
+              style={{
+                fontWeight: 600,
+              }}
             >
               {headCell.label}
               {orderBy === headCell.id ? (
@@ -175,6 +179,18 @@ const useToolbarStyles = makeStyles((theme) => ({
         },
   title: {
     flex: "1 1 100%",
+  },
+  searchBar: {
+    padding: "0 4px",
+    borderRadius: "4px",
+    background: "#F3F3F3",
+    transition: "all ease-in-out .2s",
+    [theme.breakpoints.up("md")]: {
+      minWidth: "14rem",
+    },
+  },
+  searchbarFocused: {
+    border: "1px solid #999",
   },
 }));
 
@@ -228,6 +244,14 @@ const EnhancedTableToolbar = (props) => {
         [classes.highlight]: numSelected > 0,
       })}
     >
+      <InputBase
+        placeholder="Search"
+        className={classes.searchBar}
+        classes={{
+          focused: classes.searchbarFocused,
+        }}
+        onChange={props.searchChangeHandler}
+      />
       {numSelected > 0 && (
         <Typography
           className={classes.title}
@@ -302,8 +326,20 @@ const TableView = ({ projects, ...props }) => {
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [rows, setRows] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [projectsToRender, setProjectsToRender] = useState([]);
 
   useEffect(() => {
+    // setProjectsToRender(projects);
+    // if (searchText.trim().length) {
+    //   const projectList = projects.filter((project) =>
+    //     project.title.startsWith(searchText)
+    //   );
+    //   setProjectsToRender(projectList);
+    // }else{
+    //   setProjectsToRender(projects)
+    // }
+
     const dataRows = [];
     projects.forEach((project) => {
       let {
@@ -316,21 +352,26 @@ const TableView = ({ projects, ...props }) => {
         createdAt,
         updatedAt,
       } = project;
-      dataRows.push(
-        createData(
-          _id,
-          title,
-          upvotes.length,
-          downvotes.length,
-          rewards.length,
-          comments.length,
-          new moment(createdAt).format("YYYY, MMM DD"),
-          new moment(updatedAt).format("YYYY, MMM DD")
-        )
-      );
+      if (
+        !searchText.trim().length ||
+        title.toLowerCase().startsWith(searchText.trim().toLowerCase())
+      ) {
+        dataRows.push(
+          createData(
+            _id,
+            title,
+            upvotes.length,
+            downvotes.length,
+            rewards.length,
+            comments.length,
+            new moment(createdAt).format("YYYY, MMM DD"),
+            new moment(updatedAt).format("YYYY, MMM DD")
+          )
+        );
+      }
     });
     setRows(dataRows);
-  }, [projects]);
+  }, [projects, searchText]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -398,6 +439,10 @@ const TableView = ({ projects, ...props }) => {
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
+  const searchChangeHandler = (e) => {
+    setSearchText(e.target.value);
+  };
+
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -410,6 +455,7 @@ const TableView = ({ projects, ...props }) => {
           selectedIds={selectedIds}
           projects={projects}
           updateProjects={props.updateProjects}
+          searchChangeHandler={searchChangeHandler}
           setModalState={props.setModalState}
           deselectAll={deselectAll}
           haveAccess={props.haveAccess}

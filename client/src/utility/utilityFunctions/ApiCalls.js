@@ -96,3 +96,8 @@ export const setIcon = (icon) => {
   data.append("icon", icon);
   return axios.post("/icon", data, configs);
 };
+
+export const deleteCompanyPost = (pid) => {
+  setConfigs();
+  return axios.delete(`/post/${pid}`, configs);
+};

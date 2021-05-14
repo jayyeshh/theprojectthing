@@ -242,7 +242,6 @@ const ProjectPage = (props) => {
     getProjectById(props.match.params.id)
       .then((resp) => {
         setProject(resp.data);
-        console.log(resp.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -627,16 +626,13 @@ const ProjectPage = (props) => {
                       />
                     </span>
                   )}
-                  <img src={project.photos[gallery]} width="100%" />
-                  {/* <ImageGallery
-                    items={project.photos}
-                    showBullets={true}
-                    showThumbnails={false}
-                    showFullscreenButton={false}
-                    showPlayButton={false}
-                    infinite={false}
-                    slideDuration={200}
-                  /> */}
+                  <img
+                    src={project.photos[gallery]}
+                    width="100%"
+                    style={{
+                      transition: "all ease-in-out 1s",
+                    }}
+                  />
                   {gallery < project.photos.length - 1 && (
                     <span
                       onClick={nextPhoto}
@@ -786,12 +782,19 @@ const ProjectPage = (props) => {
                   {project.about.length < 80 || expanded ? (
                     <Grid
                       container
-                      direction="row"
+                      direction="column"
                       style={{
                         whiteSpace: "pre-wrap",
                       }}
                     >
-                      <Typography>{project.about}</Typography>
+                      <Typography
+                        style={{
+                          width: "100%",
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {project.about}
+                      </Typography>
                       {expanded && (
                         <Typography
                           className={classes.expandTagStyles}

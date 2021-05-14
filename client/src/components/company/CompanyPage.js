@@ -24,6 +24,7 @@ import { connect } from "react-redux";
 import AddReviewPopupModal from "./AddReviewPopupModal";
 import ListModal from "../modals/ListModal";
 import { Edit3 } from "react-feather";
+import Test from "../test";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -56,8 +57,6 @@ const useStyles = makeStyles((theme) => ({
     transform: "rotate(180deg)",
   },
   profile: {
-    display: "flex",
-    flexDirection: "column",
     padding: "4rem",
     overflow: "hidden",
     minHeight: "100%",
@@ -169,6 +168,12 @@ const CompanyPage = (props) => {
     setCompany({ ...company, posts: updatedPosts });
   };
 
+  const removePost = (postIndex) => {
+    const updatedPosts = [...company.posts];
+    updatedPosts.splice(postIndex, 1);
+    setCompany({ ...company, posts: updatedPosts });
+  };
+
   const handleShowInterestedDevs = (index) => {
     setList(company.posts[index].interested);
     setShowInterestedDevs(true);
@@ -232,8 +237,8 @@ const CompanyPage = (props) => {
             xs={12}
             sm={3}
             container
+            direction="column"
             alignItems="center"
-            justify="center"
             className={classes.profile}
           >
             <Hidden xsDown>
@@ -273,7 +278,7 @@ const CompanyPage = (props) => {
                   <Grid
                     style={{
                       position: "absolute",
-                      background: "#ffc996",
+                      background: "#f3bda1",
                       width: "80%",
                       height: "7rem",
                       borderRadius: "5px 5px 0 0",
@@ -412,7 +417,7 @@ const CompanyPage = (props) => {
                     </Grid>
                   )}
                 </Grid>
-              </div>
+              </div>{" "}
             </Hidden>
             <Hidden smUp>
               <Grid
@@ -544,9 +549,13 @@ const CompanyPage = (props) => {
                           post={post}
                           index={index}
                           key={post._id}
+                          setModalState={props.setModalState}
                           updatePost={(updatedPost) =>
                             updatePost(updatedPost, index)
                           }
+                          removePost={() => {
+                            removePost(index);
+                          }}
                         />
                       );
                     })
