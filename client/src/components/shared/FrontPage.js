@@ -5,10 +5,12 @@ import { connect } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
 import { NavLink } from "react-router-dom";
 import axios from "../../utility/axios/apiInstance";
+import Particles from "react-particles-js";
 
 const colors = [
   "#f0f8ff",
   "#e7feff",
+  "#fbc6a4",
   "#d8e8e6",
   "#e8f4f7",
   "#ecf1ec",
@@ -41,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     minWidth: "100%",
     transition: "all .7s ease-in-out",
-    minHeight: "90vh",
+    minHeight: "90.5vh",
     paddingTop: "6rem",
     [theme.breakpoints.down("xs")]: {
       minHeight: "92.3vh",
@@ -80,6 +82,43 @@ const FrontPage = (props) => {
         backgroundColor: bgColor,
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+        }}
+      >
+        <Particles
+          params={{
+            particles: {
+              number: {
+                value: 200,
+                density: {
+                  enable: true,
+                  value_area: 1000,
+                },
+              },
+            },
+            interactivity: {
+              detect_on: "window",
+              events: {
+                onhover: {
+                  enable: true,
+                  mode: "repulse",
+                },
+                onclick: {
+                  enable: false,
+                  mode: "bubble",
+                },
+                resize: true,
+              },
+            },
+          }}
+        />
+      </div>
       <Grid
         item
         container

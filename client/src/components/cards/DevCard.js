@@ -27,9 +27,9 @@ const useStyles = makeStyles((theme) => ({
       cursor: "pointer",
       boxShadow: "5px 20px 12px",
     },
-    [theme.breakpoints.down('sm')]:{
-      margin: '.4rem'
-    }
+    [theme.breakpoints.down("sm")]: {
+      margin: ".4rem",
+    },
   },
   actionBtn: {},
   avatarStyles: {
@@ -56,42 +56,36 @@ const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
     followUser(uid)
       .then((res) => {
         props.refresh(true);
-        props.setModalState(true, `You are now following ${profile.username}`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          `You are now following ${profile.username}`,
+          "success"
+        );
         setupAuthentication();
       })
       .catch((_error) => {
         props.setModalState(
           true,
-          "Something went wrong! try again after some time"
+          "Something went wrong! try again after some time",
+          "error"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
         setupAuthentication();
       });
   };
 
   const unfollow = (uid) => {
     unfollowUser(uid)
-      .then((res) => {
+      .then((_res) => {
         props.refresh(false);
-        props.setModalState(true, `unfollowed ${profile.username}`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, `unfollowed ${profile.username}`, "info");
         setupAuthentication();
       })
       .catch((_error) => {
         props.setModalState(
           true,
-          "Something went wrong! try again after some time"
+          "Something went wrong! try again after some time",
+          "error"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
         setupAuthentication();
       });
   };
@@ -101,7 +95,7 @@ const DevCard = ({ profile, isAuthenticated, as, username, ...props }) => {
       className={classes.root}
       onClick={(e) => {
         if (!["FOLLOW", "UNFOLLOW"].includes(e.target.innerText)) {
-          history.push(`/dev/${profile._id}`);
+          history.push(`/dev/${profile.username}`);
         }
       }}
     >
@@ -177,8 +171,8 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

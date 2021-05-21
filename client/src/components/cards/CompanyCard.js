@@ -44,7 +44,7 @@ const CompanyCard = ({ profile, setError }) => {
     <Card
       className={classes.root}
       onClick={(e) => {
-        history.push(`/company/${profile._id}`);
+        history.push(`/company/${profile.username}`);
       }}
     >
       <Grid

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Grid, Typography } from "@material-ui/core";
+import React, { useEffect, useState, useRef } from "react";
+import { Grid, Typography, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import axios from "../../utility/axios/apiInstance";
 import Post from "../post/Post";
@@ -19,25 +19,25 @@ const useStyles = makeStyles((theme) => ({
   homeContainer: {
     width: "100%",
     overflowY: "auto",
-    marginRight: "3rem",
     [theme.breakpoints.down("xs")]: {
-      paddingLeft: 0,
       margin: 0,
       margin: "0 1rem",
+      padding: 0,
+      alignItems: "flex-start",
     },
   },
   createPostContainer: {
     marginTop: "2rem",
     minHeight: "3rem",
     width: "70%",
-    marginRight: "2rem",
+    marginLeft: "8rem",
     background: "white",
     "&:hover": {
       cursor: "pointer",
     },
     [theme.breakpoints.down("xs")]: {
       minWidth: "100%",
-      marginRight: 0,
+      marginLeft: 0,
     },
   },
   createPostBtn: {
@@ -58,6 +58,40 @@ const Home = (props) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [createPost, setCreatePost] = useState(false);
+  const [prevY, setPrevY] = useState(0);
+  const [loadMore, setLoadMore] = useState(false);
+  const [load, setLoad] = useState(false);
+  const [observer, setObserver] = useState(null);
+  const [seenAll, setSeenAll] = useState(false);
+  const loadingRef = useRef();
+
+  function buildThresholdList() {
+    let thresholds = [];
+    let numSteps = 180;
+
+    for (let i = 1.0; i <= numSteps; i++) {
+      let ratio = i / numSteps;
+      thresholds.push(ratio);
+    }
+
+    thresholds.push(0);
+    return thresholds;
+  }
+
+  const options = {
+    root: null,
+    rootMargin: "0px",
+    threshold: buildThresholdList(),
+  };
+
+  const handleObserver = (entities, observer) => {
+    const y = entities[0].boundingClientRect.y;
+    if (window) {
+      if (y + window.scrollY <= 100) {
+        setLoad(true);
+      }
+    }
+  };
 
   const updatePost = (index, updatedPost) => {
     const updatedPosts = [...posts];
@@ -70,28 +104,51 @@ const Home = (props) => {
   };
 
   useEffect(() => {
+    if (seenAll) return;
+    setLoad(false);
+    if (loadMore) return;
+    setLoadMore(true);
     const configs = {
       headers: {
         Authorization: localStorage.getItem("authToken"),
       },
     };
     axios
-      .get("/home", configs)
+      .get(`/home/?skip=${posts.length}&limit=2`, configs)
       .then((resp) => {
         setLoading(false);
-        setPosts(resp.data);
+        if (resp.data.length === 0) {
+          setSeenAll(true);
+        } else {
+          setPosts((prev) => prev.concat(resp.data));
+        }
+        setTimeout(() => {
+          setLoadMore(false);
+        }, 1000);
+        setLoad(false);
       })
       .catch((error) => {
         setLoading(false);
         props.setModalState(
           true,
-          "something went wrong! unable to fetch posts!"
+          "something went wrong! unable to fetch posts!",
+          "error"
         );
+        setLoad(false);
         setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+          setLoadMore(false);
+        }, 1000);
       });
-  }, []);
+
+    const observerr = new IntersectionObserver(handleObserver, options);
+    setObserver(observerr);
+  }, [load]);
+
+  useEffect(() => {
+    if (loadingRef.current) {
+      observer.observe(loadingRef.current);
+    }
+  }, [loadingRef && loadingRef.current]);
 
   return (
     <Grid container className={classes.paperStyles}>
@@ -112,8 +169,9 @@ const Home = (props) => {
         <Grid
           container
           direction="column"
-          alignItems="flex-end"
+          alignItems="center"
           className={classes.homeContainer}
+          ref={loadingRef}
         >
           {props.authedAs.toLowerCase() === "company" && createPost && (
             <CreatePostDialog open={createPost} close={toggleCreatePost} />
@@ -126,6 +184,9 @@ const Home = (props) => {
               alignItems="center"
               className={classes.createPostContainer}
               onClick={toggleCreatePost}
+              style={{
+                marginRight: "8rem",
+              }}
             >
               <Grid
                 container
@@ -160,15 +221,36 @@ const Home = (props) => {
               </Typography>
             </Grid>
           )}
-          {posts.map((post, index) => {
-            return (
-              <Post
-                key={post._id}
-                post={post}
-                updatePost={(updatedPost) => updatePost(index, updatedPost)}
-              />
-            );
-          })}
+          <Grid
+            container
+            direction="column"
+            alignItems="center"
+            style={{
+              flexWrap: "nowrap",
+              overflow: "hidden",
+            }}
+          >
+            {posts.map((post, index) => {
+              return (
+                <Post
+                  key={post._id}
+                  post={post}
+                  updatePost={(updatedPost) => updatePost(index, updatedPost)}
+                />
+              );
+            })}
+            {loadMore && (
+              <Grid
+                container
+                justify="center"
+                style={{
+                  marginTop: "2rem",
+                }}
+              >
+                <CircularProgress color="secondary" />
+              </Grid>
+            )}
+          </Grid>
         </Grid>
       )}
     </Grid>

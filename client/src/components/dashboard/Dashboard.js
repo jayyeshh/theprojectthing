@@ -76,8 +76,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

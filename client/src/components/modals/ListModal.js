@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     margin: ".3rem 0",
     padding: ".3rem",
     overflowX: "hidden",
-    transition: 'all ease-in-out .2s',
+    transition: "all ease-in-out .2s",
     "&:hover": {
       cursor: "pointer",
       paddingLeft: "1rem",
@@ -39,7 +39,7 @@ const ListModal = (props) => {
   const classes = useStyles();
   const history = useHistory();
   const handleClose = () => {
-    if (props.id) history.push(`/dev/${props.id}`);
+    if (props.username) history.goBack();
     props.setShowModal(false);
   };
 
@@ -92,8 +92,8 @@ const ListModal = (props) => {
                     <NavLink
                       to={
                         !!props.linkto
-                          ? `/${props.linkto}/${item._id}`
-                          : `/dev/${item._id}`
+                          ? `/${props.linkto}/${item.username}`
+                          : `/dev/${item.username}`
                       }
                       style={{ textDecoration: "none", color: "black" }}
                     >

@@ -246,10 +246,11 @@ const ProjectPage = (props) => {
       })
       .catch((error) => {
         setLoading(false);
-        props.setModalState(true, `Something went wrong! Check network.`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          `Something went wrong! Check network.`,
+          "error"
+        );
       });
 
     getProjects()
@@ -274,11 +275,11 @@ const ProjectPage = (props) => {
           setProject(updatedProject.data);
         })
         .catch((error) => {
-          console.log("er: ", error);
-          props.setModalState(true, `Something went wrong! Try again later.`);
-          setTimeout(() => {
-            props.setModalState(false, "");
-          }, 3000);
+          props.setModalState(
+            true,
+            `Something went wrong! Try again later.`,
+            "error"
+          );
         });
     }
   };
@@ -315,10 +316,11 @@ const ProjectPage = (props) => {
         setProject(updatedProject);
       })
       .catch((error) => {
-        props.setModalState(true, `Something went wrong! Try again later.`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          `Something went wrong! Try again later.`,
+          "error"
+        );
       });
   };
 
@@ -340,10 +342,7 @@ const ProjectPage = (props) => {
 
   const postComment = () => {
     if (!props.isAuthenticated) {
-      props.setModalState(true, "Login to continue");
-      setTimeout(() => {
-        props.setModalState(false, "");
-      }, 3000);
+      props.setModalState(true, "Login to continue", "warning");
       return history.push("/auth");
     }
     setPostingComment(true);
@@ -409,15 +408,17 @@ const ProjectPage = (props) => {
             setProject(updatedProject);
             props.setModalState(
               true,
-              `Your comment has been deleted permanently!`
+              `Your comment has been deleted permanently!`,
+              "info"
             );
           })
           .catch((error) => {
-            props.setModalState(true, `Something went wrong! Try again later.`);
+            props.setModalState(
+              true,
+              `Something went wrong! Try again later.`,
+              "error"
+            );
           });
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       })
       .catch((error) => {});
   };
@@ -442,18 +443,17 @@ const ProjectPage = (props) => {
         setUpdatingComment(false);
         props.setModalState(
           true,
-          `Your comment has been updated successfully!`
+          `Your comment has been updated successfully!`,
+          "info"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       })
       .catch((error) => {
         setUpdatingComment(false);
-        props.setModalState(true, `Something went wrong! Try again later.`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          `Something went wrong! Try again later.`,
+          "error"
+        );
       });
   };
 
@@ -768,7 +768,7 @@ const ProjectPage = (props) => {
                 }}
               >
                 <NavLink
-                  to={`/dev/${project.developer._id}`}
+                  to={`/dev/${project.developer.username}`}
                   className={classes.link}
                 >
                   <Typography style={{ fontWeight: 600, color: "#000" }}>
@@ -840,6 +840,11 @@ const ProjectPage = (props) => {
                   onFocus={() => setFocused(true)}
                   onClick={() => {
                     if (!props.isAuthenticated) {
+                      props.setModalState(
+                        true,
+                        "You need to join first!",
+                        "warning"
+                      );
                       history.push("/auth");
                     }
                   }}
@@ -1013,8 +1018,8 @@ const ProjectPage = (props) => {
                               <NavLink
                                 to={
                                   comment.onModel === "Developer"
-                                    ? `/dev/${comment.by._id}`
-                                    : `/company/${comment.by._id}`
+                                    ? `/dev/${comment.by.username}`
+                                    : `/company/${comment.by.username}`
                                 }
                                 style={{
                                   color: "black",
@@ -1113,8 +1118,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

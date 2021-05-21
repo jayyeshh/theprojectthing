@@ -122,6 +122,29 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+router.get("/u/:username", async (req, res) => {
+  try {
+    const developer = await Developer.findOne({
+      username: req.params.username,
+    }).populate(["projects", "followers", "following"]);
+    if (!developer) {
+      return res.status(404).send({
+        error: "Not Found! Invalid Id!",
+      });
+    }
+    res.send(developer);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).send({
+        error: "Invalid Id!",
+      });
+    }
+    res.status(500).send({
+      error: "Internal Server Error!",
+    });
+  }
+});
+
 //get developer by id
 router.get("/:id", async (req, res) => {
   try {

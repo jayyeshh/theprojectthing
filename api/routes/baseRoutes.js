@@ -230,6 +230,9 @@ router.get("/tags", async (req, res) => {
 
 router.get("/home", auth, async (req, res) => {
   try {
+    let { skip = 0, limit = 10 } = req.query;
+    skip = +skip;
+    limit = +limit;
     if (req.as.toLowerCase() === "developer") {
       await req.user.populate("following").execPopulate();
       const followings = req.user.following;
@@ -257,6 +260,13 @@ router.get("/home", auth, async (req, res) => {
             createdAt: 1,
           },
         },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
+        },
+
         {
           $addFields: {
             upvoted: {
@@ -298,6 +308,12 @@ router.get("/home", auth, async (req, res) => {
           $sort: {
             createdAt: 1,
           },
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: limit,
         },
         {
           $addFields: {

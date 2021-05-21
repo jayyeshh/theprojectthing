@@ -54,18 +54,16 @@ const AddReviewPopupModal = (props) => {
       .then((resp) => {
         setText("");
         setLoading(false);
-        props.setModalState(true, "Review Added!");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, "Review Added!", "info");
         props.updateReviews(resp.data.review);
       })
       .catch((error) => {
         setLoading(false);
-        props.setModalState(true, "Somthing went wrong! Try again later!");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          "Somthing went wrong! Try again later!",
+          "error"
+        );
         console.log("error: ", error);
       });
   };

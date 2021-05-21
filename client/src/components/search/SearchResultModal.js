@@ -152,7 +152,7 @@ const SearchResultModal = ({
                 return (
                   <NavLink
                     key={item._id}
-                    to={`/company/${item._id}`}
+                    to={`/company/${item.username}`}
                     className={classes.linkStyles}
                   >
                     <Grid
@@ -177,7 +177,7 @@ const SearchResultModal = ({
                 return (
                   <NavLink
                     key={item._id}
-                    to={`/dev/${item._id}`}
+                    to={`/dev/${item.username}`}
                     className={classes.linkStyles}
                   >
                     <Grid

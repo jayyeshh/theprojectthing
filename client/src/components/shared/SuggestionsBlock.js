@@ -135,8 +135,8 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
         <NavLink
           to={
             authedAs.toLowerCase() === "company"
-              ? `/company/${user._id}`
-              : `/dev/${user._id}`
+              ? `/company/${user.username}`
+              : `/dev/${user.username}`
           }
           className={classes.linkBlock}
         >
@@ -183,7 +183,12 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
         <Grid container>
           <Typography className={classes.title}>Jobs</Typography>
           {jobPosts.map((post) => (
-            <Grid container direction="column" className={classes.jobBlock}>
+            <Grid
+              container
+              direction="column"
+              className={classes.jobBlock}
+              key={post._id}
+            >
               <NavLink
                 to={`/post/${post._id}`}
                 className={classes.link}
@@ -202,7 +207,7 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
                 </Typography>
               </NavLink>
               <NavLink
-                to={`/company/${post.author._id}`}
+                to={`/company/${post.author.username}`}
                 className={classes.link}
               >
                 <Typography
@@ -233,9 +238,14 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
         <Grid container>
           <Typography className={classes.title}>Developers</Typography>
           {developers.map((developer) => (
-            <Grid container direction="column" className={classes.jobBlock}>
+            <Grid
+              container
+              direction="column"
+              className={classes.jobBlock}
+              key={developer._id}
+            >
               <NavLink
-                to={`/dev/${developer._id}`}
+                to={`/dev/${developer.username}`}
                 className={classes.link}
                 style={{ color: "black" }}
               >
@@ -270,7 +280,7 @@ const SuggestionsBlock = ({ user, authedAs, ...props }) => {
       <Grid className={classes.blockWrapper}>
         <Typography className={classes.title}>Projects</Typography>
         {projects.map((project) => (
-          <SideSuggestionBlock project={project} />
+          <SideSuggestionBlock project={project} key={project._id} />
         ))}
         <NavLink to={`/explore/?tab=projects`} className={classes.link}>
           <Typography className={classes.moreType}>view more</Typography>

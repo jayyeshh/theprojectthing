@@ -305,7 +305,7 @@ const SearchResultsPage = (props) => {
                             <Grid container direction="row">
                               <Typography>by: </Typography>
                               <NavLink
-                                to={`/dev/${result.author._id}`}
+                                to={`/dev/${result.author.username}`}
                                 className={classes.link}
                               >
                                 <Typography
@@ -333,7 +333,7 @@ const SearchResultsPage = (props) => {
                             <Grid container direction="row">
                               <Typography>by: </Typography>
                               <NavLink
-                                to={`/dev/${result._id}`}
+                                to={`/dev/${result.developer.username}`}
                                 className={classes.link}
                               >
                                 <Typography
@@ -408,7 +408,7 @@ const SearchResultsPage = (props) => {
                         <Grid container direction="row">
                           <Typography>by: </Typography>
                           <NavLink
-                            to={`/company/${result.author._id}`}
+                            to={`/company/${result.author.username}`}
                             className={classes.link}
                           >
                             <Typography
@@ -445,7 +445,7 @@ const SearchResultsPage = (props) => {
                         <Grid container direction="row">
                           <Typography>by: </Typography>
                           <NavLink
-                            to={`/dev/${result._id}`}
+                            to={`/dev/${result.developer.username}`}
                             className={classes.link}
                           >
                             <Typography
@@ -502,7 +502,7 @@ const SearchResultsPage = (props) => {
                           }}
                         >
                           <NavLink
-                            to={`/dev/${result._id}`}
+                            to={`/dev/${result.username}`}
                             className={classes.link}
                           >
                             <Typography style={{ color: "#000" }}>
@@ -552,7 +552,7 @@ const SearchResultsPage = (props) => {
                         </Grid>
                         <Grid>
                           <NavLink
-                            to={`/company/${result._id}`}
+                            to={`/company/${result.username}`}
                             className={classes.link}
                           >
                             <Typography style={{ color: "#000" }}>

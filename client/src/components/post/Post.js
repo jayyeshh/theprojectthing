@@ -10,9 +10,6 @@ import {
   voteProject,
   getProjectById,
 } from "../../utility/utilityFunctions/ApiCalls";
-import { MessageCircle } from "react-feather";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComment } from "@fortawesome/free-solid-svg-icons";
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -121,7 +118,7 @@ const Post = ({ post, ...props }) => {
 
           <NavLink
             to={{
-              pathname: `/dev/${post.developer._id}`,
+              pathname: `/dev/${post.developer.username}`,
             }}
             className={classes.linkStyles}
           >

@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import {
-  getDeveloperById,
+  getDeveloperByUsername,
   unfollowUser,
   followUser,
 } from "../../utility/utilityFunctions/ApiCalls";
@@ -123,7 +123,7 @@ const DevPage = (props) => {
       history.replace(props.match.url);
     }
 
-    getDeveloperById(props.match.params.id)
+    getDeveloperByUsername(props.match.params.username)
       .then((resp) => {
         const dummyLinks = {
           website: "",
@@ -166,13 +166,11 @@ const DevPage = (props) => {
         if (error.response && error.response.data) {
           props.setModalState(
             true,
-            `Something went wrong! ${error.response.data.error}`
+            `Something went wrong! ${error.response.data.error}`,
+            "error"
           );
         }
-        props.setModalState(true, `Something went wrong!`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, `Something went wrong!`, "error");
       });
   }, [currLocation]);
 
@@ -189,21 +187,17 @@ const DevPage = (props) => {
         setAlreadyFollowing(true);
         props.setModalState(
           true,
-          `You are now following ${developer.username}`
+          `You are now following ${developer.username}`,
+          "success"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       })
       .catch((_error) => {
         setBtnInAction(false);
         props.setModalState(
           true,
-          "Something went wrong! try again after some time"
+          "Something went wrong! try again after some time",
+          "error"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -218,20 +212,15 @@ const DevPage = (props) => {
         );
         setDeveloper(updatedDeveloper);
         setAlreadyFollowing(false);
-        props.setModalState(true, `unfollowed ${developer.username}`);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, `unfollowed ${developer.username}`, "info");
       })
       .catch((_error) => {
         setBtnInAction(false);
         props.setModalState(
           true,
-          "Something went wrong! try again after some time"
+          "Something went wrong! try again after some time",
+          "error"
         );
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -244,7 +233,7 @@ const DevPage = (props) => {
       {popupOf === "followers" && (
         <ListModal
           showModal={showModal}
-          id={props.match.params.id}
+          username={props.match.params.username}
           title={"Followers"}
           list={developer.followers}
           setShowModal={setShowModal}
@@ -252,8 +241,8 @@ const DevPage = (props) => {
       )}
       {popupOf === "following" && (
         <ListModal
-          id={props.match.params.id}
           title={"Following"}
+          username={props.match.params.username}
           showModal={showModal}
           setShowModal={setShowModal}
           list={developer.following}
@@ -356,7 +345,7 @@ const DevPage = (props) => {
                   </>
                 )}
               <NavLink
-                to={`/dev/${developer._id}/followers`}
+                to={`/dev/${developer.username}/followers`}
                 className={classes.linkStyles}
               >
                 <Button
@@ -375,7 +364,7 @@ const DevPage = (props) => {
               </NavLink>
 
               <NavLink
-                to={`/dev/${developer._id}/following`}
+                to={`/dev/${developer.username}/following`}
                 className={classes.linkStyles}
               >
                 <Button
@@ -592,7 +581,7 @@ const DevPage = (props) => {
                       )}
 
                     <NavLink
-                      to={`/dev/${developer._id}/followers`}
+                      to={`/dev/${developer.username}/followers`}
                       className={classes.linkStyles}
                     >
                       <Button
@@ -611,7 +600,7 @@ const DevPage = (props) => {
                     </NavLink>
 
                     <NavLink
-                      to={`/dev/${developer._id}/following`}
+                      to={`/dev/${developer.username}/following`}
                       className={classes.linkStyles}
                     >
                       <Button
@@ -780,8 +769,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

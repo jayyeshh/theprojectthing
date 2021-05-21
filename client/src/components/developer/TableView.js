@@ -216,11 +216,9 @@ const EnhancedTableToolbar = (props) => {
               true,
               `${props.selectedIds.length} ${
                 props.selectedIds.length > 1 ? "Projects" : "Project"
-              } Deleted`
+              } Deleted`,
+              "info"
             );
-            setTimeout(() => {
-              props.setModalState(false, "");
-            }, 3000);
             const updatedProjects = props.projects.filter(
               (project) => !props.selectedIds.includes(project._id)
             );
@@ -228,11 +226,7 @@ const EnhancedTableToolbar = (props) => {
             props.deselectAll();
           })
           .catch((error) => {
-            console.log(error);
-            props.setModalState(true, `Something went wrong!`);
-            setTimeout(() => {
-              props.setModalState(false, "");
-            }, 3000);
+            props.setModalState(true, `Something went wrong!`, "error");
           });
       })
       .catch(() => {});
@@ -545,8 +539,8 @@ const TableView = ({ projects, ...props }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

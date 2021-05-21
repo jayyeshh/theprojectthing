@@ -1,28 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+import { Snackbar, Slide } from "@material-ui/core";
+import MuiAlert from "@material-ui/lab/Alert";
 import "../../styles/animations.css";
+import { CLOSE_MODAL } from "../../actions/action-types";
+import { connect } from "react-redux";
 
-const GlobalModal = ({ modalText, ...props }) => {
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
+const GlobalModal = ({ modalText, showModal, closeModal, severity }) => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "1rem",
-        left: "28%",
-        zIndex: "9999",
-        background: "white",
-        padding: "2rem",
-        boxShadow: "5px 5px 14px",
-        borderRadius: "3px",
-        textAlign: "center",
-        width: "40%",
-        transition: "all .4s ease-in-out",
-        opacity: ".8",
-        animation: "fromTop .2s ease-in-out",
-      }}
+    <Snackbar
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      open={showModal}
+      onClose={closeModal}
+      autoHideDuration={3000}
     >
-      {modalText}
-    </div>
+      <Alert severity={severity}>{modalText}</Alert>
+    </Snackbar>
   );
 };
 
-export default GlobalModal;
+const mapStateToProps = (state) => {
+  return {
+    showModal: state.modalReducer.showModal,
+    modalText: state.modalReducer.text,
+    severity: state.modalReducer.severity,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    closeModal: () => {
+      dispatch({ type: CLOSE_MODAL });
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(GlobalModal);

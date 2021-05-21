@@ -65,21 +65,15 @@ const PostBlock = (props) => {
         clearFields();
         setLoading(false);
         props.addNewPost(resp.data);
-        props.setModalState(true, "post added");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, "post added", "success");
       })
       .catch((error) => {
         let errorText = "Something went wrong! Try again later.";
         if (error.response) {
           errorText = error.response.data.error;
         }
-        props.setModalState(true, errorText);
+        props.setModalState(true, errorText, "error");
         setLoading(false);
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -175,8 +169,8 @@ const PostBlock = (props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
     addNewPost: (post) => {
       dispatch({ type: ADD_NEW_POST, payload: { post } });
     },

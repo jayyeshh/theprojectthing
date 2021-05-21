@@ -224,10 +224,11 @@ const EditProject = ({ profile, ...props }) => {
       })
       .catch((error) => {
         setUpdatingIcon(false);
-        props.setModalState(true, "Something went wrong! Try again later!");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          "Something went wrong! Try again later!",
+          "error"
+        );
       });
   };
 
@@ -297,10 +298,7 @@ const EditProject = ({ profile, ...props }) => {
       .patch(url, payload, configs)
       .then((resp) => {
         setUpdatingProfile(false);
-        props.setModalState(true, "Profile Updated!");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, "Profile Updated!", "success");
         props.updateLocalProfile({
           profile: resp.data.profile,
           as: props.authedAs,
@@ -310,13 +308,14 @@ const EditProject = ({ profile, ...props }) => {
         console.log(error);
         setUpdatingProfile(false);
         if (error.response && error.response.data) {
-          props.setModalState(true, error.response.data.error);
+          props.setModalState(true, error.response.data.error, "error");
         } else {
-          props.setModalState(true, "Something went wrong! Try again later.");
+          props.setModalState(
+            true,
+            "Something went wrong! Try again later.",
+            "error"
+          );
         }
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -335,11 +334,9 @@ const EditProject = ({ profile, ...props }) => {
       });
       props.setModalState(
         true,
-        "new password and confirm password does not match"
+        "new password and confirm password does not match",
+        "error"
       );
-      setTimeout(() => {
-        props.setModalState(false, "");
-      }, 3000);
       return;
     }
     setPaswordFieldsErrors({
@@ -360,10 +357,7 @@ const EditProject = ({ profile, ...props }) => {
       .patch("/password", payload, configs)
       .then((resp) => {
         setChangingPassword(false);
-        props.setModalState(true, "Password Changed!");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(true, "Password Changed!", "success");
         props.logout();
       })
       .catch((error) => {
@@ -375,23 +369,18 @@ const EditProject = ({ profile, ...props }) => {
             confirmPassword: !!error.response.data.confirmPassword,
           });
           if (error.response.data.oldPassword) {
-            props.setModalState(true, error.response.data.oldPassword);
-            setTimeout(() => {
-              props.setModalState(false, "");
-            }, 3000);
+            props.setModalState(true, error.response.data.oldPassword, "error");
           }
           if (error.response.data.message) {
-            props.setModalState(true, error.response.data.message);
-            setTimeout(() => {
-              props.setModalState(false, "");
-            }, 3000);
+            props.setModalState(true, error.response.data.message, "error");
           }
           return;
         }
-        props.setModalState(true, "Something went wrong! Try again later.");
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
+        props.setModalState(
+          true,
+          "Something went wrong! Try again later.",
+          "error"
+        );
       });
   };
 
@@ -747,8 +736,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
     updateLocalProfile: ({ profile, as }) =>
       dispatch({
         type: SETUP_PROFILE,

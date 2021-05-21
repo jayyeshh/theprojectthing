@@ -53,9 +53,19 @@ export const getDeveloperById = (id) => {
   return axios.get(`/developer/${id}`, null, configs);
 };
 
+export const getDeveloperByUsername = (username) => {
+  setConfigs();
+  return axios.get(`/developer/u/${username}`, null, configs);
+};
+
 export const getCompanyById = (id) => {
   setConfigs();
   return axios.get(`/company/${id}`, null, configs);
+};
+
+export const getCompanyByUsername = (username) => {
+  setConfigs();
+  return axios.get(`/company/u/${username}`, null, configs);
 };
 
 export const getPostById = (id) => {

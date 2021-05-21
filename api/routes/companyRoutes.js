@@ -13,7 +13,10 @@ const router = new express.Router();
 //company registration(sign up)
 router.post("/register", async (req, res) => {
   try {
-    const { technologies = [] } = req.body;
+    let { technologies = [] } = req.body;
+    technologies = technologies
+      .map((tech) => tech.trim())
+      .filter((tech) => tech.length);
     delete req.body.technologies;
     req.body = trimValues(req.body);
     let { username, name, email, password } = req.body;
@@ -35,10 +38,6 @@ router.post("/register", async (req, res) => {
       technologies,
       name,
     });
-  } catch (error) {
-    res.status(500).send({ error: "Internal Server Error" });
-  }
-  try {
     await company.save();
     res.status(201).send();
   } catch (error) {
@@ -127,6 +126,52 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+//get company by username
+router.get("/u/:username", async (req, res) => {
+  try {
+    let company = await Company.findOne({ username: req.params.username })
+      .populate({
+        path: "posts",
+        populate: [
+          {
+            path: "author",
+          },
+          {
+            path: "interested",
+          },
+        ],
+      })
+      .populate({
+        path: "reviews",
+        populate: [
+          {
+            path: "by",
+          },
+          {
+            path: "company",
+          },
+        ],
+      });
+    if (!company) {
+      return res.status(404).send({
+        error: "Not Found! Invalid Id!",
+      });
+    }
+    company = company.toObject();
+    delete company.saved;
+    res.send(company);
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).send({
+        error: "Invalid Id!",
+      });
+    }
+    res.status(500).send({
+      error: "Internal Server Error!",
+    });
+  }
+});
+
 //get company by id
 router.get("/:id", async (req, res) => {
   try {
@@ -178,6 +223,9 @@ router.patch("/", auth, async (req, res) => {
   try {
     let { technologies = [] } = req.body;
     delete req.body.technologies;
+    technologies = technologies
+      .map((tech) => tech.trim())
+      .filter((tech) => tech.length);
     req.body = trimValues(req.body);
     let {
       username = req.user.username,

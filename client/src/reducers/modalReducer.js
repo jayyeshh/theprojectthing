@@ -1,18 +1,24 @@
-import { SET_MODAL_STATE } from "../actions/action-types";
+import { SET_MODAL_STATE, CLOSE_MODAL } from "../actions/action-types";
 
 const initialState = {
   showModal: false,
   text: "",
+  severity: "",
 };
 
 const modalReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_MODAL_STATE: {
+      const { showModal, text, severity = "warning" } = action.payload;
       return {
         ...state,
-        showModal: action.payload.showModal,
-        text: action.payload.text,
+        showModal,
+        text,
+        severity,
       };
+    }
+    case CLOSE_MODAL: {
+      return initialState;
     }
     default:
       return state;

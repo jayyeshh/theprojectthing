@@ -104,19 +104,14 @@ const CompanyPost = ({ post, removePost, ...props }) => {
           deleteCompanyPost(post._id)
             .then((res) => {
               removePost();
-              props.setModalState(true, "Post Deleted!");
-              setTimeout(() => {
-                props.setModalState(false, "");
-              }, 3000);
+              props.setModalState(true, "Post Deleted!", "info");
             })
             .catch((error) => {
               props.setModalState(
                 true,
-                "Something went wrong! Try again later!"
+                "Something went wrong! Try again later!",
+                "error"
               );
-              setTimeout(() => {
-                props.setModalState(false, "");
-              }, 3000);
               console.log("[error]: ", error);
             });
           handleClose();

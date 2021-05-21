@@ -204,13 +204,10 @@ const AddProject = (props) => {
       .catch((err) => {
         setLoading(false);
         if (err.response && err.response.data.error) {
-          props.setModalState(true, err.response.data.error);
+          props.setModalState(true, err.response.data.error, "error");
         } else {
-          props.setModalState(true, `Something went wrong!`);
+          props.setModalState(true, `Something went wrong!`, "error");
         }
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -228,16 +225,17 @@ const AddProject = (props) => {
         };
         axios
           .delete(`/project/${props.computedMatch.params.pid}`, configs)
-          .then((resp) => {
-            props.setModalState(true, `Project Deleted Permanently!`);
+          .then((_resp) => {
+            props.setModalState(true, `Project Deleted Permanently!`, "info");
             history.replace("/");
           })
           .catch((error) => {
-            props.setModalState(true, `Something went wrong! Try again later.`);
+            props.setModalState(
+              true,
+              `Something went wrong! Try again later.`,
+              "error"
+            );
           });
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       })
       .catch(() => {});
   };
@@ -277,7 +275,7 @@ const AddProject = (props) => {
             ...err.response.data.errors,
           };
 
-          props.setModalState(true, errormsg.error);
+          props.setModalState(true, errormsg.error, "error");
         } else {
           errormsg = {
             ...errormsg,
@@ -286,12 +284,9 @@ const AddProject = (props) => {
                 ? err.response.data.error
                 : "",
           };
-          props.setModalState(true, errormsg.error);
+          props.setModalState(true, errormsg.error, "error");
         }
         setErrors({ ...errormsg });
-        setTimeout(() => {
-          props.setModalState(false, "");
-        }, 3000);
       });
   };
 
@@ -449,8 +444,8 @@ const AddProject = (props) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

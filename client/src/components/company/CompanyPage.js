@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
-import { getCompanyById } from "../../utility/utilityFunctions/ApiCalls";
+import { getCompanyByUsername } from "../../utility/utilityFunctions/ApiCalls";
 import { makeStyles } from "@material-ui/core/styles";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import Spinner from "../spinners/Spinner";
@@ -24,7 +24,7 @@ import { connect } from "react-redux";
 import AddReviewPopupModal from "./AddReviewPopupModal";
 import ListModal from "../modals/ListModal";
 import { Edit3 } from "react-feather";
-import Test from "../test";
+import ErrorPage from "../shared/ErrorPage";
 
 const useStyles = makeStyles((theme) => ({
   containerStyles: {
@@ -120,6 +120,13 @@ const useStyles = makeStyles((theme) => ({
     width: theme.spacing(8),
     height: theme.spacing(8),
   },
+  techGrid: {
+    maxHeight: "8rem",
+    overflowY: "auto",
+    "&::-webkit-scrollbar": {
+      display: "none",
+    },
+  },
 }));
 
 const CompanyPage = (props) => {
@@ -128,7 +135,7 @@ const CompanyPage = (props) => {
   const [company, setCompany] = useState({});
   const [currLocation, setCurrLocation] = useState("");
   const [type, setType] = useState("posts");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(false);
   const [addReviewPopup, setAddReviewPopup] = useState(false);
   const [showInterestedDevs, setShowInterestedDevs] = useState(false);
   const [list, setList] = useState([]);
@@ -152,15 +159,17 @@ const CompanyPage = (props) => {
   };
 
   useEffect(() => {
-    getCompanyById(props.match.params.id)
+    getCompanyByUsername(props.match.params.username)
       .then((resp) => {
         setCompany(resp.data);
         setLoading(false);
+        setError(false);
       })
       .catch((error) => {
         setLoading(false);
+        setError(true);
       });
-  }, []);
+  }, [props.match.params.username]);
 
   const updatePost = (updatedPost, index) => {
     const updatedPosts = [...company.posts];
@@ -178,6 +187,10 @@ const CompanyPage = (props) => {
     setList(company.posts[index].interested);
     setShowInterestedDevs(true);
   };
+
+  if (error) {
+    return <ErrorPage />;
+  }
 
   return (
     <Grid
@@ -399,7 +412,7 @@ const CompanyPage = (props) => {
                       >
                         Technologies
                       </Typography>
-                      <Grid container>
+                      <Grid container className={classes.techGrid}>
                         {company.technologies.map((tech) => (
                           <NavLink
                             to={`/search/?q=${tech}&type=tag`}
@@ -625,7 +638,7 @@ const CompanyPage = (props) => {
                               }}
                             >
                               <NavLink
-                                to={`/dev/${review.by._id}`}
+                                to={`/dev/${review.by.username}`}
                                 style={{ textDecoration: "none" }}
                               >
                                 @{review.by.username}
@@ -691,8 +704,8 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    setModalState: (modalState, text) =>
-      dispatch(setModalStateAction({ showModal: modalState, text })),
+    setModalState: (modalState, text, severity) =>
+      dispatch(setModalStateAction({ showModal: modalState, text, severity })),
   };
 };
 

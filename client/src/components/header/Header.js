@@ -16,7 +16,7 @@ import {
 import { NavLink, useHistory, useLocation } from "react-router-dom";
 import HeaderMenus from "./HeaderMenus";
 import CodeIcon from "@material-ui/icons/Code";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import HomeIcon from "@material-ui/icons/Home";
 import ExploreIcon from "@material-ui/icons/Explore";

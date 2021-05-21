@@ -257,7 +257,7 @@ const PostPage = (props) => {
                   <Avatar>{post.author.name[0]}</Avatar>
                 )}
                 <NavLink
-                  to={`/company/${post.author._id}`}
+                  to={`/company/${post.author.username}`}
                   className={classes.link}
                 >
                   <Typography className={classes.boldTitle}>
@@ -282,7 +282,7 @@ const PostPage = (props) => {
                   color="primary"
                   className={classes.btnStyles}
                   onClick={() => {
-                    history.push(`/company/${post.author._id}`);
+                    history.push(`/company/${post.author.username}`);
                   }}
                 >
                   View Profile
@@ -310,7 +310,7 @@ const PostPage = (props) => {
                   </Grid>
                   <Grid item xs={10} container direction="column">
                     <NavLink
-                      to={`/dev/${developer._id}`}
+                      to={`/dev/${developer.username}`}
                       className={classes.link}
                     >
                       <Typography
