@@ -20,6 +20,7 @@ import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { connect } from "react-redux";
 import { setModalStateAction } from "../../actions/modalActions";
 import { green } from "@material-ui/core/colors";
+import { useHistory } from "react-router-dom";
 import InputField from "../forms/InputField";
 import axios from "../../utility/axios/apiInstance";
 import { logoutAction } from "../../actions/authActions";
@@ -156,6 +157,7 @@ const initialEditProfileErrors = {
 
 const EditProject = ({ profile, ...props }) => {
   const classes = useStyles();
+  const history = useHistory();
   const [value, setValue] = useState(0);
   const [changingPassword, setChangingPassword] = useState(false);
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -303,6 +305,7 @@ const EditProject = ({ profile, ...props }) => {
           profile: resp.data.profile,
           as: props.authedAs,
         });
+        history.push(`/dev/${resp.data.profile.username}`);
       })
       .catch((error) => {
         console.log(error);

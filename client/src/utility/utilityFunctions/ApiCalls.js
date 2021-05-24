@@ -50,7 +50,7 @@ export const rewardProject = ({ pid }) => {
 
 export const getDeveloperById = (id) => {
   setConfigs();
-  return axios.get(`/developer/${id}`, null, configs);
+  return axios.get(`/developer/${id}`);
 };
 
 export const getDeveloperByUsername = (username) => {
@@ -60,7 +60,7 @@ export const getDeveloperByUsername = (username) => {
 
 export const getCompanyById = (id) => {
   setConfigs();
-  return axios.get(`/company/${id}`, null, configs);
+  return axios.get(`/company/${id}`);
 };
 
 export const getCompanyByUsername = (username) => {
@@ -110,4 +110,12 @@ export const setIcon = (icon) => {
 export const deleteCompanyPost = (pid) => {
   setConfigs();
   return axios.delete(`/post/${pid}`, configs);
+};
+
+export const fetchProjects = ({ order, orderBy, limit, skip }) => {
+  setConfigs();
+  return axios.get(
+    `/fetchprojects/?limit=${limit}&skip=${skip}&order=${order}&orderBy=${orderBy}`,
+    configs
+  );
 };

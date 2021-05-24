@@ -735,6 +735,7 @@ const DevPage = (props) => {
                 ) : (
                   <TableView
                     projects={developer.projects}
+                    total={developer.projects.length}
                     updateProjects={updateProjects}
                     haveAccess={developer._id === props.user._id}
                   />

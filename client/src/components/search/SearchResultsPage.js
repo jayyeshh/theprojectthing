@@ -137,10 +137,24 @@ const SearchResultsPage = (props) => {
   const [results, setResults] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const classes = useStyles();
   const history = useHistory();
   const qs = new URLSearchParams(props.location.search);
+
+  useEffect(() => {
+    getProjects()
+      .then((resp) => {
+        const randomSuggestions = _.shuffle(resp.data, 5);
+        setSuggestions(randomSuggestions.slice(0, 15));
+        setSuggestionsLoading(false);
+      })
+      .catch((error) => {
+        setSuggestionsLoading(false);
+        console.log("Something went wrong!", error);
+      });
+  }, []);
+
   useEffect(() => {
     setQuery(qs.get("q"));
     let queryType = qs.get("type");
@@ -153,16 +167,6 @@ const SearchResultsPage = (props) => {
     }
     setType(queryType);
     getResults();
-    getProjects()
-      .then((resp) => {
-        const randomSuggestions = _.shuffle(resp.data, 5);
-        setSuggestions(randomSuggestions.slice(0, 15));
-        setSuggestionsLoading(false);
-      })
-      .catch((error) => {
-        setSuggestionsLoading(false);
-        console.log("Something went wrong!", error);
-      });
   }, [type, qs.get("q")]);
 
   const getResults = async () => {
@@ -426,6 +430,7 @@ const SearchResultsPage = (props) => {
                   }
                   case "projects":
                   case "tag": {
+                    if (!!!result.developer) return;
                     return (
                       <Grid
                         container
@@ -462,6 +467,7 @@ const SearchResultsPage = (props) => {
                     );
                   }
                   case "developers":
+                    if (!!!result.username) return;
                     return (
                       <Grid
                         container
@@ -522,6 +528,7 @@ const SearchResultsPage = (props) => {
                       </Grid>
                     );
                   case "companies": {
+                    if (!!!result.username) return;
                     return (
                       <Grid
                         item

@@ -23,7 +23,10 @@ import { connect } from "react-redux";
 import { setModalStateAction } from "../../actions/modalActions";
 import { useConfirm } from "material-ui-confirm";
 import { NavLink } from "react-router-dom";
-import { InputBase } from "@material-ui/core";
+import { InputBase, Grid } from "@material-ui/core";
+import { fetchProjects } from "../../utility/utilityFunctions/ApiCalls";
+import Spinner from "../spinners/Spinner";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 function createData(
   id,
@@ -308,12 +311,18 @@ const useStyles = makeStyles((theme) => ({
       color: "blue",
     },
   },
+  iconCell: {
+    "&:hover": {
+      cursor: "pointer",
+    },
+  },
 }));
 
-const TableView = ({ projects, ...props }) => {
+const TableView = ({ total, ...props }) => {
   const classes = useStyles();
+  const [projects, setProjects] = useState([]);
   const [order, setOrder] = useState("asc");
-  const [orderBy, setOrderBy] = useState("calories");
+  const [orderBy, setOrderBy] = useState("title");
   const [selected, setSelected] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const [page, setPage] = useState(0);
@@ -321,7 +330,26 @@ const TableView = ({ projects, ...props }) => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [projectsToRender, setProjectsToRender] = useState([]);
+  // const [projectsToRender, setProjectsToRender] = useState([]);
+
+  useEffect(() => {
+    if (projects.length >= (page + 1) * rowsPerPage || projects.length >= total)
+      return;
+    fetchProjects({
+      order,
+      orderBy,
+      limit: (page + 1) * rowsPerPage - projects.length,
+      skip: projects.length,
+    })
+      .then((resp) => {
+        console.log(resp.data);
+        const updatedProjects = [...projects, ...resp.data];
+        setProjects(updatedProjects);
+      })
+      .catch((error) => {
+        console.log("Something went wrong!", error);
+      });
+  }, [page, orderBy, order, rowsPerPage]);
 
   useEffect(() => {
     // setProjectsToRender(projects);
@@ -367,7 +395,8 @@ const TableView = ({ projects, ...props }) => {
     setRows(dataRows);
   }, [projects, searchText]);
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (_event, property) => {
+    if (projects.length < total) setProjects([]);
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
@@ -437,6 +466,26 @@ const TableView = ({ projects, ...props }) => {
     setSearchText(e.target.value);
   };
 
+  const renderSkeleton = () => {
+    const skeletonRows = [];
+    for (let i = 0; i < rowsPerPage; i++) {
+      // skeletonRows.push(<Skeleton />);
+      skeletonRows.push(
+        createData(
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />,
+          <Skeleton />
+        )
+      );
+    }
+    return skeletonRows;
+  };
+
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
@@ -470,35 +519,15 @@ const TableView = ({ projects, ...props }) => {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
             />
-            <TableBody>
-              {stableSort(rows, getComparator(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.title);
-                  const labelId = `enhanced-table-checkbox-${index}`;
 
+            {projects.length !== total &&
+            projects.length < (page + 1) * rowsPerPage ? (
+              <>
+                {renderSkeleton().map((row) => {
                   return (
-                    <TableRow
-                      hover
-                      onClick={(event) => handleClick(event, row.title, row.id)}
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.title}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ "aria-labelledby": labelId }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component="th"
-                        id={labelId}
-                        scope="row"
-                        padding="none"
-                      >
+                    <TableRow>
+                      <TableCell padding="checkbox"></TableCell>
+                      <TableCell component="th" scope="row" padding="none">
                         <NavLink
                           to={`/projects/${row.id}`}
                           className={classes.titleLink}
@@ -515,18 +544,71 @@ const TableView = ({ projects, ...props }) => {
                     </TableRow>
                   );
                 })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
+              </>
+            ) : (
+              <TableBody>
+                {stableSort(rows, getComparator(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => {
+                    const isItemSelected = isSelected(row.title);
+                    const labelId = `enhanced-table-checkbox-${index}`;
+
+                    return (
+                      <TableRow
+                        hover
+                        onClick={(event) =>
+                          handleClick(event, row.title, row.id)
+                        }
+                        role="checkbox"
+                        aria-checked={isItemSelected}
+                        tabIndex={-1}
+                        key={row.title}
+                        selected={isItemSelected}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{ "aria-labelledby": labelId }}
+                          />
+                        </TableCell>
+                        <TableCell
+                          component="th"
+                          id={labelId}
+                          scope="row"
+                          padding="none"
+                        >
+                          <NavLink
+                            to={`/projects/${row.id}`}
+                            className={classes.titleLink}
+                          >
+                            {row.title}
+                          </NavLink>
+                        </TableCell>
+                        <TableCell align="right">{row.upvotes}</TableCell>
+                        <TableCell align="right">{row.downvotes}</TableCell>
+                        <TableCell align="right">{row.rewards}</TableCell>
+                        <TableCell align="right">{row.comments}</TableCell>
+                        <TableCell align="right">{row.uploadedOn}</TableCell>
+                        <TableCell align="right">{row.lastUpdated}</TableCell>
+                        <TableCell align="right" className={classes.iconCell}>
+                          Edit
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            )}
           </Table>
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={total}
           rowsPerPage={rowsPerPage}
           page={page}
           onChangePage={handleChangePage}

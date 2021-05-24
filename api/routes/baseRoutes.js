@@ -361,6 +361,56 @@ router.get("/devs", async (req, res) => {
   }
 });
 
+router.get("/fetchprojects", authAsDev, async (req, res) => {
+  try {
+    let { order, orderBy, limit = 5, skip = 0 } = req.query;
+    console.log(req.query)
+    limit = +limit;
+    skip = +skip;
+    const projects = await Project.aggregate([
+      {
+        $match: {
+          developer: req.developer._id,
+        },
+      },
+      {
+        $lookup: {
+          from: "developers",
+          as: "developer",
+          localField: "developer",
+          foreignField: "_id",
+        },
+      },
+      {
+        $unwind: "$developer",
+      },
+      {
+        $addFields: {
+          upvoteTotal: { $size: "$upvotes" },
+          downvoteTotal: { $size: "$downvotes" },
+          commentsTotal: { $size: "$comments" },
+        },
+      },
+      {
+        $sort: {
+          [orderBy]: order === "asc" ? 1 : -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    res.send(projects);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
 router.get("/projects", async (req, res) => {
   try {
     const { sortby } = req.query;
